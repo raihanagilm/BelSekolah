@@ -124,7 +124,10 @@ Endpoint REST API yang disediakan oleh ESPAsyncWebServer:
 | `POST` | `/api/schedule/save` | JSON lengkap struktur data | Menyimpan perubahan preset atau jadwal baru ke flash LittleFS |
 | `POST` | `/api/trigger` | `?track={1..999}` | Membunyikan nada bel seketika (manual trigger atau pengujian) |
 | `POST` | `/api/time/sync` | `?epoch={timestamp_detik}` | Mengupdate waktu RTC DS3231 menggunakan timestamp browser |
-| `GET` | `/api/status` | - | Mengambil telemetri mikrokontroler (uptime, status RTC, sinyal Wi-Fi, preset aktif) |
+| `GET` | `/api/status` | - | Mengambil telemetri mikrokontroler (uptime, status RTC, sinyal Wi-Fi, preset aktif, auth status) |
+| `POST` | `/api/auth/login` | `{"pin": "1234"}` | Validasi PIN admin untuk sesi modifikasi jadwal dan pengaturan |
+| `POST` | `/api/auth/change-pin` | `{"old_pin": "1234", "new_pin": "5678"}` | Mengganti PIN admin keamanan sistem |
+| `POST` | `/api/tracks/save` | `[{"track": 1, "name": "0001.mp3", "title": "..."}]` | Memperbarui daftar dan label judul nada bel audio |
 
 ---
 
@@ -170,6 +173,7 @@ Format data non-volatil yang disimpan pada partisi LittleFS:
     { "track": 8, "name": "0008.mp3", "title": "Nada Panggilan Darurat" }
   ],
   "settings": {
+    "admin_pin": "1234",
     "ntp_server": "pool.ntp.org",
     "timezone_offset_sec": 25200,
     "relay_pre_roll_sec": 2,

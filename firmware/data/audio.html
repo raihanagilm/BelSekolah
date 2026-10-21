@@ -1,0 +1,167 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Pustaka Audio - Bel Sekolah Otomatis Mandiri</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <header class="header-bar">
+    <div class="header-container">
+      <div class="brand-title">
+        <span>Bel Sekolah Otomatis</span>
+      </div>
+      <nav class="nav-links">
+        <a href="index.html" class="nav-link">Beranda</a>
+        <a href="schedule.html" class="nav-link">Jadwal</a>
+        <a href="audio.html" class="nav-link active">Pustaka Audio</a>
+        <a href="settings.html" class="nav-link">Pengaturan</a>
+      </nav>
+    </div>
+  </header>
+
+  <main class="main-content">
+    <section class="card">
+      <h2 class="card-title">Informasi Format Audio MicroSD</h2>
+      <p style="font-size: 0.875rem; color: var(--text-muted); margin-bottom: 0.75rem;">
+        DFPlayer Mini membaca file audio MP3 dari folder <code>/mp3/</code> pada kartu MicroSD berformat FAT32 dengan penamaan 4-digit angka (contoh: <code>0001.mp3</code>, <code>0002.mp3</code>).
+      </p>
+      <div class="status-badge-group">
+        <span class="badge badge-success">Format: FAT32</span>
+        <span class="badge badge-warning">Folder: /mp3/</span>
+        <span class="badge badge-success">Ekstensi: .mp3</span>
+      </div>
+    </section>
+
+    <section class="card">
+      <h2 class="card-title">Tambah / Ubah Judul Track Audio</h2>
+      <form id="trackForm" onsubmit="handleSaveTrack(event)">
+        <div class="form-row-3">
+          <div class="form-group">
+            <label for="trackNumber" class="form-label">Nomor Track (1 - 999)</label>
+            <input type="number" id="trackNumber" class="form-input" min="1" max="999" required>
+          </div>
+          <div class="form-group">
+            <label for="trackFileName" class="form-label">Nama File SD Card</label>
+            <input type="text" id="trackFileName" class="form-input" placeholder="0001.mp3" required readonly>
+          </div>
+          <div class="form-group">
+            <label for="trackTitle" class="form-label">Judul / Keterangan Nada</label>
+            <input type="text" id="trackTitle" class="form-input" placeholder="Contoh: Bel Masuk Kelas" required>
+          </div>
+        </div>
+        <div style="margin-top: 1rem;">
+          <button type="submit" class="btn btn-primary">Simpan Track</button>
+        </div>
+      </form>
+    </section>
+
+    <section class="card">
+      <h2 class="card-title">Daftar Pustaka Audio DFPlayer</h2>
+      <div class="table-container">
+        <table class="table-custom">
+          <thead>
+            <tr>
+              <th>Track #</th>
+              <th>Nama File SD</th>
+              <th>Judul Nada Bel</th>
+              <th>Uji Coba Suara</th>
+            </tr>
+          </thead>
+          <tbody id="audioTrackTable">
+            <tr>
+              <td colspan="4" style="text-align: center; color: var(--text-muted);">Memuat daftar audio...</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+  </main>
+
+  <footer class="footer-bar">
+    Bel Sekolah Otomatis Mandiri ESP32 - Sistem Mandiri Tanpa PC Server
+  </footer>
+
+  <script src="app.js"></script>
+  <script>
+    document.getElementById('trackNumber').addEventListener('input', (e) => {
+      const val = parseInt(e.target.value);
+      if (!isNaN(val) && val > 0) {
+        document.getElementById('trackFileName').value = String(val).padStart(4, '0') + '.mp3';
+      }
+    });
+
+    async function loadAudioPage() {
+      const data = await fetchSchedule();
+      if (!data) return;
+      renderAudioList(data.audio_tracks || []);
+    }
+
+    function renderAudioList(tracks) {
+      const tbody = document.getElementById('audioTrackTable');
+      tbody.innerHTML = '';
+
+      if (tracks.length === 0) {
+        tbody.innerHTML = '<tr><td colspan="4" style="text-align: center;">Belum ada daftar audio terkonfigurasi.</td></tr>';
+        return;
+      }
+
+      tracks.forEach(t => {
+        const tr = document.createElement('tr');
+        tr.innerHTML = `
+          <td style="font-weight: 700; color: var(--primary);">#${t.track}</td>
+          <td><code>${t.name}</code></td>
+          <td>${t.title}</td>
+          <td>
+            <button type="button" class="btn btn-outline btn-sm" onclick="triggerBell(${t.track})">Uji Nada</button>
+          </td>
+        `;
+        tbody.appendChild(tr);
+      });
+    }
+
+    async function handleSaveTrack(e) {
+      e.preventDefault();
+      const trackNum = parseInt(document.getElementById('trackNumber').value);
+      const fileName = document.getElementById('trackFileName').value;
+      const title = document.getElementById('trackTitle').value.trim();
+
+      if (!currentData.audio_tracks) currentData.audio_tracks = [];
+      const existing = currentData.audio_tracks.find(t => t.track === trackNum);
+
+      if (existing) {
+        existing.title = title;
+        existing.name = fileName;
+      } else {
+        currentData.audio_tracks.push({
+          track: trackNum,
+          name: fileName,
+          title: title
+        });
+        currentData.audio_tracks.sort((a, b) => a.track - b.track);
+      }
+
+      try {
+        const res = await fetch('/api/tracks/save', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(currentData.audio_tracks)
+        });
+        const resData = await res.json();
+        if (resData.success) {
+          alert('Track audio berhasil disimpan!');
+          renderAudioList(currentData.audio_tracks);
+          document.getElementById('trackForm').reset();
+        } else {
+          alert('Gagal menyimpan track audio.');
+        }
+      } catch (err) {
+        alert('Koneksi terputus saat menyimpan track.');
+      }
+    }
+
+    window.addEventListener('DOMContentLoaded', loadAudioPage);
+  </script>
+</body>
+</html>

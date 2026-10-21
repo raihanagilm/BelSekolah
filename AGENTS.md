@@ -111,3 +111,12 @@ Setiap agen AI wajib memverifikasi checklist berikut sebelum menyerahkan tugas:
     - `settings.html`: Sinkronisasi satu-klik jam RTC dengan browser dan setting relay pre-roll.
     - `style.css`: Design tokens bersih, anti-slop, dan responsive table container query.
     - `app.js`: REST API client async fetch.
+- **2026-10-21**:
+  - Penyempurnaan spesifikasi dan dokumen arsitektur:
+    - Penambahan sistem **Autentikasi PIN Keamanan Admin** (`admin_pin`) pada skema `schedule.json`, endpoint REST API `/api/auth/login` & `/api/auth/change-pin`.
+    - Penambahan fitur **Kustomisasi Pustaka Audio** melalui endpoint `/api/tracks/save` dan form interaktif di `audio.html`.
+    - Sinkronisasi rantai dokumen: [README.md](file:///d:/BelSekolah/README.md), [SPEC.md](file:///d:/BelSekolah/SPEC.md), [docs/WEB.md](file:///d:/BelSekolah/docs/WEB.md), dan [docs/ARDUINO.md](file:///d:/BelSekolah/docs/ARDUINO.md).
+  - Implementasi penuh kode firmware dan frontend berbasis arsitektur teruji `Schop/esp32-rfid-jukebox`:
+    - Membuat konfigurasi [firmware/platformio.ini](file:///d:/BelSekolah/firmware/platformio.ini) untuk ESP32 dengan dependensi DFRobotDFPlayerMini, RTClib, ArduinoJson v7, dan ESPAsyncWebServer.
+    - Mengimplementasikan seluruh aset frontend LittleFS: [index.html](file:///d:/BelSekolah/firmware/data/index.html), [schedule.html](file:///d:/BelSekolah/firmware/data/schedule.html), [audio.html](file:///d:/BelSekolah/firmware/data/audio.html), [settings.html](file:///d:/BelSekolah/firmware/data/settings.html), [style.css](file:///d:/BelSekolah/firmware/data/style.css), [app.js](file:///d:/BelSekolah/firmware/data/app.js), dan [schedule.json](file:///d:/BelSekolah/firmware/data/schedule.json).
+    - Mengimplementasikan firmware inti di [firmware/src/main.cpp](file:///d:/BelSekolah/firmware/src/main.cpp) (Wi-Fi AP mandiri, scheduler RTC non-blocking, relay amplifier auto-mute, dan REST API handlers).

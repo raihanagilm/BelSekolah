@@ -28,16 +28,16 @@ Frontend dibagi menjadi 4 halaman terpisah untuk menjaga kejelasan alur kerja:
 
 | File Halaman | Nama Menu | Tanggung Jawab & Fitur Utama |
 |---|---|---|
-| `index.html` | Beranda / Dashboard | - Live Clock ticker (Jam:Menit:Detik)<br>- Indikator status koneksi ESP32 & RTC DS3231<br>- Panel trigger manual bel darurat / pengumuman<br>- Agenda tabel bel yang berbunyi hari ini |
+| `index.html` | Beranda / Dashboard | - Live Clock ticker (Jam:Menit:Detik)<br>- Indikator status koneksi ESP32 & RTC DS3231<br>- Panel trigger manual bel darurat / pengumuman (dengan konfirmasi modal PIN)<br>- Agenda tabel bel yang berbunyi hari ini |
 | `schedule.html` | Kelola Jadwal | - Switch preset aktif (`reguler`, `jumat`, `ujian`)<br>- Form tambah jadwal bel baru (jam, menit, track, hari)<br>- Tabel jadwal aktif dengan tombol Uji Coba & Hapus per baris |
-| `audio.html` | Pustaka Audio | - Daftar pemetaan file MP3 MicroSD (`0001.mp3` s/d `0008.mp3`)<br>- Tombol uji dengar per track langsung ke speaker/amplifier |
-| `settings.html` | Pengaturan | - Tombol 1-klik sinkronisasi jam RTC DS3231 dengan jam browser<br>- Konfigurasi volume nada dering (0-30)<br>- Pengaturan jeda waktu pre-roll relay amplifier<br>- Panduan visual pinout ESP32 |
+| `audio.html` | Pustaka Audio | - Daftar pemetaan file MP3 MicroSD (`0001.mp3` s/d `0008.mp3`)<br>- Form edit judul nada bel dan penambahan pemetaan track baru<br>- Tombol uji dengar per track langsung ke speaker/amplifier |
+| `settings.html` | Pengaturan | - Tombol 1-klik sinkronisasi jam RTC DS3231 dengan jam browser<br>- Konfigurasi volume nada dering (0-30)<br>- Pengaturan jeda waktu pre-roll relay amplifier<br>- Form ganti PIN Admin keamanan sistem<br>- Panduan visual pinout ESP32 |
 
 ---
 
 ## 3. Standar UI/UX & Anti-Slop (Frontend Web)
 - **FE-01 (Render Order)**: Render komponen waktu dan ringkasan utama terlebih dahulu, notifikasi atau modal belakangan.
-- **FE-02 (Komponen Terpusat)**: Pola navbar, header, card, dan tombol memakai kelas seragam yang didefinisikan di `style.css`.
+- **FE-02 (Komponen Terpusat)**: Pola navbar, header, card, modal PIN dialog, dan tombol memakai kelas seragam yang didefinisikan di `style.css`.
 - **FE-03 (Design Tokens)**:
   - Warna dominan: Deep Navy `#1e3a8a`
   - Warna aksen: Royal Blue `#2563eb`
@@ -56,6 +56,9 @@ Frontend berkomunikasi secara asynchronous dengan firmware ESP32 melalui endpoin
 - `POST /api/trigger?track={id}`: Membunyikan bel secara manual.
 - `POST /api/time/sync?epoch={seconds}`: Mengirim timestamp browser ke RTC.
 - `GET /api/status`: Mengambil status koneksi hardware secara live.
+- `POST /api/auth/login`: Verifikasi PIN admin (disimpan di `sessionStorage`).
+- `POST /api/auth/change-pin`: Mengganti PIN admin di pengaturan.
+- `POST /api/tracks/save`: Menyimpan pembaruan daftar dan judul track audio.
 
 ---
 

@@ -1,0 +1,180 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Pengaturan Sistem - Bel Sekolah Otomatis Mandiri</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <header class="header-bar">
+    <div class="header-container">
+      <div class="brand-title">
+        <span>Bel Sekolah Otomatis</span>
+      </div>
+      <nav class="nav-links">
+        <a href="index.html" class="nav-link">Beranda</a>
+        <a href="schedule.html" class="nav-link">Jadwal</a>
+        <a href="audio.html" class="nav-link">Pustaka Audio</a>
+        <a href="settings.html" class="nav-link active">Pengaturan</a>
+      </nav>
+    </div>
+  </header>
+
+  <main class="main-content">
+    <section class="card">
+      <h2 class="card-title">Sinkronisasi Waktu RTC DS3231</h2>
+      <p style="font-size: 0.875rem; color: var(--text-muted); margin-bottom: 1rem;">
+        Jika perangkat ESP32 berada di jaringan intranet offline tanpa akses internet, Anda dapat menyinkronkan waktu modul RTC DS3231 langsung dengan jam perangkat (laptop/smartphone) ini secara instan.
+      </p>
+      <button type="button" class="btn btn-primary" onclick="syncTimeWithBrowser()">Sinkronkan Jam RTC Sekarang</button>
+    </section>
+
+    <section class="card">
+      <h2 class="card-title">Parameter Audio & Relay Anti-Hum</h2>
+      <form id="settingsForm" onsubmit="handleSaveSettings(event)">
+        <div class="form-row-2">
+          <div class="form-group">
+            <label for="speakerVolume" class="form-label">Volume Speaker / DFPlayer (0 - 30)</label>
+            <input type="number" id="speakerVolume" class="form-input" min="0" max="30" value="25" required>
+          </div>
+          <div class="form-group">
+            <label for="preRollSec" class="form-label">Jeda Relay Pre-Roll (Detik)</label>
+            <input type="number" id="preRollSec" class="form-input" min="1" max="10" value="2" required>
+          </div>
+        </div>
+        <div style="margin-top: 1rem;">
+          <button type="submit" class="btn btn-primary">Simpan Parameter</button>
+        </div>
+      </form>
+    </section>
+
+    <section class="card">
+      <h2 class="card-title">Keamanan & Ganti PIN Admin</h2>
+      <form id="pinForm" onsubmit="handleChangePin(event)">
+        <div class="form-row-2">
+          <div class="form-group">
+            <label for="oldPin" class="form-label">PIN Lama</label>
+            <input type="password" id="oldPin" class="form-input" placeholder="Default: 1234" required>
+          </div>
+          <div class="form-group">
+            <label for="newPin" class="form-label">PIN Baru (4-8 Digit)</label>
+            <input type="password" id="newPin" class="form-input" placeholder="Masukkan PIN baru" minlength="4" maxlength="8" required>
+          </div>
+        </div>
+        <div style="margin-top: 1rem;">
+          <button type="submit" class="btn btn-primary">Perbarui PIN</button>
+        </div>
+      </form>
+    </section>
+
+    <section class="card">
+      <h2 class="card-title">Referensi Pinout Hardware ESP32</h2>
+      <div class="table-container">
+        <table class="table-custom">
+          <thead>
+            <tr>
+              <th>Pin ESP32</th>
+              <th>Komponen Target</th>
+              <th>Fungsi</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><code>GPIO 17 (TX2)</code></td>
+              <td>RX DFPlayer Mini</td>
+              <td>UART Data Audio (Resistor 1k&Omega; seri)</td>
+            </tr>
+            <tr>
+              <td><code>GPIO 16 (RX2)</code></td>
+              <td>TX DFPlayer Mini</td>
+              <td>UART Status Modul Audio</td>
+            </tr>
+            <tr>
+              <td><code>GPIO 21</code></td>
+              <td>SDA RTC DS3231</td>
+              <td>I2C Data Bus Waktu Presisi</td>
+            </tr>
+            <tr>
+              <td><code>GPIO 22</code></td>
+              <td>SCL RTC DS3231</td>
+              <td>I2C Clock Bus Waktu</td>
+            </tr>
+            <tr>
+              <td><code>GPIO 4</code></td>
+              <td>Signal Relay 5V</td>
+              <td>Saklar Mute Amplifier Sekolah (Anti-Hum)</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+  </main>
+
+  <footer class="footer-bar">
+    Bel Sekolah Otomatis Mandiri ESP32 - Sistem Mandiri Tanpa PC Server
+  </footer>
+
+  <script src="app.js"></script>
+  <script>
+    async function loadSettingsPage() {
+      const data = await fetchSchedule();
+      if (!data || !data.settings) return;
+
+      document.getElementById('speakerVolume').value = data.settings.speaker_volume ?? 25;
+      document.getElementById('preRollSec').value = data.settings.relay_pre_roll_sec ?? 2;
+    }
+
+    async function handleSaveSettings(e) {
+      e.preventDefault();
+      const vol = parseInt(document.getElementById('speakerVolume').value);
+      const preRoll = parseInt(document.getElementById('preRollSec').value);
+
+      if (!currentData.settings) currentData.settings = {};
+      currentData.settings.speaker_volume = vol;
+      currentData.settings.relay_pre_roll_sec = preRoll;
+
+      try {
+        const res = await fetch('/api/schedule/save', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(currentData)
+        });
+        const resData = await res.json();
+        if (resData.success) {
+          alert('Pengaturan parameter berhasil disimpan!');
+        } else {
+          alert('Gagal menyimpan ke ESP32.');
+        }
+      } catch (err) {
+        alert('Koneksi terputus saat menyimpan pengaturan.');
+      }
+    }
+
+    async function handleChangePin(e) {
+      e.preventDefault();
+      const oldPin = document.getElementById('oldPin').value;
+      const newPin = document.getElementById('newPin').value;
+
+      try {
+        const res = await fetch('/api/auth/change-pin', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ old_pin: oldPin, new_pin: newPin })
+        });
+        const resData = await res.json();
+        if (resData.success) {
+          alert('PIN Admin berhasil diperbarui!');
+          document.getElementById('pinForm').reset();
+        } else {
+          alert('Gagal mengubah PIN: ' + (resData.message || 'PIN lama salah'));
+        }
+      } catch (err) {
+        alert('Koneksi terputus saat mengganti PIN.');
+      }
+    }
+
+    window.addEventListener('DOMContentLoaded', loadSettingsPage);
+  </script>
+</body>
+</html>

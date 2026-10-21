@@ -1,0 +1,190 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Bel Sekolah Otomatis Mandiri - Beranda</title>
+  <link rel="stylesheet" href="style.css">
+  <link rel="manifest" href="manifest.json">
+  <link rel="icon" type="image/svg+xml" href="icon.svg">
+  <script>
+    if ('serviceWorker' in navigator) {
+      window.addEventListener('load', () => {
+        navigator.serviceWorker.register('./sw.js').catch(() => {});
+      });
+    }
+  </script>
+</head>
+<body>
+  <header class="header-bar">
+    <div class="header-container">
+      <div class="brand-title">
+        <span>Bel Sekolah Otomatis</span>
+      </div>
+      <nav class="nav-links">
+        <a href="index.html" class="nav-link active">Beranda</a>
+        <a href="schedule.html" class="nav-link">Jadwal</a>
+        <a href="audio.html" class="nav-link">Pustaka Audio</a>
+        <a href="settings.html" class="nav-link">Pengaturan</a>
+      </nav>
+    </div>
+  </header>
+
+  <main class="main-content">
+    <section class="card">
+      <div class="clock-display">
+        <div id="liveClock" class="clock-time">--:--:--</div>
+        <div id="liveDate" class="clock-date">Memuat tanggal...</div>
+        <div class="status-badge-group">
+          <span id="badgeRtc" class="badge badge-success">RTC DS3231 Aktif</span>
+          <span id="badgePreset" class="badge badge-warning">Preset: Memuat...</span>
+          <span id="badgeWifi" class="badge badge-success">Mode AP / Wi-Fi Siap</span>
+        </div>
+      </div>
+    </section>
+
+    <section class="card">
+      <h2 class="card-title">Trigger Manual Bel Sekolah</h2>
+      <p style="font-size: 0.875rem; color: var(--text-muted); margin-bottom: 1rem;">
+        Gunakan tombol di bawah ini untuk membunyikan bel darurat atau pengumuman secara langsung.
+      </p>
+      <div class="btn-group">
+        <button type="button" class="btn btn-primary" onclick="openManualTrigger(1, 'Bel Masuk Kelas')">Masuk Kelas</button>
+        <button type="button" class="btn btn-outline" onclick="openManualTrigger(2, 'Bel Istirahat')">Istirahat</button>
+        <button type="button" class="btn btn-outline" onclick="openManualTrigger(5, 'Bel Ishoma')">Ishoma</button>
+        <button type="button" class="btn btn-outline" onclick="openManualTrigger(6, 'Bel Pulang')">Bel Pulang</button>
+        <button type="button" class="btn btn-danger" onclick="openManualTrigger(8, 'Panggilan Darurat')">Panggilan Darurat</button>
+      </div>
+    </section>
+
+    <section class="card">
+      <h2 class="card-title">
+        <span>Agenda Bel Hari Ini</span>
+        <a href="schedule.html" class="btn btn-outline btn-sm">Kelola Jadwal</a>
+      </h2>
+      <div class="table-container">
+        <table class="table-custom">
+          <thead>
+            <tr>
+              <th>Waktu</th>
+              <th>Keterangan</th>
+              <th>Track Audio</th>
+              <th>Status</th>
+            </tr>
+          </thead>
+          <tbody id="todayScheduleList">
+            <tr>
+              <td colspan="4" style="text-align: center; color: var(--text-muted);">Memuat agenda bel...</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+  </main>
+
+  <div id="pinModal" class="modal-overlay">
+    <div class="modal-box">
+      <h3 class="modal-title">Konfirmasi PIN Keamanan</h3>
+      <p class="modal-desc" id="pinModalDesc">Masukkan PIN admin untuk membunyikan bel secara manual.</p>
+      <div class="form-group">
+        <label for="adminPinInput" class="form-label">PIN Admin</label>
+        <input type="password" id="adminPinInput" class="form-input" placeholder="Masukkan 4 digit PIN" maxlength="10">
+      </div>
+      <div class="btn-group" style="justify-content: flex-end; margin-top: 1rem;">
+        <button type="button" class="btn btn-outline" onclick="closePinModal()">Batal</button>
+        <button type="button" class="btn btn-primary" onclick="submitPinAndTrigger()">Lanjutkan</button>
+      </div>
+    </div>
+  </div>
+
+  <footer class="footer-bar">
+    Bel Sekolah Otomatis Mandiri ESP32 - Sistem Mandiri Tanpa PC Server
+  </footer>
+
+  <script src="app.js"></script>
+  <script>
+    startClock('liveClock', 'liveDate');
+    let pendingTrackId = null;
+
+    async function loadDashboard() {
+      const data = await fetchSchedule();
+      if (!data) return;
+
+      const activePresetKey = data.active_preset || 'reguler';
+      const presetObj = data.presets[activePresetKey];
+      document.getElementById('badgePreset').textContent = 'Preset: ' + (presetObj ? presetObj.name : activePresetKey);
+
+      const today = new Date().getDay(); // 0: Minggu, 1: Senin, dst.
+      const tbody = document.getElementById('todayScheduleList');
+      tbody.innerHTML = '';
+
+      if (!presetObj || !presetObj.schedules || presetObj.schedules.length === 0) {
+        tbody.innerHTML = '<tr><td colspan="4" style="text-align: center;">Tidak ada jadwal bel pada preset ini.</td></tr>';
+        return;
+      }
+
+      const todayItems = presetObj.schedules
+        .filter(item => item.days.includes(today))
+        .sort((a, b) => a.time.localeCompare(b.time));
+
+      if (todayItems.length === 0) {
+        tbody.innerHTML = '<tr><td colspan="4" style="text-align: center; color: var(--text-muted);">Tidak ada agenda bel untuk hari ini.</td></tr>';
+        return;
+      }
+
+      todayItems.forEach(item => {
+        const tr = document.createElement('tr');
+        tr.innerHTML = `
+          <td style="font-weight: 700; color: var(--primary);">${item.time}</td>
+          <td>${item.label}</td>
+          <td>Track #${item.track}</td>
+          <td><span class="badge badge-success">Terjadwal</span></td>
+        `;
+        tbody.appendChild(tr);
+      });
+    }
+
+    function openManualTrigger(trackId, title) {
+      pendingTrackId = trackId;
+      if (verifyAdminSession()) {
+        executeTrigger(trackId);
+        return;
+      }
+      document.getElementById('pinModalDesc').textContent = `Masukkan PIN admin untuk membunyikan: ${title}.`;
+      document.getElementById('adminPinInput').value = '';
+      document.getElementById('pinModal').classList.add('active');
+    }
+
+    function closePinModal() {
+      document.getElementById('pinModal').classList.remove('active');
+      pendingTrackId = null;
+    }
+
+    async function submitPinAndTrigger() {
+      const pin = document.getElementById('adminPinInput').value;
+      if (!pin) {
+        alert('PIN wajib diisi');
+        return;
+      }
+      const isOk = await loginAdmin(pin);
+      if (isOk) {
+        closePinModal();
+        if (pendingTrackId) {
+          executeTrigger(pendingTrackId);
+        }
+      } else {
+        alert('PIN salah. Akses ditolak!');
+      }
+    }
+
+    async function executeTrigger(trackId) {
+      const res = await triggerBell(trackId);
+      if (res && res.success) {
+        alert('Perintah bel terkirim. Audio sedang diputar!');
+      }
+    }
+
+    window.addEventListener('DOMContentLoaded', loadDashboard);
+  </script>
+</body>
+</html>

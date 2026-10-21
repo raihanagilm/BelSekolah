@@ -46,6 +46,8 @@ Setiap agen AI dan pengembang wajib memahami pembagian tanggung jawab dokumen ma
   - Sinkronisasi otomatis ke internet (NTP) jika tersedia koneksi Wi-Fi.
   - Sinkronisasi instan satu klik dengan jam browser jika berada di jaringan intranet offline.
 - **Peredam Dengung Otomatis (Relay Auto-Mute)**: Mengaktifkan jalur input amplifier 2 detik sebelum bel berbunyi dan mematikannya kembali setelah nada selesai untuk menghilangkan dengung konstan (*ground hum*).
+- **Proteksi PIN Admin & Keamanan**: Panel pengaturan dan eksekusi manual dilindungi PIN admin guna mencegah perubahan jadwal oleh pihak yang tidak berwenang.
+- **Kustomisasi Pustaka Audio Fleksibel**: Pemetaan nomor track DFPlayer dan penamaan judul nada bel dapat dikonfigurasi langsung melalui browser tanpa memodifikasi kode program.
 
 ---
 
@@ -91,7 +93,12 @@ d:/BelSekolah/
 
 ## 5. Menjalankan & Menguji Proyek
 
-### A. Menguji Antarmuka Web Secara Lokal
+### A. Membuka Aplikasi Desktop Langsung di PC (Semi-Offline)
+Cukup klik ganda (double-click) file **[Aplikasi_Bel_Sekolah.bat](file:///d:/BelSekolah/Aplikasi_Bel_Sekolah.bat)**:
+- Script otomatis mendeteksi koneksi: jika PC terhubung ke Wi-Fi ESP32 (`192.168.4.1`), aplikasi akan terhubung secara online.
+- Jika sedang tidak terhubung ke ESP32, aplikasi otomatis berjalan dalam **Mode Semi-Offline Mandiri** dengan antarmuka native tanpa address bar browser, memungkinkan operator piket mengatur jadwal dan menguji simulasi secara lokal.
+
+### B. Menguji Antarmuka Web Secara Lokal
 Buka file `firmware/data/index.html` langsung di browser Anda untuk melihat tampilan dashboard responsif. Halaman dilengkapi fallback mock otomatis sehingga semua menu dan tombol dapat diuji sebelum ESP32 terpasang.
 
 ### B. Menjalankan di Simulator Virtual Wokwi

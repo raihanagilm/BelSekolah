@@ -1,0 +1,250 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Kelola Jadwal - Bel Sekolah Otomatis Mandiri</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <header class="header-bar">
+    <div class="header-container">
+      <div class="brand-title">
+        <span>Bel Sekolah Otomatis</span>
+      </div>
+      <nav class="nav-links">
+        <a href="index.html" class="nav-link">Beranda</a>
+        <a href="schedule.html" class="nav-link active">Jadwal</a>
+        <a href="audio.html" class="nav-link">Pustaka Audio</a>
+        <a href="settings.html" class="nav-link">Pengaturan</a>
+      </nav>
+    </div>
+  </header>
+
+  <main class="main-content">
+    <section class="card">
+      <h2 class="card-title">Pilih Preset Jadwal Aktif</h2>
+      <div class="form-row-2">
+        <div class="form-group">
+          <label for="presetSelect" class="form-label">Mode Preset yang Digunakan</label>
+          <select id="presetSelect" class="form-select" onchange="changeActivePreset()">
+            <option value="reguler">Jadwal Reguler (Senin - Kamis)</option>
+            <option value="jumat">Jadwal Khusus Hari Jumat</option>
+            <option value="ujian">Jadwal Penilaian / Ujian (PTS/PAS)</option>
+          </select>
+        </div>
+        <div style="display: flex; align-items: flex-end; margin-bottom: 0.85rem;">
+          <span id="presetSaveStatus" style="font-size: 0.85rem; color: var(--success); font-weight: 600;"></span>
+        </div>
+      </div>
+    </section>
+
+    <section class="card">
+      <h2 class="card-title">Tambah Jadwal Baru</h2>
+      <form id="addScheduleForm" onsubmit="handleAddSchedule(event)">
+        <div class="form-row-3">
+          <div class="form-group">
+            <label for="newTime" class="form-label">Jam & Menit (HH:MM)</label>
+            <input type="time" id="newTime" class="form-input" required>
+          </div>
+          <div class="form-group">
+            <label for="newTrack" class="form-label">Nada Bel Audio</label>
+            <select id="newTrack" class="form-select" required>
+              <option value="1">Track 1 - Bel Masuk Kelas</option>
+              <option value="2">Track 2 - Bel Istirahat Pertama</option>
+              <option value="3">Track 3 - Bel Masuk Setelah Istirahat</option>
+              <option value="4">Track 4 - Bel Pergantian Jam Pelajaran</option>
+              <option value="5">Track 5 - Bel Istirahat Ishoma</option>
+              <option value="6">Track 6 - Bel Pulang Sekolah</option>
+              <option value="7">Track 7 - Lagu Indonesia Raya</option>
+              <option value="8">Track 8 - Nada Panggilan Darurat</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label for="newLabel" class="form-label">Keterangan Aktivitas</label>
+            <input type="text" id="newLabel" class="form-input" placeholder="Contoh: Bel Masuk Kelas" required>
+          </div>
+        </div>
+
+        <div class="form-group" style="margin-top: 0.5rem;">
+          <label class="form-label">Hari Berlaku</label>
+          <div style="display: flex; flex-wrap: wrap; gap: 0.75rem; font-size: 0.875rem;">
+            <label><input type="checkbox" name="days" value="1" checked> Senin</label>
+            <label><input type="checkbox" name="days" value="2" checked> Selasa</label>
+            <label><input type="checkbox" name="days" value="3" checked> Rabu</label>
+            <label><input type="checkbox" name="days" value="4" checked> Kamis</label>
+            <label><input type="checkbox" name="days" value="5"> Jumat</label>
+            <label><input type="checkbox" name="days" value="6"> Sabtu</label>
+          </div>
+        </div>
+
+        <div style="margin-top: 1rem;">
+          <button type="submit" class="btn btn-primary">Tambah ke Jadwal</button>
+        </div>
+      </form>
+    </section>
+
+    <section class="card">
+      <h2 class="card-title">Daftar Jadwal pada Preset Terpilih</h2>
+      <div class="table-container">
+        <table class="table-custom">
+          <thead>
+            <tr>
+              <th>Waktu</th>
+              <th>Keterangan</th>
+              <th>Hari</th>
+              <th>Track</th>
+              <th>Aksi</th>
+            </tr>
+          </thead>
+          <tbody id="scheduleTableBody">
+            <tr>
+              <td colspan="5" style="text-align: center; color: var(--text-muted);">Memuat daftar jadwal...</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+  </main>
+
+  <footer class="footer-bar">
+    Bel Sekolah Otomatis Mandiri ESP32 - Sistem Mandiri Tanpa PC Server
+  </footer>
+
+  <script src="app.js"></script>
+  <script>
+    let activePreset = 'reguler';
+
+    async function initSchedulePage() {
+      const data = await fetchSchedule();
+      if (!data) return;
+
+      activePreset = data.active_preset || 'reguler';
+      document.getElementById('presetSelect').value = activePreset;
+      renderTable();
+    }
+
+    function renderTable() {
+      if (!currentData) return;
+      const preset = currentData.presets[activePreset];
+      const tbody = document.getElementById('scheduleTableBody');
+      tbody.innerHTML = '';
+
+      if (!preset || !preset.schedules || preset.schedules.length === 0) {
+        tbody.innerHTML = '<tr><td colspan="5" style="text-align: center; color: var(--text-muted);">Belum ada jadwal yang ditambahkan.</td></tr>';
+        return;
+      }
+
+      const sorted = [...preset.schedules].sort((a, b) => a.time.localeCompare(b.time));
+
+      sorted.forEach(item => {
+        const tr = document.createElement('tr');
+        const dayNames = item.days.map(d => formatDayName(d).slice(0, 3)).join(', ');
+        tr.innerHTML = `
+          <td style="font-weight: 700; color: var(--primary);">${item.time}</td>
+          <td>${item.label}</td>
+          <td>${dayNames}</td>
+          <td>Track #${item.track}</td>
+          <td>
+            <div class="btn-group">
+              <button type="button" class="btn btn-outline btn-sm" onclick="triggerBell(${item.track})">Uji Nada</button>
+              <button type="button" class="btn btn-danger btn-sm" onclick="deleteScheduleItem(${item.id})">Hapus</button>
+            </div>
+          </td>
+        `;
+        tbody.appendChild(tr);
+      });
+    }
+
+    async function changeActivePreset() {
+      const newPreset = document.getElementById('presetSelect').value;
+      activePreset = newPreset;
+      currentData.active_preset = newPreset;
+      renderTable();
+
+      const statusEl = document.getElementById('presetSaveStatus');
+      statusEl.textContent = 'Menyimpan...';
+
+      try {
+        const res = await fetch('/api/schedule/save', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(currentData)
+        });
+        const resData = await res.json();
+        if (resData.success) {
+          statusEl.textContent = 'Preset aktif tersimpan!';
+          setTimeout(() => { statusEl.textContent = ''; }, 2500);
+        } else {
+          statusEl.textContent = 'Gagal menyimpan preset.';
+        }
+      } catch (err) {
+        statusEl.textContent = 'Gagal koneksi ke ESP32.';
+      }
+    }
+
+    async function handleAddSchedule(e) {
+      e.preventDefault();
+      const time = document.getElementById('newTime').value;
+      const track = parseInt(document.getElementById('newTrack').value);
+      const label = document.getElementById('newLabel').value.trim();
+
+      const selectedDays = [];
+      document.querySelectorAll('input[name="days"]:checked').forEach(cb => {
+        selectedDays.push(parseInt(cb.value));
+      });
+
+      if (selectedDays.length === 0) {
+        alert('Pilih minimal satu hari aktif');
+        return;
+      }
+
+      const preset = currentData.presets[activePreset];
+      if (!preset.schedules) preset.schedules = [];
+
+      const newId = preset.schedules.length > 0 ? Math.max(...preset.schedules.map(s => s.id || 0)) + 1 : 1;
+
+      preset.schedules.push({
+        id: newId,
+        days: selectedDays,
+        time: time,
+        track: track,
+        label: label
+      });
+
+      renderTable();
+      await saveFullSchedule();
+      document.getElementById('addScheduleForm').reset();
+    }
+
+    async function deleteScheduleItem(id) {
+      if (!confirm('Hapus jadwal ini?')) return;
+      const preset = currentData.presets[activePreset];
+      preset.schedules = preset.schedules.filter(s => s.id !== id);
+      renderTable();
+      await saveFullSchedule();
+    }
+
+    async function saveFullSchedule() {
+      // Simpan selalu ke localStorage untuk preview / testing offline
+      localStorage.setItem('bell_schedule_local', JSON.stringify(currentData));
+
+      try {
+        const res = await fetch('/api/schedule/save', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(currentData)
+        });
+        const resData = await res.json();
+        if (!resData.success) {
+          console.warn('Peringatan: Gagal menyimpan perubahan ke flash ESP32.');
+        }
+      } catch (err) {
+        console.warn('Mode Offline: Jadwal tersimpan di penyimpanan browser lokal.');
+      }
+    }
+
+    window.addEventListener('DOMContentLoaded', initSchedulePage);
+  </script>
+</body>
+</html>

@@ -72,6 +72,10 @@ void loop() {
 4. **Langkah 4**: Monitor status pemutaran sampai audio selesai.
 5. **Langkah 5**: Beri jeda post-roll (1000 ms), lalu matikan Relay (`digitalWrite(PIN_RELAY, LOW)`).
 
+### D. Penanganan Keamanan & Modifikasi Track
+1. **Verifikasi PIN Admin**: Validasi request mutasi (`/api/schedule/save`, `/api/tracks/save`, `/api/auth/change-pin`) dengan memeriksa kecocokan `admin_pin` yang tersimpan di `schedule.json`.
+2. **Serialisasi Track Audio**: Endpoint `/api/tracks/save` memperbarui array `audio_tracks` pada `schedule.json` di LittleFS secara aman tanpa merusak struktur jadwal utama.
+
 ---
 
 ## 4. Checklist Verifikasi Firmware Sebelum Flashing

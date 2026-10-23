@@ -72,6 +72,10 @@ d:/BelSekolah/
 ├── README.md                  # [User Guide] Panduan umum dan petunjuk pengguna
 ├── AGENTS.md                  # [AI Ruler] Kontrak perilaku coding AI & anti-slop rules
 ├── SPEC.md                    # [Architecture Spec] Spesifikasi teknis, alur data & REST API
+├── DAFTAR_BELANJA.md          # [Bill of Materials] Panduan belanja komponen & estimasi harga
+├── docs/                      # Dokumentasi per domain pengerjaan
+│   ├── ARDUINO.md             # Panduan lengkap firmware & skema rangkaian
+│   └── WEB.md                 # Panduan arsitektur frontend LittleFS
 ├── simulation/                # Konfigurasi simulasi Wokwi
 │   ├── diagram.json           # Sirkuit virtual simulasi ESP32 + RTC + Relay
 │   └── wokwi.toml             # Konfigurasi simulator Wokwi

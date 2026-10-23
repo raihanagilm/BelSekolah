@@ -120,3 +120,6 @@ Setiap agen AI wajib memverifikasi checklist berikut sebelum menyerahkan tugas:
     - Membuat konfigurasi [firmware/platformio.ini](file:///d:/BelSekolah/firmware/platformio.ini) untuk ESP32 dengan dependensi DFRobotDFPlayerMini, RTClib, ArduinoJson v7, dan ESPAsyncWebServer.
     - Mengimplementasikan seluruh aset frontend LittleFS: [index.html](file:///d:/BelSekolah/firmware/data/index.html), [schedule.html](file:///d:/BelSekolah/firmware/data/schedule.html), [audio.html](file:///d:/BelSekolah/firmware/data/audio.html), [settings.html](file:///d:/BelSekolah/firmware/data/settings.html), [style.css](file:///d:/BelSekolah/firmware/data/style.css), [app.js](file:///d:/BelSekolah/firmware/data/app.js), dan [schedule.json](file:///d:/BelSekolah/firmware/data/schedule.json).
     - Mengimplementasikan firmware inti di [firmware/src/main.cpp](file:///d:/BelSekolah/firmware/src/main.cpp) (Wi-Fi AP mandiri, scheduler RTC non-blocking, relay amplifier auto-mute, dan REST API handlers).
+  - Pembuatan dokumen panduan belanja & prototipe:
+    - Membuat [DAFTAR_BELANJA.md](file:///d:/BelSekolah/DAFTAR_BELANJA.md) (BOM lengkap, estimasi harga pasaran e-commerce, spesifikasi dan tips pemilihan modul).
+    - Menyiapkan sketch Arduino IDE [firmware/firmware.ino](file:///d:/BelSekolah/firmware/firmware.ino) untuk kemudahan kompilasi dan upload langsung dari Arduino IDE.

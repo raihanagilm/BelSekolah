@@ -3,7 +3,7 @@
 
 - **Nama Proyek:** BelSekolah
 - **Tipe Sistem:** Standalone Embedded Web Application (IoT Edge Device)
-- **Target Hardware:** ESP32 (NodeMCU-32S / ESP32-WROOM-32)
+- **Target Hardware:** ESP8266 (NodeMCU V3 Lolin Type-C) & ESP32 (NodeMCU-32S / ESP32-WROOM-32)
 > **KONTRAK KETERIKATAN DOKUMEN (DOCUMENT BINDING CONTRACT)**:
 > File ini adalah spesifikasi arsitektur data, pinout, dan kontrak REST API sistem.
 > - Induk Kontrak AI: [AGENTS.md](file:///d:/BelSekolah/AGENTS.md)
@@ -17,7 +17,7 @@
 
 ## 1. Arsitektur Komunikasi & Hierarki Hardware
 
-ESP32 beroperasi mandiri tanpa server PC perantara. Seluruh konfigurasi dan jadwal dikelola langsung oleh ESP32 melalui antarmuka web browser.
+ESP8266 / ESP32 beroperasi mandiri tanpa server PC perantara. Seluruh konfigurasi dan jadwal dikelola langsung oleh mikrokontroler melalui antarmuka web browser.
 
 ```
                     JARINGAN WI-FI LOKAL SEKOLAH
@@ -30,7 +30,7 @@ ESP32 beroperasi mandiri tanpa server PC perantara. Seluruh konfigurasi dan jadw
                                  │ HTTP GET/POST (REST API & Web Assets)
                                  ▼
 ┌────────────────────────────────────────────────────────────────────────┐
-│                        MIKROKONTROLER ESP32                            │
+│                   MIKROKONTROLER (ESP8266 / ESP32)                     │
 │                                                                        │
 │   ┌────────────────────────────────────────────────────────────────┐   │
 │   │               ESPAsyncWebServer & AsyncTCP Engine              │   │
@@ -53,35 +53,58 @@ ESP32 beroperasi mandiri tanpa server PC perantara. Seluruh konfigurasi dan jadw
 │   └───────────────┬────────────────────────────────┬───────────────┘   │
 └───────────────────┼────────────────────────────────┼───────────────────┘
                     │                                │
-      I2C Bus (SDA:21, SCL:22)        UART2 (TX2:17, RX2:16) + GPIO:4
+        I2C Bus (RTC DS3231)              Serial UART (DFPlayer Mini)
+        ESP8266: D2(SDA), D1(SCL)         ESP8266: D5(RX), D6(TX)
+        ESP32  : 21(SDA), 22(SCL)         ESP32  : 16(RX), 17(TX)
                     ▼                                ▼
        ┌────────────────────────┐       ┌────────────────────────┐
        │   RTC Modul DS3231     │       │  DFPlayer Mini MP3     │
        │ (Waktu Akurat Offline) │       │ (MicroSD: /mp3/000x)   │
        └────────────────────────┘       └───────────┬────────────┘
-                                                    │ GPIO 4: Relay Mute
+                                                    │ Output Audio
                                                     ▼
                                         ┌────────────────────────┐
-                                        │ Relay 5V + Jack Audio  │
-                                        │ Ke Amplifier Sekolah   │
+                                        │ Modul Relay 5V 2-CH    │
+                                        │ CH1: Mute Audio Line   │
+                                        │ CH2: Power Listrik Amp │
+                                        └───────────┬────────────┘
+                                                    │
+                                                    ▼
+                                        ┌────────────────────────┐
+                                        │ Amplifier & Speaker    │
+                                        │ Sentral Ruang Piket    │
                                         └────────────────────────┘
 ```
 
 ---
 
-## 2. Diagram Pinout & Pengkabelan (ESP32)
+## 2. Diagram Pinout & Pengkabelan
 
+### A. Pinout ESP8266 NodeMCU V3 Lolin Type-C
+| Pin NodeMCU | Pin GPIO | Komponen Target | Fungsi / Keterangan |
+|---|---|---|---|
+| **VIN (5V)** | - | VCC Relay, DFPlayer, RTC | Sumber daya 5V dari kabel Type-C / adaptor |
+| **GND** | GND | Common Ground | Ground bersama untuk seluruh modul |
+| **D1** | GPIO 5 | SCL RTC DS3231 | I2C Clock Bus waktu real-time |
+| **D2** | GPIO 4 | SDA RTC DS3231 | I2C Data Bus waktu real-time |
+| **D5** | GPIO 14 | TX DFPlayer Mini | Jalur SoftwareSerial RX mikrokontroler |
+| **D6** | GPIO 12 | RX DFPlayer Mini | Jalur SoftwareSerial TX (**wajib resistor 1kΩ seri**) |
+| **D7** | GPIO 13 | IN 1 Relay | Relay Channel 1: Saklar Mute Audio Line |
+| **D0** | GPIO 16 | IN 2 Relay | Relay Channel 2: Saklar Daya Listrik Amplifier |
+| **D4** | GPIO 2 | Built-in LED Biru | Indikator visual aktivitas (Active-LOW) |
+
+### B. Pinout Alternatif ESP32 DevKit
 | Kaki ESP32 | Komponen / Pin Target | Keterangan & Standar Pengkabelan |
 |---|---|---|
 | **VIN (5V)** | VCC DFPlayer & RTC | Catu daya adaptor 5V 2A-3A stabil |
 | **GND** | GND Semua Komponen | Wajib satu jalur ground bersama (Common Ground) |
-| **GPIO 17 (TX2)** | RX DFPlayer Mini | Diberi resistor 1kΩ seri (peredam noise transfer data serial) |
+| **GPIO 17 (TX2)** | RX DFPlayer Mini | Diberi resistor 1kΩ seri (peredam noise) |
 | **GPIO 16 (RX2)** | TX DFPlayer Mini | Jalur data status modul pemutar audio |
-| **GPIO 21 (SDA)** | SDA RTC DS3231 | I2C Data bus untuk Real-Time Clock presisi |
-| **GPIO 22 (SCL)** | SCL RTC DS3231 | I2C Clock bus untuk Real-Time Clock |
-| **GPIO 4** | Signal Modul Relay | Mengaktifkan relay 2 detik sebelum audio diputar (*Pre-Roll*) |
-| **GPIO 2** | Built-in LED / Buzzer | Indikator visual pengujian dan debugging |
-| **DFPlayer DAC_R/L** | Jack Audio 3.5mm / RCA | Output line-level ke amplifier ruang piket sekolah |
+| **GPIO 21 (SDA)** | SDA RTC DS3231 | I2C Data bus untuk RTC |
+| **GPIO 22 (SCL)** | SCL RTC DS3231 | I2C Clock bus untuk RTC |
+| **GPIO 4** | IN 1 Relay | Relay Channel 1: Mute Audio (*Pre-Roll*) |
+| **GPIO 5** | IN 2 Relay | Relay Channel 2: Saklar Power Amplifier |
+| **GPIO 2** | Built-in LED | Indikator visual sistem |
 
 ---
 
@@ -163,14 +186,27 @@ Format data non-volatil yang disimpan pada partisi LittleFS:
     }
   },
   "audio_tracks": [
-    { "track": 1, "name": "0001.mp3", "title": "Bel Masuk Kelas" },
-    { "track": 2, "name": "0002.mp3", "title": "Bel Istirahat Pertama" },
-    { "track": 3, "name": "0003.mp3", "title": "Bel Masuk Setelah Istirahat" },
-    { "track": 4, "name": "0004.mp3", "title": "Bel Pergantian Jam Pelajaran" },
-    { "track": 5, "name": "0005.mp3", "title": "Bel Istirahat Ishoma" },
-    { "track": 6, "name": "0006.mp3", "title": "Bel Pulang Sekolah" },
-    { "track": 7, "name": "0007.mp3", "title": "Lagu Indonesia Raya / Upacara" },
-    { "track": 8, "name": "0008.mp3", "title": "Nada Panggilan Darurat" }
+    { "track": 1, "name": "0001.mp3", "title": "Siswa Datang / Bel Masuk" },
+    { "track": 2, "name": "0002.mp3", "title": "Jam Pelajaran 01" },
+    { "track": 3, "name": "0003.mp3", "title": "Jam Pelajaran 02" },
+    { "track": 4, "name": "0004.mp3", "title": "Jam Pelajaran 03" },
+    { "track": 5, "name": "0005.mp3", "title": "Jam Pelajaran 04" },
+    { "track": 6, "name": "0006.mp3", "title": "Istirahat Pertama" },
+    { "track": 7, "name": "0007.mp3", "title": "Jam Pelajaran 05" },
+    { "track": 8, "name": "0008.mp3", "title": "Jam Pelajaran 06" },
+    { "track": 9, "name": "0009.mp3", "title": "Jam Pelajaran 07" },
+    { "track": 10, "name": "0010.mp3", "title": "Jam Pelajaran 08" },
+    { "track": 11, "name": "0011.mp3", "title": "Istirahat Kedua / Dzuhur" },
+    { "track": 12, "name": "0012.mp3", "title": "Jam Pelajaran 09" },
+    { "track": 13, "name": "0013.mp3", "title": "Jam Pelajaran 10" },
+    { "track": 14, "name": "0014.mp3", "title": "Jam Pelajaran 11" },
+    { "track": 15, "name": "0015.mp3", "title": "Jam Pelajaran 12" },
+    { "track": 16, "name": "0016.mp3", "title": "Siswa Pulang / Akhir Pelajaran" },
+    { "track": 17, "name": "0017.mp3", "title": "Ujian: Masuk Ruang Ujian" },
+    { "track": 18, "name": "0018.mp3", "title": "Ujian: Mulai Dalam 10 Menit" },
+    { "track": 19, "name": "0019.mp3", "title": "Ujian: Mulai Ujian" },
+    { "track": 20, "name": "0020.mp3", "title": "Ujian: Selesai Dalam 10 Menit" },
+    { "track": 21, "name": "0021.mp3", "title": "Ujian: Selesai Ujian" }
   ],
   "settings": {
     "admin_pin": "1234",

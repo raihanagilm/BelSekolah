@@ -13,32 +13,50 @@
 ---
 
 ## 1. Lingkungan Pengembangan & Framework
-- **Framework**: Arduino Core for ESP32 (via PlatformIO / Arduino IDE)
-- **Target Chip**: ESP32-WROOM-32 / NodeMCU-32S (Dual-Core 240MHz, 4MB Flash)
-- **Partisi Flash**: `default_16MB.csv` atau minimal `minimal_spiffs.csv` (Partisi Data LittleFS minimal 1.5MB untuk web assets & database JSON)
+- **Framework**: Arduino Core for ESP8266 & ESP32 (via PlatformIO / Arduino IDE)
+- **Target Chip**:
+  - **ESP8266**: NodeMCU V3 Lolin Type-C (ESP-12E/F, 4MB Flash - Partisi 2MB Flash / 2MB LittleFS `eagle.flash.4m2m.ld`)
+  - **ESP32**: ESP32-WROOM-32 / NodeMCU-32S (Dual-Core 240MHz, 4MB Flash)
+- **Partisi LittleFS**: Minimal 1MB untuk menampung UI web (HTML/CSS/JS) & database JSON.
 
 ### Dependensi Library Utama:
-1. `ESPAsyncWebServer` & `AsyncTCP`: Web server non-blocking asynchronous agar eksekusi web tidak mengganggu ketepatan detik scheduler.
-2. `ArduinoJson` (v6/v7): Parsing dan serialisasi konfigurasi `schedule.json` dengan static/filter memory guard.
+1. `ESPAsyncWebServer` & `ESPAsyncTCP` (atau `AsyncTCP` di ESP32): Web server non-blocking asynchronous.
+2. `ArduinoJson` (v7): Parsing dan serialisasi konfigurasi `schedule.json`.
 3. `RTClib` (by Adafruit): Driver komunikasi I2C untuk RTC DS3231.
-4. `DFRobotDFPlayerMini`: Driver UART kontrol track audio pada DFPlayer Mini.
-5. `LittleFS`: Driver file system flash internal ESP32.
+4. `DFRobotDFPlayerMini`: Driver kontrol track audio pada DFPlayer Mini.
+5. `SoftwareSerial` (ESP8266) / `HardwareSerial UART2` (ESP32): Komunikasi serial modul MP3.
+6. `LittleFS`: Driver file system flash internal mikrokontroler.
 
 ---
 
-## 2. Pemetaan Pinout Hardware (Pin Assignment)
+## 2. Pemetaan Pinout Hardware
 
+### A. Tabel Pinout ESP8266 V3 CH340 (Lolin Type-C)
+| Label Pin NodeMCU | GPIO Chip | Komponen / Pin Target | Keterangan & Catatan Perakitan |
+|---|---|---|---|
+| **VIN (5V / VUSB)** | - | VCC Relay, DFPlayer, RTC | Catu daya adaptor 5V 2A-3A via Type-C / VIN |
+| **GND** | GND | Ground Seluruh Komponen | Wajib Common Ground (satu ground bersama) |
+| **D1** | GPIO 5 | SCL RTC DS3231 | I2C Clock Bus waktu offline |
+| **D2** | GPIO 4 | SDA RTC DS3231 | I2C Data Bus waktu offline |
+| **D5** | GPIO 14 | TX DFPlayer Mini | Jalur SoftwareSerial RX ESP8266 |
+| **D6** | GPIO 12 | RX DFPlayer Mini | Jalur SoftwareSerial TX ESP8266 (**Wajib pasang R 1kΩ seri**) |
+| **D7** | GPIO 13 | IN 1 Modul Relay | **Relay Channel 1: Mute Audio Line** (Memutus jalur speaker saat diam) |
+| **D0** | GPIO 16 | IN 2 Modul Relay | **Relay Channel 2: Saklar Daya Amplifier** (Otomatis ON saat bel, OFF saat selesai) |
+| **D4** | GPIO 2 | Built-in Blue LED | Indikator visual aktivitas (Active-LOW di ESP8266) |
+| **SPK_1/2 / DAC_R/L** | - | Jack Audio / Speaker | Output audio ke pengeras suara / amplifier |
+
+### B. Tabel Pinout ESP32 (Alternatif Target)
 | Kaki ESP32 | Komponen | Tipe Pin | Keterangan & Catatan Perakitan |
 |---|---|---|---|
-| **VIN (5V)** | VCC DFPlayer & RTC | Power Input | Gunakan adaptor 5V 2A-3A berkualitas baik |
-| **GND** | Ground Seluruh Komponen | Power | Wajib Common Ground (satu jalur ground bersama) |
-| **GPIO 17 (TX2)** | RX DFPlayer Mini | UART TX | Pasang **resistor 1kΩ seri** untuk meredam noise tegangan |
-| **GPIO 16 (RX2)** | TX DFPlayer Mini | UART RX | Jalur baca status modul pemutar audio |
-| **GPIO 21** | SDA RTC DS3231 | I2C Data | Jalur komunikasi data waktu presisi |
-| **GPIO 22** | SCL RTC DS3231 | I2C Clock | Jalur clock bus waktu |
-| **GPIO 4** | Signal Modul Relay | Output Digital | Kontrol daya/input amplifier (*Active High/Low*) |
-| **GPIO 2** | Built-in LED / Buzzer | Output Digital | Indikator visual/buzzer saat simulasi bel |
-| **DAC_R / DAC_L** | Jack Audio 3.5mm / RCA | Audio Line-Out | Dihubungkan ke input mixer/amplifier sekolah |
+| **VIN (5V)** | VCC DFPlayer & RTC | Power Input | Adaptor 5V 2A-3A berkualitas baik |
+| **GND** | Ground Seluruh Komponen | Power | Wajib Common Ground |
+| **GPIO 17 (TX2)** | RX DFPlayer Mini | UART TX | Pasang **resistor 1kΩ seri** |
+| **GPIO 16 (RX2)** | TX DFPlayer Mini | UART RX | Jalur baca status modul MP3 |
+| **GPIO 21** | SDA RTC DS3231 | I2C Data | Jalur data I2C |
+| **GPIO 22** | SCL RTC DS3231 | I2C Clock | Jalur clock I2C |
+| **GPIO 4** | IN 1 Relay | Output Digital | Relay Channel 1: Mute Audio |
+| **GPIO 5** | IN 2 Relay | Output Digital | Relay Channel 2: Power Amplifier |
+| **GPIO 2** | Built-in LED | Output Digital | Indikator visual |
 
 ---
 

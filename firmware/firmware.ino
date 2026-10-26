@@ -1,17 +1,42 @@
 #include <Arduino.h>
-#include <WiFi.h>
+
+#if defined(ESP8266)
+  #include <ESP8266WiFi.h>
+  #include <ESPAsyncTCP.h>
+  #include <SoftwareSerial.h>
+#elif defined(ESP32)
+  #include <WiFi.h>
+  #include <AsyncTCP.h>
+#endif
+
 #include <LittleFS.h>
 #include <Wire.h>
 #include <RTClib.h>
 #include <DFRobotDFPlayerMini.h>
 #include <ESPAsyncWebServer.h>
 #include <ArduinoJson.h>
+#include <AsyncJson.h>
 
-// Definisi Pinout
-#define PIN_RELAY 4
-#define PIN_DF_RX 16
-#define PIN_DF_TX 17
-#define PIN_LED 2
+// Definisi Pinout Fleksibel (ESP8266 NodeMCU & ESP32)
+#if defined(ESP8266)
+  // NodeMCU ESP8266 V3 Lolin Pinout
+  #define PIN_RELAY_MUTE   D7 // GPIO 13 (Relay Channel 1: Mute Audio Jack)
+  #define PIN_RELAY_POWER  D0 // GPIO 16 (Relay Channel 2: Saklar Daya Amplifier)
+  #define PIN_DF_RX        D5 // GPIO 14 (Ke TX DFPlayer)
+  #define PIN_DF_TX        D6 // GPIO 12 (Ke RX DFPlayer via Resistor 1k)
+  #define PIN_I2C_SDA      D2 // GPIO 4 (SDA RTC DS3231)
+  #define PIN_I2C_SCL      D1 // GPIO 5 (SCL RTC DS3231)
+  #define PIN_LED          D4 // GPIO 2 (Built-in LED Active-Low)
+#else
+  // ESP32 DevKit Pinout
+  #define PIN_RELAY_MUTE   4  // GPIO 4 (Relay Channel 1)
+  #define PIN_RELAY_POWER  5  // GPIO 5 (Relay Channel 2)
+  #define PIN_DF_RX        16 // GPIO 16 (RX2)
+  #define PIN_DF_TX        17 // GPIO 17 (TX2)
+  #define PIN_I2C_SDA      21 // GPIO 21 (SDA)
+  #define PIN_I2C_SCL      22 // GPIO 22 (SCL)
+  #define PIN_LED          2  // GPIO 2 (Built-in LED)
+#endif
 
 // Wi-Fi Access Point Konfigurasi Mandiri
 const char* ap_ssid = "Bel-Sekolah-AP";
@@ -21,7 +46,12 @@ const char* ap_password = ""; // Open AP atau bisa diset password
 AsyncWebServer server(80);
 RTC_DS3231 rtc;
 DFRobotDFPlayerMini dfplayer;
+
+#if defined(ESP8266)
+SoftwareSerial dfSerial(PIN_DF_RX, PIN_DF_TX);
+#else
 HardwareSerial dfSerial(2);
+#endif
 
 // Status Sistem
 bool rtcFound = false;
@@ -45,19 +75,31 @@ void registerHttpRoutes();
 void setup() {
   Serial.begin(115200);
   delay(1000);
+#if defined(ESP8266)
+  Serial.println("\n=== Memulai Bel Sekolah Otomatis Mandiri ESP8266 V3 ===");
+#else
   Serial.println("\n=== Memulai Bel Sekolah Otomatis Mandiri ESP32 ===");
+#endif
 
-  pinMode(PIN_RELAY, OUTPUT);
-  digitalWrite(PIN_RELAY, LOW); // Default Mute
+  // Inisialisasi Relay Dual-Channel
+  pinMode(PIN_RELAY_MUTE, OUTPUT);
+  pinMode(PIN_RELAY_POWER, OUTPUT);
+  digitalWrite(PIN_RELAY_MUTE, LOW);  // Default Mute
+  digitalWrite(PIN_RELAY_POWER, LOW); // Default Power Amp OFF
+
   pinMode(PIN_LED, OUTPUT);
+#if defined(ESP8266)
+  digitalWrite(PIN_LED, HIGH); // LED ESP8266 aktif LOW (HIGH = OFF)
+#else
   digitalWrite(PIN_LED, LOW);
+#endif
 
   // Inisialisasi LittleFS Flash
   initFileSystem();
   loadSettings();
 
   // Inisialisasi I2C & RTC DS3231
-  Wire.begin(21, 22);
+  Wire.begin(PIN_I2C_SDA, PIN_I2C_SCL);
   if (rtc.begin()) {
     rtcFound = true;
     Serial.println("[OK] Modul RTC DS3231 terdeteksi.");
@@ -66,17 +108,22 @@ void setup() {
       rtc.adjust(DateTime(2026, 10, 21, 7, 0, 0));
     }
   } else {
-    Serial.println("[FAIL] RTC DS3231 tidak ditemukan! Cek koneksi pin 21/22.");
+    Serial.printf("[FAIL] RTC DS3231 tidak ditemukan! Cek koneksi pin SDA:%d / SCL:%d\n", PIN_I2C_SDA, PIN_I2C_SCL);
   }
 
-  // Inisialisasi DFPlayer Mini Serial UART2
+  // Inisialisasi DFPlayer Mini Serial
+#if defined(ESP8266)
+  dfSerial.begin(9600);
+#else
   dfSerial.begin(9600, SERIAL_8N1, PIN_DF_RX, PIN_DF_TX);
+#endif
+
   if (dfplayer.begin(dfSerial, false, true)) {
     dfFound = true;
     dfplayer.volume(speakerVolume);
     Serial.println("[OK] DFPlayer Mini berhasil diinisialisasi.");
   } else {
-    Serial.println("[WARN] DFPlayer Mini tidak merespons (Periksa MicroSD / Pin 16,17).");
+    Serial.println("[WARN] DFPlayer Mini tidak merespons (Periksa MicroSD / Kabel Serial).");
   }
 
   // Aktifkan Wi-Fi Access Point
@@ -195,8 +242,18 @@ void checkScheduledBell() {
 
 void playBellTrack(int trackNumber) {
   Serial.printf("[AUDIO] Mengaktifkan Relay Pre-Roll (%d detik)...\n", relayPreRoll);
-  digitalWrite(PIN_RELAY, HIGH); // Hubungkan jalur amplifier
+  
+  // 1. Nyalakan Daya Amplifier (Relay Channel 2) & Unmute Jalur Audio (Relay Channel 1)
+  digitalWrite(PIN_RELAY_POWER, HIGH);
+  delay(500); // Beri waktu 500ms agar amplifier hidup tanpa pop noise
+  digitalWrite(PIN_RELAY_MUTE, HIGH);
+
+#if defined(ESP8266)
+  digitalWrite(PIN_LED, LOW); // ESP8266 LED ON (Active LOW)
+#else
   digitalWrite(PIN_LED, HIGH);
+#endif
+
   delay(relayPreRoll * 1000);
 
   if (dfFound) {
@@ -210,8 +267,15 @@ void playBellTrack(int trackNumber) {
   delay(15000);
 
   Serial.println("[AUDIO] Mematikan Relay (Post-Roll / Mute).");
-  digitalWrite(PIN_RELAY, LOW);
+  digitalWrite(PIN_RELAY_MUTE, LOW);
+  delay(1000); // Biarkan mute aktif sebelum memutus saklar listrik amplifier
+  digitalWrite(PIN_RELAY_POWER, LOW);
+
+#if defined(ESP8266)
+  digitalWrite(PIN_LED, HIGH); // ESP8266 LED OFF
+#else
   digitalWrite(PIN_LED, LOW);
+#endif
 }
 
 void registerHttpRoutes() {

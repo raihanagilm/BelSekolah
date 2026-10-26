@@ -5,35 +5,67 @@ const defaultFallbackData = {
     "reguler": {
       "name": "Jadwal Reguler (Senin - Kamis)",
       "schedules": [
-        { "id": 1, "days": [1, 2, 3, 4], "time": "07:00", "track": 1, "label": "Bel Masuk Kelas" },
-        { "id": 2, "days": [1, 2, 3, 4], "time": "09:40", "track": 2, "label": "Istirahat Pertama" },
-        { "id": 3, "days": [1, 2, 3, 4], "time": "10:00", "track": 3, "label": "Masuk Setelah Istirahat" },
-        { "id": 4, "days": [1, 2, 3, 4], "time": "11:45", "track": 5, "label": "Istirahat Ishoma" },
-        { "id": 5, "days": [1, 2, 3, 4], "time": "12:30", "track": 3, "label": "Masuk Siang" },
-        { "id": 6, "days": [1, 2, 3, 4], "time": "15:00", "track": 6, "label": "Bel Pulang Sekolah" }
+        { "id": 1, "days": [1, 2, 3, 4], "time": "06:45", "track": 1, "label": "Siswa Datang / Bel Masuk" },
+        { "id": 2, "days": [1, 2, 3, 4], "time": "07:00", "track": 2, "label": "Jam Pelajaran 01" },
+        { "id": 3, "days": [1, 2, 3, 4], "time": "07:45", "track": 3, "label": "Jam Pelajaran 02" },
+        { "id": 4, "days": [1, 2, 3, 4], "time": "08:30", "track": 4, "label": "Jam Pelajaran 03" },
+        { "id": 5, "days": [1, 2, 3, 4], "time": "09:15", "track": 5, "label": "Jam Pelajaran 04" },
+        { "id": 6, "days": [1, 2, 3, 4], "time": "10:00", "track": 6, "label": "Istirahat Pertama" },
+        { "id": 7, "days": [1, 2, 3, 4], "time": "10:30", "track": 7, "label": "Jam Pelajaran 05" },
+        { "id": 8, "days": [1, 2, 3, 4], "time": "11:15", "track": 8, "label": "Jam Pelajaran 06" },
+        { "id": 9, "days": [1, 2, 3, 4], "time": "12:00", "track": 11, "label": "Istirahat Kedua / Dzuhur" },
+        { "id": 10, "days": [1, 2, 3, 4], "time": "12:45", "track": 9, "label": "Jam Pelajaran 07" },
+        { "id": 11, "days": [1, 2, 3, 4], "time": "13:30", "track": 10, "label": "Jam Pelajaran 08" },
+        { "id": 12, "days": [1, 2, 3, 4], "time": "14:15", "track": 12, "label": "Jam Pelajaran 09" },
+        { "id": 13, "days": [1, 2, 3, 4], "time": "15:00", "track": 16, "label": "Siswa Pulang / Akhir Pelajaran" }
       ]
     },
     "jumat": {
       "name": "Jadwal Khusus Hari Jumat",
       "schedules": [
-        { "id": 1, "days": [5], "time": "07:00", "track": 1, "label": "Bel Masuk Kelas" },
-        { "id": 2, "days": [5], "time": "11:15", "track": 6, "label": "Bel Pulang Jumat" }
+        { "id": 1, "days": [5], "time": "06:45", "track": 1, "label": "Siswa Datang / Bel Masuk" },
+        { "id": 2, "days": [5], "time": "07:00", "track": 2, "label": "Jam Pelajaran 01" },
+        { "id": 3, "days": [5], "time": "07:45", "track": 3, "label": "Jam Pelajaran 02" },
+        { "id": 4, "days": [5], "time": "08:30", "track": 4, "label": "Jam Pelajaran 03" },
+        { "id": 5, "days": [5], "time": "09:15", "track": 5, "label": "Jam Pelajaran 04" },
+        { "id": 6, "days": [5], "time": "09:45", "track": 6, "label": "Istirahat Pertama" },
+        { "id": 7, "days": [5], "time": "10:15", "track": 7, "label": "Jam Pelajaran 05" },
+        { "id": 8, "days": [5], "time": "11:00", "track": 16, "label": "Siswa Pulang Jumat (Persiapan Sholat)" }
       ]
     },
     "ujian": {
-      "name": "Jadwal Penilaian / Ujian (PTS/PAS)",
-      "schedules": []
+      "name": "Jadwal Penilaian / Ujian (UNAS/PTS/PAS)",
+      "schedules": [
+        { "id": 1, "days": [1, 2, 3, 4, 5], "time": "07:15", "track": 17, "label": "Ujian: Masuk Ruang Ujian" },
+        { "id": 2, "days": [1, 2, 3, 4, 5], "time": "07:20", "track": 18, "label": "Ujian: Mulai Dalam 10 Menit" },
+        { "id": 3, "days": [1, 2, 3, 4, 5], "time": "07:30", "track": 19, "label": "Ujian: Mulai Ujian" },
+        { "id": 4, "days": [1, 2, 3, 4, 5], "time": "09:20", "track": 20, "label": "Ujian: Selesai Dalam 10 Menit" },
+        { "id": 5, "days": [1, 2, 3, 4, 5], "time": "09:30", "track": 21, "label": "Ujian: Selesai Ujian / Istirahat" }
+      ]
     }
   },
   "audio_tracks": [
-    { "track": 1, "name": "0001.mp3", "title": "Bel Masuk Kelas" },
-    { "track": 2, "name": "0002.mp3", "title": "Bel Istirahat Pertama" },
-    { "track": 3, "name": "0003.mp3", "title": "Bel Masuk Setelah Istirahat" },
-    { "track": 4, "name": "0004.mp3", "title": "Bel Pergantian Jam Pelajaran" },
-    { "track": 5, "name": "0005.mp3", "title": "Bel Istirahat Ishoma" },
-    { "track": 6, "name": "0006.mp3", "title": "Bel Pulang Sekolah" },
-    { "track": 7, "name": "0007.mp3", "title": "Lagu Indonesia Raya / Upacara" },
-    { "track": 8, "name": "0008.mp3", "title": "Nada Panggilan Darurat" }
+    { "track": 1, "name": "0001.mp3", "title": "Siswa Datang / Bel Masuk" },
+    { "track": 2, "name": "0002.mp3", "title": "Jam Pelajaran 01" },
+    { "track": 3, "name": "0003.mp3", "title": "Jam Pelajaran 02" },
+    { "track": 4, "name": "0004.mp3", "title": "Jam Pelajaran 03" },
+    { "track": 5, "name": "0005.mp3", "title": "Jam Pelajaran 04" },
+    { "track": 6, "name": "0006.mp3", "title": "Istirahat Pertama" },
+    { "track": 7, "name": "0007.mp3", "title": "Jam Pelajaran 05" },
+    { "track": 8, "name": "0008.mp3", "title": "Jam Pelajaran 06" },
+    { "track": 9, "name": "0009.mp3", "title": "Jam Pelajaran 07" },
+    { "track": 10, "name": "0010.mp3", "title": "Jam Pelajaran 08" },
+    { "track": 11, "name": "0011.mp3", "title": "Istirahat Kedua / Dzuhur" },
+    { "track": 12, "name": "0012.mp3", "title": "Jam Pelajaran 09" },
+    { "track": 13, "name": "0013.mp3", "title": "Jam Pelajaran 10" },
+    { "track": 14, "name": "0014.mp3", "title": "Jam Pelajaran 11" },
+    { "track": 15, "name": "0015.mp3", "title": "Jam Pelajaran 12" },
+    { "track": 16, "name": "0016.mp3", "title": "Siswa Pulang / Akhir Pelajaran" },
+    { "track": 17, "name": "0017.mp3", "title": "Ujian: Masuk Ruang Ujian" },
+    { "track": 18, "name": "0018.mp3", "title": "Ujian: Mulai Dalam 10 Menit" },
+    { "track": 19, "name": "0019.mp3", "title": "Ujian: Mulai Ujian" },
+    { "track": 20, "name": "0020.mp3", "title": "Ujian: Selesai Dalam 10 Menit" },
+    { "track": 21, "name": "0021.mp3", "title": "Ujian: Selesai Ujian" }
   ],
   "settings": {
     "admin_pin": "1234",
@@ -45,19 +77,11 @@ const defaultFallbackData = {
 };
 
 async function fetchSchedule() {
-  // Cek apakah ada data lokal tersimpan di browser
-  const saved = localStorage.getItem('bell_schedule_local');
-  if (saved) {
-    try {
-      currentData = JSON.parse(saved);
-    } catch (e) {}
-  }
-
-  // Coba ambil dari server (mendukung path relatif ./schedule.json dan root /schedule.json)
+  // Coba ambil dari server terlebih dahulu (selalu gunakan versi terbaru)
   const paths = ['./schedule.json', '/schedule.json', 'schedule.json'];
   for (const p of paths) {
     try {
-      const res = await fetch(p);
+      const res = await fetch(p + '?v=' + Date.now());
       if (res.ok) {
         currentData = await res.json();
         localStorage.setItem('bell_schedule_local', JSON.stringify(currentData));
@@ -66,6 +90,15 @@ async function fetchSchedule() {
     } catch (err) {
       // Lanjut ke path berikutnya
     }
+  }
+
+  // Cek apakah ada data lokal tersimpan di browser jika server offline
+  const saved = localStorage.getItem('bell_schedule_local');
+  if (saved) {
+    try {
+      currentData = JSON.parse(saved);
+      return currentData;
+    } catch (e) {}
   }
 
   // Jika diakses via file:// atau Live Server tanpa koneksi backend ESP32 aktif
@@ -87,22 +120,84 @@ async function fetchStatus() {
   }
 }
 
-async function triggerBell(trackId) {
-  try {
-    const res = await fetch(`/api/trigger?track=${trackId}`, { method: 'POST' });
-    if (res.ok) {
-      return await res.json();
+let mqttClient = null;
+function initMqtt() {
+  if (typeof Paho !== 'undefined' && !mqttClient) {
+    try {
+      const clientId = 'WebClient_' + Math.random().toString(16).substr(2, 8);
+      const isHttps = location.protocol === 'https:';
+      const brokerPort = isHttps ? 8884 : 8000;
+      const useSsl = isHttps;
+
+      mqttClient = new Paho.MQTT.Client('broker.hivemq.com', brokerPort, clientId);
+      mqttClient.connect({
+        useSSL: useSsl,
+        timeout: 5,
+        onSuccess: () => {
+          console.log('[MQTT] Web Terhubung ke Broker Cloud HiveMQ!');
+          const badgeWifi = document.getElementById('badgeWifi');
+          if (badgeWifi) {
+            badgeWifi.innerHTML = '<span class="badge-dot"></span>Simulasi Wokwi Terhubung!';
+            badgeWifi.className = 'badge badge-success';
+          }
+        },
+        onFailure: (err) => {
+          console.warn('[MQTT] Gagal konek ke broker port ' + brokerPort + ':', err);
+          // Fallback coba SSL jika port non-ssl gagal
+          if (!useSsl) {
+            mqttClient = new Paho.MQTT.Client('broker.hivemq.com', 8884, clientId);
+            mqttClient.connect({
+              useSSL: true,
+              timeout: 5,
+              onSuccess: () => {
+                console.log('[MQTT] SSL Terhubung!');
+                const badgeWifi = document.getElementById('badgeWifi');
+                if (badgeWifi) {
+                  badgeWifi.innerHTML = '<span class="badge-dot"></span>Simulasi Wokwi Terhubung!';
+                  badgeWifi.className = 'badge badge-success';
+                }
+              }
+            });
+          }
+        }
+      });
+    } catch (e) {
+      console.error(e);
     }
-  } catch (err) {
-    // Mode offline / Live Server
   }
-  // Simulasi sukses jika di localhost / Live Server
-  if (location.hostname === '127.0.0.1' || location.hostname === 'localhost') {
-    alert(`[Simulasi Audio] Memutar Track #${trackId} (Relay ON -> Audio 15 dtk -> Relay OFF)`);
-    return { success: true };
+}
+window.addEventListener('load', initMqtt);
+
+async function triggerBell(trackId) {
+  // 1. Kirim sinyal real-time ke ESP32 Wokwi via MQTT
+  if (mqttClient && mqttClient.isConnected()) {
+    try {
+      const message = new Paho.MQTT.Message(String(trackId));
+      message.destinationName = 'belsekolah/trigger';
+      mqttClient.send(message);
+      console.log('[MQTT] Perintah bel dikirim ke ESP32 Wokwi:', trackId);
+    } catch (e) {
+      console.error(e);
+    }
   }
-  alert('Gagal menghubungi ESP32');
-  return { success: false };
+
+  // 2. Coba fetch REST API jika terhubung ke ESP32 fisik (bukan Live Server)
+  const isLocalServer = location.hostname === '127.0.0.1' || location.hostname === 'localhost' || location.protocol === 'file:';
+  if (!isLocalServer) {
+    try {
+      const res = await fetch(`/api/trigger?track=${trackId}`, { method: 'POST' });
+      if (res.ok) return await res.json();
+    } catch (err) {}
+  }
+
+  // 3. Putar suara audio MP3 asli di browser laptop
+  const trackFile = `./audio/${String(trackId).padStart(4, '0')}.mp3`;
+  const audioObj = new Audio(trackFile);
+  audioObj.play()
+    .then(() => console.log('[Audio] Memutar suara asli:', trackFile))
+    .catch(e => console.warn('Audio auto-play dicegat browser:', e));
+
+  return { success: true };
 }
 
 async function syncTimeWithBrowser() {
@@ -142,24 +237,29 @@ function setAdminSession(status) {
 }
 
 async function loginAdmin(pin) {
-  try {
-    const res = await fetch('/api/auth/login', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ pin: pin })
-    });
-    if (res.ok) {
-      const data = await res.json();
-      if (data.success) {
-        setAdminSession(true);
-        return true;
+  // Jika sedang berjalan di Live Server / Localhost (bukan ESP32 asli)
+  const isLocalServer = location.hostname === '127.0.0.1' || location.hostname === 'localhost' || location.protocol === 'file:';
+  
+  if (!isLocalServer) {
+    try {
+      const res = await fetch('/api/auth/login', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ pin: pin })
+      });
+      if (res.ok) {
+        const data = await res.json();
+        if (data.success) {
+          setAdminSession(true);
+          return true;
+        }
       }
+    } catch (err) {
+      // Mode offline / fallback
     }
-  } catch (err) {
-    // Mode offline / Live Server
   }
 
-  // Validasi fallback terhadap PIN di schedule.json
+  // Validasi fallback terhadap PIN di schedule.json (default: 1234)
   const expectedPin = (currentData && currentData.settings && currentData.settings.admin_pin) || '1234';
   if (pin === expectedPin) {
     setAdminSession(true);

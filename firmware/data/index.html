@@ -7,6 +7,7 @@
   <link rel="stylesheet" href="style.css">
   <link rel="manifest" href="manifest.json">
   <link rel="icon" type="image/svg+xml" href="icon.svg">
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/paho-mqtt/1.0.1/mqttws31.min.js"></script>
   <script>
     if ('serviceWorker' in navigator) {
       window.addEventListener('load', () => {
@@ -18,8 +19,12 @@
 <body>
   <header class="header-bar">
     <div class="header-container">
-      <div class="brand-title">
-        <span>Bel Sekolah Otomatis</span>
+      <div class="brand-wrapper">
+        <div class="brand-icon">B</div>
+        <div class="brand-text">
+          <h1>Bel Sekolah Mandiri</h1>
+          <p>Sistem Pengendali Waktu & Audio Sekolah ESP32</p>
+        </div>
       </div>
       <nav class="nav-links">
         <a href="index.html" class="nav-link active">Beranda</a>
@@ -33,35 +38,57 @@
   <main class="main-content">
     <section class="card">
       <div class="clock-display">
+        <div class="clock-meta-top">Waktu Sistem (RTC DS3231)</div>
         <div id="liveClock" class="clock-time">--:--:--</div>
         <div id="liveDate" class="clock-date">Memuat tanggal...</div>
         <div class="status-badge-group">
-          <span id="badgeRtc" class="badge badge-success">RTC DS3231 Aktif</span>
-          <span id="badgePreset" class="badge badge-warning">Preset: Memuat...</span>
-          <span id="badgeWifi" class="badge badge-success">Mode AP / Wi-Fi Siap</span>
+          <span id="badgeRtc" class="badge badge-success"><span class="badge-dot"></span>RTC DS3231 Aktif</span>
+          <span id="badgePreset" class="badge badge-warning"><span class="badge-dot"></span>Preset: Memuat...</span>
+          <span id="badgeWifi" class="badge badge-success"><span class="badge-dot"></span>Mode AP / Wi-Fi Siap</span>
         </div>
       </div>
     </section>
 
     <section class="card">
-      <h2 class="card-title">Trigger Manual Bel Sekolah</h2>
-      <p style="font-size: 0.875rem; color: var(--text-muted); margin-bottom: 1rem;">
-        Gunakan tombol di bawah ini untuk membunyikan bel darurat atau pengumuman secara langsung.
+      <div class="card-header-clean">
+        <h2 class="card-title">Trigger Manual Bel Sekolah</h2>
+      </div>
+      <p class="card-subtitle">
+        Pilih nada bel di bawah ini untuk membunyikan bel darurat atau pengumuman secara langsung tanpa menunggu jadwal otomatis.
       </p>
-      <div class="btn-group">
-        <button type="button" class="btn btn-primary" onclick="openManualTrigger(1, 'Bel Masuk Kelas')">Masuk Kelas</button>
-        <button type="button" class="btn btn-outline" onclick="openManualTrigger(2, 'Bel Istirahat')">Istirahat</button>
-        <button type="button" class="btn btn-outline" onclick="openManualTrigger(5, 'Bel Ishoma')">Ishoma</button>
-        <button type="button" class="btn btn-outline" onclick="openManualTrigger(6, 'Bel Pulang')">Bel Pulang</button>
-        <button type="button" class="btn btn-danger" onclick="openManualTrigger(8, 'Panggilan Darurat')">Panggilan Darurat</button>
+      <div class="trigger-grid" id="manualTriggerGrid">
+        <button type="button" class="trigger-card-btn" onclick="openManualTrigger(1, 'Bel Masuk Kelas')">
+          <span class="btn-track-label">Track 01</span>
+          <span class="btn-track-title">Masuk Kelas / Bel Mulai</span>
+        </button>
+        <button type="button" class="trigger-card-btn" onclick="openManualTrigger(6, 'Istirahat Pertama')">
+          <span class="btn-track-label">Track 06</span>
+          <span class="btn-track-title">Istirahat Pertama</span>
+        </button>
+        <button type="button" class="trigger-card-btn" onclick="openManualTrigger(11, 'Istirahat Kedua / Dzuhur')">
+          <span class="btn-track-label">Track 11</span>
+          <span class="btn-track-title">Istirahat Kedua / Dzuhur</span>
+        </button>
+        <button type="button" class="trigger-card-btn" onclick="openManualTrigger(16, 'Bel Pulang Sekolah')">
+          <span class="btn-track-label">Track 16</span>
+          <span class="btn-track-title">Siswa Pulang Sekolah</span>
+        </button>
+        <button type="button" class="trigger-card-btn" onclick="openManualTrigger(17, 'Masuk Ruang Ujian')">
+          <span class="btn-track-label">Track 17</span>
+          <span class="btn-track-title">Ujian: Masuk Ruangan</span>
+        </button>
+        <button type="button" class="trigger-card-btn danger-action" onclick="openManualTrigger(8, 'Panggilan Darurat / Khusus')">
+          <span class="btn-track-label">Khusus</span>
+          <span class="btn-track-title">Panggilan / Peringatan</span>
+        </button>
       </div>
     </section>
 
     <section class="card">
-      <h2 class="card-title">
-        <span>Agenda Bel Hari Ini</span>
-        <a href="schedule.html" class="btn btn-outline btn-sm">Kelola Jadwal</a>
-      </h2>
+      <div class="card-header-clean">
+        <h2 class="card-title">Agenda Bel Hari Ini</h2>
+        <a href="schedule.html" class="btn btn-outline btn-sm">Kelola Jadwal Lengkap</a>
+      </div>
       <div class="table-container">
         <table class="table-custom">
           <thead>
@@ -74,7 +101,7 @@
           </thead>
           <tbody id="todayScheduleList">
             <tr>
-              <td colspan="4" style="text-align: center; color: var(--text-muted);">Memuat agenda bel...</td>
+              <td colspan="4" style="text-align: center; color: var(--text-muted); padding: 1.5rem;">Memuat agenda bel hari ini...</td>
             </tr>
           </tbody>
         </table>
@@ -90,9 +117,9 @@
         <label for="adminPinInput" class="form-label">PIN Admin</label>
         <input type="password" id="adminPinInput" class="form-input" placeholder="Masukkan 4 digit PIN" maxlength="10">
       </div>
-      <div class="btn-group" style="justify-content: flex-end; margin-top: 1rem;">
+      <div class="btn-group" style="justify-content: flex-end; margin-top: 1.25rem;">
         <button type="button" class="btn btn-outline" onclick="closePinModal()">Batal</button>
-        <button type="button" class="btn btn-primary" onclick="submitPinAndTrigger()">Lanjutkan</button>
+        <button type="button" class="btn btn-primary" onclick="submitPinAndTrigger()">Lanjutkan Bunyikan</button>
       </div>
     </div>
   </div>
@@ -112,14 +139,14 @@
 
       const activePresetKey = data.active_preset || 'reguler';
       const presetObj = data.presets[activePresetKey];
-      document.getElementById('badgePreset').textContent = 'Preset: ' + (presetObj ? presetObj.name : activePresetKey);
+      document.getElementById('badgePreset').innerHTML = '<span class="badge-dot"></span>Preset: ' + (presetObj ? presetObj.name : activePresetKey);
 
       const today = new Date().getDay(); // 0: Minggu, 1: Senin, dst.
       const tbody = document.getElementById('todayScheduleList');
       tbody.innerHTML = '';
 
       if (!presetObj || !presetObj.schedules || presetObj.schedules.length === 0) {
-        tbody.innerHTML = '<tr><td colspan="4" style="text-align: center;">Tidak ada jadwal bel pada preset ini.</td></tr>';
+        tbody.innerHTML = '<tr><td colspan="4" style="text-align: center; padding: 1.5rem; color: var(--text-muted);">Tidak ada jadwal bel pada preset ini.</td></tr>';
         return;
       }
 
@@ -128,17 +155,17 @@
         .sort((a, b) => a.time.localeCompare(b.time));
 
       if (todayItems.length === 0) {
-        tbody.innerHTML = '<tr><td colspan="4" style="text-align: center; color: var(--text-muted);">Tidak ada agenda bel untuk hari ini.</td></tr>';
+        tbody.innerHTML = '<tr><td colspan="4" style="text-align: center; padding: 1.5rem; color: var(--text-muted);">Tidak ada agenda bel untuk hari ini.</td></tr>';
         return;
       }
 
       todayItems.forEach(item => {
         const tr = document.createElement('tr');
         tr.innerHTML = `
-          <td style="font-weight: 700; color: var(--primary);">${item.time}</td>
-          <td>${item.label}</td>
+          <td><span class="table-time-badge">${item.time}</span></td>
+          <td style="font-weight: 500;">${item.label}</td>
           <td>Track #${item.track}</td>
-          <td><span class="badge badge-success">Terjadwal</span></td>
+          <td><span class="badge badge-success"><span class="badge-dot"></span>Terjadwal</span></td>
         `;
         tbody.appendChild(tr);
       });

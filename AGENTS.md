@@ -123,3 +123,15 @@ Setiap agen AI wajib memverifikasi checklist berikut sebelum menyerahkan tugas:
   - Pembuatan dokumen panduan belanja & prototipe:
     - Membuat [DAFTAR_BELANJA.md](file:///d:/BelSekolah/DAFTAR_BELANJA.md) (BOM lengkap, estimasi harga pasaran e-commerce, spesifikasi dan tips pemilihan modul).
     - Menyiapkan sketch Arduino IDE [firmware/firmware.ino](file:///d:/BelSekolah/firmware/firmware.ino) untuk kemudahan kompilasi dan upload langsung dari Arduino IDE.
+- **2026-10-23**:
+  - Sinkronisasi sirkuit & BOM hardware: memperbarui [DAFTAR_BELANJA.md](file:///d:/BelSekolah/DAFTAR_BELANJA.md) dengan penambahan item LED indikator 5mm dan Resistor 220Ω (GPIO 2) agar 100% identik dengan rangkaian simulasi visual Wokwi.
+  - Perbaikan kompatibilitas compiler: patching `WebAuthentication.cpp` ESPAsyncWebServer untuk ESP32 Arduino Core v3 (mbedtls 3.x) dan penambahan header `<AsyncJson.h>`.
+  - Penataan dan integrasi 21 rekaman audio asli dari repositori `cimo95/delphi-belsekolah` ke folder kartu memori [microsd_audio/mp3/](file:///d:/BelSekolah/microsd_audio/mp3/) dan frontend [firmware/data/audio/](file:///d:/BelSekolah/firmware/data/audio/).
+  - Pembaruan konfigurasi diagram simulasi Wokwi [firmware/wokwi_diagram.json](file:///d:/BelSekolah/firmware/wokwi_diagram.json) dan penyediaan panduan Wokwi IoT Gateway / Web Server simulator.
+  - Penyusunan dokumen komparasi dan langkah perakitan fisik: [PANDUAN_TRANSISI.md](file:///d:/BelSekolah/PANDUAN_TRANSISI.md) (perbandingan mendalam simulasi vs perangkat nyata, panduan flash LittleFS, wiring breadboard DFPlayer/RTC/Relay, dan pengoperasian perdana).
+- **2026-10-26**:
+  - Migrasi target hardware & porting firmware ke **ESP8266 V3 CH340 (Lolin Type-C)** dan **Modul Relay 5V 2-Channel**:
+    - [firmware/firmware.ino](file:///d:/BelSekolah/firmware/firmware.ino): Menambahkan dukungan multi-platform (`#if defined(ESP8266)` / `ESP32`), `SoftwareSerial` (D5/D6) untuk DFPlayer Mini, I2C Wire (D1/D2) untuk RTC DS3231, dan kontrol Relay Dual-Channel (D7 untuk Mute Audio, D0 untuk Saklar Daya Listrik Amplifier).
+    - [firmware/platformio.ini](file:///d:/BelSekolah/firmware/platformio.ini): Menambahkan environment `[env:esp8266]` dengan konfigurasi partisi 4MB (2MB code / 2MB LittleFS) serta dependensi `ESPAsyncWebServer-esphome` & `ESPAsyncTCP-esphome`.
+    - [SPEC.md](file:///d:/BelSekolah/SPEC.md) & [docs/ARDUINO.md](file:///d:/BelSekolah/docs/ARDUINO.md): Memperbarui diagram pinout, skema wiring D1-D7, dan hierarki kontrol relay ganda.
+    - [DAFTAR_BELANJA.md](file:///d:/BelSekolah/DAFTAR_BELANJA.md): Memperbarui status kepemilikan komponen pengguna (ESP8266 & Relay 2-CH sudah ada, memfokuskan daftar belanja hanya pada DFPlayer Mini, RTC DS3231, MicroSD FAT32, dan Resistor 1kΩ).

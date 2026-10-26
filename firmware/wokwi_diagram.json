@@ -1,0 +1,27 @@
+{
+  "version": 1,
+  "author": "BelSekolah ESP32",
+  "editor": "wokwi",
+  "parts": [
+    { "type": "board-esp32-devkit-c-v4", "id": "esp", "top": 0, "left": 0, "attrs": {} },
+    { "type": "wokwi-ds1307", "id": "rtc", "top": -140, "left": -80, "attrs": {} },
+    { "type": "wokwi-relay-module", "id": "relay", "top": -140, "left": 160, "attrs": {} },
+    { "type": "wokwi-led", "id": "led", "top": 140, "left": 160, "attrs": { "color": "blue", "label": "Status Bel / Relay" } },
+    { "type": "wokwi-resistor", "id": "r1", "top": 180, "left": 160, "attrs": { "value": "220" } }
+  ],
+  "connections": [
+    [ "esp:TX", "$serialMonitor:RX", "", [] ],
+    [ "esp:RX", "$serialMonitor:TX", "", [] ],
+    [ "rtc:GND", "esp:GND.1", "black", [ "v0" ] ],
+    [ "rtc:5V", "esp:5V", "red", [ "v0" ] ],
+    [ "rtc:SDA", "esp:21", "green", [ "v0" ] ],
+    [ "rtc:SCL", "esp:22", "yellow", [ "v0" ] ],
+    [ "relay:GND", "esp:GND.2", "black", [ "v0" ] ],
+    [ "relay:VCC", "esp:5V", "red", [ "v0" ] ],
+    [ "relay:IN", "esp:4", "orange", [ "v0" ] ],
+    [ "esp:2", "led:A", "blue", [ "v0" ] ],
+    [ "led:C", "r1:1", "black", [ "v0" ] ],
+    [ "r1:2", "esp:GND.2", "black", [ "v0" ] ]
+  ],
+  "dependencies": {}
+}

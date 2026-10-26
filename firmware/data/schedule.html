@@ -5,12 +5,18 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Kelola Jadwal - Bel Sekolah Otomatis Mandiri</title>
   <link rel="stylesheet" href="style.css">
+  <link rel="icon" type="image/svg+xml" href="icon.svg">
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/paho-mqtt/1.0.1/mqttws31.min.js"></script>
 </head>
 <body>
   <header class="header-bar">
     <div class="header-container">
-      <div class="brand-title">
-        <span>Bel Sekolah Otomatis</span>
+      <div class="brand-wrapper">
+        <div class="brand-icon">B</div>
+        <div class="brand-text">
+          <h1>Bel Sekolah Mandiri</h1>
+          <p>Sistem Pengendali Waktu & Audio Sekolah ESP32</p>
+        </div>
       </div>
       <nav class="nav-links">
         <a href="index.html" class="nav-link">Beranda</a>
@@ -23,24 +29,69 @@
 
   <main class="main-content">
     <section class="card">
-      <h2 class="card-title">Pilih Preset Jadwal Aktif</h2>
+      <div class="card-header-clean">
+        <h2 class="card-title">Kelola Preset Jadwal</h2>
+        <button type="button" class="btn btn-primary btn-sm" onclick="toggleAddPresetForm()">+ Tambah Preset Baru</button>
+      </div>
       <div class="form-row-2">
         <div class="form-group">
-          <label for="presetSelect" class="form-label">Mode Preset yang Digunakan</label>
-          <select id="presetSelect" class="form-select" onchange="changeActivePreset()">
-            <option value="reguler">Jadwal Reguler (Senin - Kamis)</option>
-            <option value="jumat">Jadwal Khusus Hari Jumat</option>
-            <option value="ujian">Jadwal Penilaian / Ujian (PTS/PAS)</option>
-          </select>
+          <label for="presetSelect" class="form-label">Mode Preset Aktif</label>
+          <div style="display: flex; gap: 0.5rem; flex-wrap: wrap;">
+            <select id="presetSelect" class="form-select" style="flex: 1; min-width: 220px;" onchange="changeActivePreset()">
+              <option value="reguler">Jadwal Reguler (Senin - Kamis)</option>
+              <option value="jumat">Jadwal Khusus Hari Jumat</option>
+              <option value="ujian">Jadwal Penilaian / Ujian (PTS/PAS)</option>
+            </select>
+            <button type="button" id="btnEditPreset" class="btn btn-outline btn-sm" onclick="toggleEditPresetForm()" title="Ubah Nama Preset Ini">Edit Nama</button>
+            <button type="button" id="btnDeletePreset" class="btn btn-danger btn-sm" onclick="deleteCurrentPreset()" title="Hapus Preset Ini">Hapus</button>
+          </div>
         </div>
         <div style="display: flex; align-items: flex-end; margin-bottom: 0.85rem;">
           <span id="presetSaveStatus" style="font-size: 0.85rem; color: var(--success); font-weight: 600;"></span>
         </div>
       </div>
+
+      <!-- Form Tambah Preset Baru (Hidden Default) -->
+      <div id="addPresetContainer" style="display: none; background: #f8fafc; border: 1px solid var(--border); padding: 1.25rem; border-radius: var(--radius-md); margin-top: 1rem;">
+        <h3 style="font-size: 0.975rem; font-weight: 700; color: var(--navy-900); margin-bottom: 0.75rem;">Buat Preset Jadwal Baru</h3>
+        <form onsubmit="handleCreatePreset(event)">
+          <div class="form-row-2">
+            <div class="form-group">
+              <label for="newPresetKey" class="form-label">Kode Singkat (ID Unik)</label>
+              <input type="text" id="newPresetKey" class="form-input" placeholder="contoh: ramadhan, classmeeting" pattern="[a-zA-Z0-9_-]+" required>
+            </div>
+            <div class="form-group">
+              <label for="newPresetName" class="form-label">Nama Lengkap Preset</label>
+              <input type="text" id="newPresetName" class="form-input" placeholder="contoh: Jadwal Khusus Ramadhan" required>
+            </div>
+          </div>
+          <div class="btn-group" style="margin-top: 0.75rem;">
+            <button type="submit" class="btn btn-primary btn-sm">Simpan Preset</button>
+            <button type="button" class="btn btn-outline btn-sm" onclick="toggleAddPresetForm()">Batal</button>
+          </div>
+        </form>
+      </div>
+
+      <!-- Form Edit Nama Preset (Hidden Default) -->
+      <div id="editPresetContainer" style="display: none; background: #f8fafc; border: 1px solid var(--border); padding: 1.25rem; border-radius: var(--radius-md); margin-top: 1rem;">
+        <h3 style="font-size: 0.975rem; font-weight: 700; color: var(--navy-900); margin-bottom: 0.75rem;">Ubah Nama Preset</h3>
+        <form onsubmit="handleUpdatePresetName(event)">
+          <div class="form-group">
+            <label for="editPresetNameInput" class="form-label">Nama Preset</label>
+            <input type="text" id="editPresetNameInput" class="form-input" required>
+          </div>
+          <div class="btn-group" style="margin-top: 0.75rem;">
+            <button type="submit" class="btn btn-primary btn-sm">Perbarui Nama</button>
+            <button type="button" class="btn btn-outline btn-sm" onclick="toggleEditPresetForm()">Batal</button>
+          </div>
+        </form>
+      </div>
     </section>
 
     <section class="card">
-      <h2 class="card-title">Tambah Jadwal Baru</h2>
+      <div class="card-header-clean">
+        <h2 id="formScheduleTitle" class="card-title">Tambah Jadwal Baru</h2>
+      </div>
       <form id="addScheduleForm" onsubmit="handleAddSchedule(event)">
         <div class="form-row-3">
           <div class="form-group">
@@ -50,14 +101,7 @@
           <div class="form-group">
             <label for="newTrack" class="form-label">Nada Bel Audio</label>
             <select id="newTrack" class="form-select" required>
-              <option value="1">Track 1 - Bel Masuk Kelas</option>
-              <option value="2">Track 2 - Bel Istirahat Pertama</option>
-              <option value="3">Track 3 - Bel Masuk Setelah Istirahat</option>
-              <option value="4">Track 4 - Bel Pergantian Jam Pelajaran</option>
-              <option value="5">Track 5 - Bel Istirahat Ishoma</option>
-              <option value="6">Track 6 - Bel Pulang Sekolah</option>
-              <option value="7">Track 7 - Lagu Indonesia Raya</option>
-              <option value="8">Track 8 - Nada Panggilan Darurat</option>
+              <option value="">Memuat daftar track audio...</option>
             </select>
           </div>
           <div class="form-group">
@@ -68,13 +112,13 @@
 
         <div class="form-group" style="margin-top: 0.5rem;">
           <label class="form-label">Hari Berlaku</label>
-          <div style="display: flex; flex-wrap: wrap; gap: 0.75rem; font-size: 0.875rem;">
-            <label><input type="checkbox" name="days" value="1" checked> Senin</label>
-            <label><input type="checkbox" name="days" value="2" checked> Selasa</label>
-            <label><input type="checkbox" name="days" value="3" checked> Rabu</label>
-            <label><input type="checkbox" name="days" value="4" checked> Kamis</label>
-            <label><input type="checkbox" name="days" value="5"> Jumat</label>
-            <label><input type="checkbox" name="days" value="6"> Sabtu</label>
+          <div class="day-selector-group">
+            <label class="day-checkbox-label"><input type="checkbox" name="days" value="1" checked> Senin</label>
+            <label class="day-checkbox-label"><input type="checkbox" name="days" value="2" checked> Selasa</label>
+            <label class="day-checkbox-label"><input type="checkbox" name="days" value="3" checked> Rabu</label>
+            <label class="day-checkbox-label"><input type="checkbox" name="days" value="4" checked> Kamis</label>
+            <label class="day-checkbox-label"><input type="checkbox" name="days" value="5"> Jumat</label>
+            <label class="day-checkbox-label"><input type="checkbox" name="days" value="6"> Sabtu</label>
           </div>
         </div>
 
@@ -111,7 +155,9 @@
     Bel Sekolah Otomatis Mandiri ESP32 - Sistem Mandiri Tanpa PC Server
   </footer>
 
-  <script src="app.js"></script>
+  <script>
+    document.write('<script src="app.js?v=' + Date.now() + '"><\/script>');
+  </script>
   <script>
     let activePreset = 'reguler';
 
@@ -120,8 +166,115 @@
       if (!data) return;
 
       activePreset = data.active_preset || 'reguler';
-      document.getElementById('presetSelect').value = activePreset;
+      populatePresetSelect();
+
+      // Populate pilihan track audio dinamis dari 21 data audio riil
+      const trackSelect = document.getElementById('newTrack');
+      trackSelect.innerHTML = '';
+      if (data.audio_tracks && data.audio_tracks.length > 0) {
+        data.audio_tracks.forEach(t => {
+          const opt = document.createElement('option');
+          opt.value = t.track;
+          opt.textContent = `Track ${t.track} - ${t.title}`;
+          trackSelect.appendChild(opt);
+        });
+      }
+
       renderTable();
+    }
+
+    function populatePresetSelect() {
+      const select = document.getElementById('presetSelect');
+      select.innerHTML = '';
+      if (!currentData || !currentData.presets) return;
+
+      for (const [key, pObj] of Object.entries(currentData.presets)) {
+        const opt = document.createElement('option');
+        opt.value = key;
+        opt.textContent = pObj.name || key;
+        select.appendChild(opt);
+      }
+      select.value = activePreset;
+      // Jangan izinkan hapus preset bawaan 'reguler'
+      document.getElementById('btnDeletePreset').style.display = (activePreset === 'reguler') ? 'none' : 'inline-block';
+    }
+
+    function toggleAddPresetForm() {
+      const box = document.getElementById('addPresetContainer');
+      const editBox = document.getElementById('editPresetContainer');
+      editBox.style.display = 'none';
+      box.style.display = (box.style.display === 'none' || box.style.display === '') ? 'block' : 'none';
+      if (box.style.display === 'block') {
+        document.getElementById('newPresetKey').focus();
+      }
+    }
+
+    function toggleEditPresetForm() {
+      const box = document.getElementById('editPresetContainer');
+      const addBox = document.getElementById('addPresetContainer');
+      addBox.style.display = 'none';
+      box.style.display = (box.style.display === 'none' || box.style.display === '') ? 'block' : 'none';
+      if (box.style.display === 'block') {
+        const input = document.getElementById('editPresetNameInput');
+        input.value = currentData?.presets[activePreset]?.name || activePreset;
+        input.focus();
+      }
+    }
+
+    async function handleUpdatePresetName(e) {
+      e.preventDefault();
+      const newName = document.getElementById('editPresetNameInput').value.trim();
+      if (!newName || !currentData || !currentData.presets[activePreset]) return;
+
+      currentData.presets[activePreset].name = newName;
+      toggleEditPresetForm();
+      populatePresetSelect();
+      await saveFullSchedule();
+      alert(`Nama preset berhasil diubah menjadi "${newName}"`);
+    }
+
+    async function handleCreatePreset(e) {
+      e.preventDefault();
+      const key = document.getElementById('newPresetKey').value.trim().toLowerCase();
+      const name = document.getElementById('newPresetName').value.trim();
+
+      if (!key || !name) return;
+      if (currentData.presets[key]) {
+        alert('ID Preset sudah ada. Gunakan ID unik lain.');
+        return;
+      }
+
+      currentData.presets[key] = {
+        name: name,
+        schedules: []
+      };
+
+      activePreset = key;
+      currentData.active_preset = key;
+      toggleAddPresetForm();
+      populatePresetSelect();
+      renderTable();
+      await saveFullSchedule();
+      alert(`Preset baru "${name}" berhasil dibuat! Silakan tambahkan jadwalnya.`);
+      document.getElementById('newPresetKey').value = '';
+      document.getElementById('newPresetName').value = '';
+    }
+
+    async function deleteCurrentPreset() {
+      if (activePreset === 'reguler') {
+        alert('Preset utama (Reguler) tidak boleh dihapus.');
+        return;
+      }
+      const presetName = currentData.presets[activePreset]?.name || activePreset;
+      if (!confirm(`Hapus preset "${presetName}" beserta seluruh jadwal di dalamnya?`)) return;
+
+      delete currentData.presets[activePreset];
+      activePreset = 'reguler';
+      currentData.active_preset = 'reguler';
+      populatePresetSelect();
+      renderTable();
+      await saveFullSchedule();
+      alert('Preset berhasil dihapus.');
     }
 
     function renderTable() {
@@ -148,6 +301,7 @@
           <td>
             <div class="btn-group">
               <button type="button" class="btn btn-outline btn-sm" onclick="triggerBell(${item.track})">Uji Nada</button>
+              <button type="button" class="btn btn-outline btn-sm" onclick="editScheduleItem(${item.id})">Edit</button>
               <button type="button" class="btn btn-danger btn-sm" onclick="deleteScheduleItem(${item.id})">Hapus</button>
             </div>
           </td>
@@ -183,6 +337,28 @@
       }
     }
 
+    let editingScheduleId = null;
+
+    function editScheduleItem(id) {
+      const preset = currentData.presets[activePreset];
+      const item = preset.schedules.find(s => s.id === id);
+      if (!item) return;
+
+      editingScheduleId = id;
+      document.getElementById('newTime').value = item.time;
+      document.getElementById('newTrack').value = item.track;
+      document.getElementById('newLabel').value = item.label;
+
+      document.querySelectorAll('input[name="days"]').forEach(cb => {
+        cb.checked = item.days.includes(parseInt(cb.value));
+      });
+
+      const submitBtn = document.querySelector('#addScheduleForm button[type="submit"]');
+      submitBtn.textContent = 'Perbarui Jadwal';
+      submitBtn.className = 'btn btn-warning';
+      document.getElementById('newTime').focus();
+    }
+
     async function handleAddSchedule(e) {
       e.preventDefault();
       const time = document.getElementById('newTime').value;
@@ -202,15 +378,30 @@
       const preset = currentData.presets[activePreset];
       if (!preset.schedules) preset.schedules = [];
 
-      const newId = preset.schedules.length > 0 ? Math.max(...preset.schedules.map(s => s.id || 0)) + 1 : 1;
-
-      preset.schedules.push({
-        id: newId,
-        days: selectedDays,
-        time: time,
-        track: track,
-        label: label
-      });
+      if (editingScheduleId !== null) {
+        // Mode Update
+        const target = preset.schedules.find(s => s.id === editingScheduleId);
+        if (target) {
+          target.time = time;
+          target.track = track;
+          target.label = label;
+          target.days = selectedDays;
+        }
+        editingScheduleId = null;
+        const submitBtn = document.querySelector('#addScheduleForm button[type="submit"]');
+        submitBtn.textContent = 'Tambah ke Jadwal';
+        submitBtn.className = 'btn btn-primary';
+      } else {
+        // Mode Tambah Baru
+        const newId = preset.schedules.length > 0 ? Math.max(...preset.schedules.map(s => s.id || 0)) + 1 : 1;
+        preset.schedules.push({
+          id: newId,
+          days: selectedDays,
+          time: time,
+          track: track,
+          label: label
+        });
+      }
 
       renderTable();
       await saveFullSchedule();

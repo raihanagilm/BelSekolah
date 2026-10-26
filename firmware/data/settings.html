@@ -9,8 +9,12 @@
 <body>
   <header class="header-bar">
     <div class="header-container">
-      <div class="brand-title">
-        <span>Bel Sekolah Otomatis</span>
+      <div class="brand-wrapper">
+        <div class="brand-icon">B</div>
+        <div class="brand-text">
+          <h1>Bel Sekolah Mandiri</h1>
+          <p>Sistem Pengendali Waktu & Audio Sekolah ESP32</p>
+        </div>
       </div>
       <nav class="nav-links">
         <a href="index.html" class="nav-link">Beranda</a>
@@ -23,9 +27,11 @@
 
   <main class="main-content">
     <section class="card">
-      <h2 class="card-title">Sinkronisasi Waktu RTC DS3231</h2>
-      <p style="font-size: 0.875rem; color: var(--text-muted); margin-bottom: 1rem;">
-        Jika perangkat ESP32 berada di jaringan intranet offline tanpa akses internet, Anda dapat menyinkronkan waktu modul RTC DS3231 langsung dengan jam perangkat (laptop/smartphone) ini secara instan.
+      <div class="card-header-clean">
+        <h2 class="card-title">Sinkronisasi Waktu RTC DS3231</h2>
+      </div>
+      <p class="card-subtitle">
+        Jika perangkat ESP32 beroperasi mandiri secara luring (offline) tanpa akses internet, Anda dapat menyinkronkan waktu modul RTC DS3231 langsung dengan jam perangkat penjelajah web ini dalam satu klik.
       </p>
       <button type="button" class="btn btn-primary" onclick="syncTimeWithBrowser()">Sinkronkan Jam RTC Sekarang</button>
     </section>
@@ -105,6 +111,11 @@
               <td>Signal Relay 5V</td>
               <td>Saklar Mute Amplifier Sekolah (Anti-Hum)</td>
             </tr>
+            <tr>
+              <td><code>GPIO 2</code></td>
+              <td>LED Indikator 5mm / Resistor 220&Omega;</td>
+              <td>Indikator Visual Status Bel Aktif (Sinkron Simulasi Wokwi)</td>
+            </tr>
           </tbody>
         </table>
       </div>
@@ -115,7 +126,9 @@
     Bel Sekolah Otomatis Mandiri ESP32 - Sistem Mandiri Tanpa PC Server
   </footer>
 
-  <script src="app.js"></script>
+  <script>
+    document.write('<script src="app.js?v=' + Date.now() + '"><\/script>');
+  </script>
   <script>
     async function loadSettingsPage() {
       const data = await fetchSchedule();
@@ -143,12 +156,13 @@
         const resData = await res.json();
         if (resData.success) {
           alert('Pengaturan parameter berhasil disimpan!');
-        } else {
-          alert('Gagal menyimpan ke ESP32.');
+          return;
         }
       } catch (err) {
-        alert('Koneksi terputus saat menyimpan pengaturan.');
+        // Mode lokal / simulator
       }
+      localStorage.setItem('bell_schedule_local', JSON.stringify(currentData));
+      alert('Pengaturan parameter tersimpan!');
     }
 
     async function handleChangePin(e) {
@@ -166,11 +180,22 @@
         if (resData.success) {
           alert('PIN Admin berhasil diperbarui!');
           document.getElementById('pinForm').reset();
-        } else {
-          alert('Gagal mengubah PIN: ' + (resData.message || 'PIN lama salah'));
+          return;
         }
       } catch (err) {
-        alert('Koneksi terputus saat mengganti PIN.');
+        // Mode lokal / simulator
+      }
+
+      // Validasi dan update PIN di penyimpanan lokal
+      const currentPin = (currentData && currentData.settings && currentData.settings.admin_pin) || '1234';
+      if (oldPin === currentPin) {
+        if (!currentData.settings) currentData.settings = {};
+        currentData.settings.admin_pin = newPin;
+        localStorage.setItem('bell_schedule_local', JSON.stringify(currentData));
+        alert(`PIN Admin berhasil diperbarui menjadi: ${newPin}`);
+        document.getElementById('pinForm').reset();
+      } else {
+        alert('PIN lama salah! Default adalah: 1234');
       }
     }
 

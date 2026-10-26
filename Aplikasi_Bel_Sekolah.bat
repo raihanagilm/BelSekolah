@@ -10,15 +10,18 @@ echo.
 :: Tentukan target URL (Jika ada ESP32 di jaringan atau lokal)
 set TARGET_URL=http://192.168.4.1
 
-:: Cek koneksi ke ESP32 (timeout 1 detik)
-ping -n 1 -w 1000 192.168.4.1 >nul 2>&1
-if %errorlevel% neq 0 (
-    :: Jika belum terhubung ke WiFi ESP32, buka file HTML lokal (Semi-Offline Mode)
-    set TARGET_URL=file:///%~dp0firmware\data\index.html
-    echo [INFO] Menjalankan dalam Mode Offline Lokal...
+:: Cek koneksi ke ESP8266 di IP 192.168.4.1
+ping -n 1 -w 800 192.168.4.1 >nul 2>&1
+if %errorlevel% equ 0 (
+    echo [INFO] Terdeteksi terhubung ke Wi-Fi ESP8266 (Bel-Sekolah-AP)!
+    echo [INFO] Relay amplifier pada alat akan otomatis aktif saat bel berbunyi.
 ) else (
-    echo [INFO] Terhubung ke Modul ESP32!
+    echo [INFO] Menjalankan dalam Mode Offline Laptop/Komputer...
+    echo [INFO] Suara nada bel tetap akan berbunyi melalui pengeras suara PC.
 )
+
+:: Selalu arahkan ke file web lokal agar dapat memutar seluruh file MP3 dari folder d:\BelSekolah\firmware\data\audio\
+set TARGET_URL=file:///%~dp0firmware\data\index.html
 
 :: Cari browser Chromium (Edge / Chrome) untuk mode standalone window (--app)
 set BROWSER_CMD=

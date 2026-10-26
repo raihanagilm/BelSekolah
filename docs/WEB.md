@@ -12,14 +12,18 @@
 
 ---
 
-## 1. Arsitektur Frontend & Batasan Hardware ESP32
-1. **Penyimpanan Flash Terbatas**: Seluruh aset web disimpan dalam flash internal ESP32 (LittleFS).
-   - Batas ukuran aset: Total file HTML, CSS, dan JS wajib **< 150 KB**.
-   - Tidak menggunakan framework runtime besar (React, Vue, Angular, atau dependensi node_modules) di runtime ESP32.
-2. **Teknologi**:
+## 1. Arsitektur Frontend & Fleksibilitas Mode (Hybrid Offline & Online)
+1. **Mode Ganda (Dual Architecture)**:
+   - **Mode Online (Terkoneksi ke ESP8266/ESP32)**: Web server melayani aset dari partisi LittleFS dan mengirim REST API trigger ke hardware relay amplifier.
+   - **Mode Offline / Laptop Lokal (Semi-Offline Standalone)**: Web dibuka melalui `Aplikasi_Bel_Sekolah.bat` (`file:///...`), jam scheduler berjalan di background browser, dan audio MP3 diputar langsung melalui speaker laptop dari folder `firmware/data/audio/`.
+2. **Penyimpanan Flash & Efisiensi**:
+   - Seluruh aset web HTML, CSS, dan JS bersifat ringan (**< 150 KB**).
+   - Tanpa framework runtime berat (React/Vue/Angular), murni Vanilla HTML5/CSS3/ES6+.
+   - Pemutaran audio lokal laptop menggunakan HTML5 `Audio()` API dengan fallback graceful saat offline.
+3. **Teknologi**:
    - **HTML5 Semantik**: Struktur dokumen bersih dengan header, nav, main, table, dan form.
    - **Vanilla CSS3 Modern**: Sistem token terpusat (`style.css`), `@container` query untuk tabel responsif, tanpa utility class sembarangan.
-   - **Vanilla JavaScript (ES6+)**: `app.js` sebagai HTTP client async fetch yang ringan dan non-blocking.
+   - **Vanilla JavaScript (ES6+)**: `app.js` sebagai HTTP client async fetch, local background scheduler, dan hybrid audio/relay dispatcher.
 
 ---
 

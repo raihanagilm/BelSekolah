@@ -169,33 +169,34 @@ function initMqtt() {
 window.addEventListener('load', initMqtt);
 
 async function triggerBell(trackId) {
-  // 1. Kirim sinyal real-time ke ESP32 Wokwi via MQTT
+  // 1. Coba kirim trigger ke ESP8266 fisik (192.168.4.1 atau IP saat ini) untuk aktifkan Relay Amplifier
+  try {
+    const espUrl = (location.hostname === '192.168.4.1') 
+      ? `/api/trigger?track=${trackId}` 
+      : `http://192.168.4.1/api/trigger?track=${trackId}`;
+    
+    fetch(espUrl, { method: 'GET', mode: 'no-cors' })
+      .then(() => console.log('[ESP8266] Sinyal pemicu relay terkirim!'))
+      .catch(() => console.log('[ESP8266] Offline / Tidak terhubung Wi-Fi ESP'));
+  } catch (err) {}
+
+  // 2. Kirim sinyal MQTT jika terhubung ke cloud/Wokwi
   if (mqttClient && mqttClient.isConnected()) {
     try {
       const message = new Paho.MQTT.Message(String(trackId));
       message.destinationName = 'belsekolah/trigger';
       mqttClient.send(message);
-      console.log('[MQTT] Perintah bel dikirim ke ESP32 Wokwi:', trackId);
-    } catch (e) {
-      console.error(e);
-    }
+    } catch (e) {}
   }
 
-  // 2. Coba fetch REST API jika terhubung ke ESP32 fisik (bukan Live Server)
-  const isLocalServer = location.hostname === '127.0.0.1' || location.hostname === 'localhost' || location.protocol === 'file:';
-  if (!isLocalServer) {
-    try {
-      const res = await fetch(`/api/trigger?track=${trackId}`, { method: 'POST' });
-      if (res.ok) return await res.json();
-    } catch (err) {}
-  }
-
-  // 3. Putar suara audio MP3 asli di browser laptop
+  // 3. Putar suara audio MP3 asli langsung di speaker/soundcard Laptop atau Komputer
   const trackFile = `./audio/${String(trackId).padStart(4, '0')}.mp3`;
   const audioObj = new Audio(trackFile);
   audioObj.play()
-    .then(() => console.log('[Audio] Memutar suara asli:', trackFile))
-    .catch(e => console.warn('Audio auto-play dicegat browser:', e));
+    .then(() => console.log('[Audio] Memutar suara asli lokal laptop:', trackFile))
+    .catch(e => {
+      console.warn('Audio auto-play dicegat browser, mencoba fallback:', e);
+    });
 
   return { success: true };
 }
@@ -273,6 +274,40 @@ function formatDayName(dayNum) {
   return days[dayNum] || 'Hari ' + dayNum;
 }
 
+// Background Scheduler di Browser (Mode Offline / Hybrid)
+let lastBellMinute = -1;
+let lastBellDay = -1;
+
+function startLocalScheduler() {
+  setInterval(async () => {
+    if (!currentData) return;
+    const now = new Date();
+    const currentDay = now.getDay();
+    const currentHour = now.getHours();
+    const currentMin = now.getMinutes();
+    const currentSec = now.getSeconds();
+
+    // Hanya evaluasi pada detik 0
+    if (currentSec !== 0) return;
+    if (currentMin === lastBellMinute && currentDay === lastBellDay) return;
+
+    const timeStr = `${String(currentHour).padStart(2, '0')}:${String(currentMin).padStart(2, '0')}`;
+    const activeKey = currentData.active_preset || 'reguler';
+    const preset = currentData.presets && currentData.presets[activeKey];
+    if (!preset || !preset.schedules) return;
+
+    for (const item of preset.schedules) {
+      if (item.time === timeStr && item.days.includes(currentDay)) {
+        lastBellMinute = currentMin;
+        lastBellDay = currentDay;
+        console.log(`[JADWAL COCOK] ${timeStr} - Memutar Track #${item.track}: ${item.label}`);
+        await triggerBell(item.track);
+        break;
+      }
+    }
+  }, 1000);
+}
+
 function startClock(timeElementId, dateElementId) {
   function update() {
     const now = new Date();
@@ -291,4 +326,5 @@ function startClock(timeElementId, dateElementId) {
   }
   update();
   setInterval(update, 1000);
+  startLocalScheduler();
 }

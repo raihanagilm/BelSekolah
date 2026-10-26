@@ -135,3 +135,9 @@ Setiap agen AI wajib memverifikasi checklist berikut sebelum menyerahkan tugas:
     - [firmware/platformio.ini](file:///d:/BelSekolah/firmware/platformio.ini): Menambahkan environment `[env:esp8266]` dengan konfigurasi partisi 4MB (2MB code / 2MB LittleFS) serta dependensi `ESPAsyncWebServer-esphome` & `ESPAsyncTCP-esphome`.
     - [SPEC.md](file:///d:/BelSekolah/SPEC.md) & [docs/ARDUINO.md](file:///d:/BelSekolah/docs/ARDUINO.md): Memperbarui diagram pinout, skema wiring D1-D7, dan hierarki kontrol relay ganda.
     - [DAFTAR_BELANJA.md](file:///d:/BelSekolah/DAFTAR_BELANJA.md): Memperbarui status kepemilikan komponen pengguna (ESP8266 & Relay 2-CH sudah ada, memfokuskan daftar belanja hanya pada DFPlayer Mini, RTC DS3231, MicroSD FAT32, dan Resistor 1kΩ).
+    - [PANDUAN_TEST_ESP8266.md](file:///d:/BelSekolah/PANDUAN_TEST_ESP8266.md): Panduan mandiri pengujian langsung modul ESP8266 V3 Lolin Type-C (Driver CH340, flashing Arduino IDE, upload LittleFS, dan pengujian Web AP Wi-Fi tanpa menunggu modul lain).
+    - **Mode Hybrid & Audio Laptop Lokal**:
+      - [firmware/data/app.js](file:///d:/BelSekolah/firmware/data/app.js): Menambahkan background scheduler jam lokal browser dan dispatcher audio ganda (memutar file `.mp3` langsung dari folder lokal laptop via HTML5 Audio API sekaligus memicu relay ESP8266 secara hybrid).
+      - [Aplikasi_Bel_Sekolah.bat](file:///d:/BelSekolah/Aplikasi_Bel_Sekolah.bat): Otomasi peluncuran aplikasi desktop Chromium (`--app`) langsung ke file web lokal laptop dengan pendeteksian otomatis koneksi Wi-Fi ESP8266.
+      - [firmware/firmware.ino](file:///d:/BelSekolah/firmware/firmware.ino): Penambahan fallback antarmuka dashboard darurat tersemat (Embedded Web) dan pemicu bel non-blocking berbasis state-machine (mencegah watchdog timeout / HTTP 500 error).
+      - [docs/WEB.md](file:///d:/BelSekolah/docs/WEB.md): Dokumentasi arsitektur dual-mode (Offline Laptop Standalone vs Online ESP8266).

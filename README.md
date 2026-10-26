@@ -105,7 +105,11 @@ Cukup klik ganda (double-click) file **[Aplikasi_Bel_Sekolah.bat](file:///d:/Bel
 ### B. Menguji Antarmuka Web Secara Lokal
 Buka file `firmware/data/index.html` langsung di browser Anda untuk melihat tampilan dashboard responsif. Halaman dilengkapi fallback mock otomatis sehingga semua menu dan tombol dapat diuji sebelum ESP32 terpasang.
 
-### B. Menjalankan di Simulator Virtual Wokwi
+### C. Pengujian Mandiri Hardware ESP8266 (Standalone Test)
+Jika Anda baru memiliki modul ESP8266 V3, ikuti panduan praktis langkah demi langkah di:
+👉 **[PANDUAN_TEST_ESP8266.md](file:///d:/BelSekolah/PANDUAN_TEST_ESP8266.md)** (Panduan instalasi driver CH340, flashing Arduino IDE, upload LittleFS, dan pengujian Web AP Wi-Fi tanpa DFPlayer/RTC).
+
+### D. Menjalankan di Simulator Virtual Wokwi
 1. Buka [Wokwi ESP32 Simulator](https://wokwi.com/projects/new/esp32).
 2. Salin diagram rangkaian dari `simulation/diagram.json`.
 3. Buka serial monitor untuk memantau waktu scheduler dan status trigger bel virtual.

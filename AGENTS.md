@@ -140,4 +140,14 @@ Setiap agen AI wajib memverifikasi checklist berikut sebelum menyerahkan tugas:
       - [firmware/data/app.js](file:///d:/BelSekolah/firmware/data/app.js): Menambahkan background scheduler jam lokal browser dan dispatcher audio ganda (memutar file `.mp3` langsung dari folder lokal laptop via HTML5 Audio API sekaligus memicu relay ESP8266 secara hybrid).
       - [Aplikasi_Bel_Sekolah.bat](file:///d:/BelSekolah/Aplikasi_Bel_Sekolah.bat): Otomasi peluncuran aplikasi desktop Chromium (`--app`) langsung ke file web lokal laptop dengan pendeteksian otomatis koneksi Wi-Fi ESP8266.
       - [firmware/firmware.ino](file:///d:/BelSekolah/firmware/firmware.ino): Penambahan fallback antarmuka dashboard darurat tersemat (Embedded Web) dan pemicu bel non-blocking berbasis state-machine (mencegah watchdog timeout / HTTP 500 error).
-      - [docs/WEB.md](file:///d:/BelSekolah/docs/WEB.md): Dokumentasi arsitektur dual-mode (Offline Laptop Standalone vs Online ESP8266).
+- **2026-10-27**:
+  - Dokumentasi integrasi perangkat nyata (Real Hardware):
+    - [PANDUAN_TRANSISI.md](file:///d:/BelSekolah/PANDUAN_TRANSISI.md): Menambahkan panduan wiring komprehensif untuk **Modul Relay 5V 2-Channel** yang dimiliki pengguna (VCC ke VU/VIN, GND, IN1 ke D7, IN2 ke D0).
+    - Menambahkan panduan sambungan ke **Mixer Amplifier TOA ZA-2120** (Input RCA AUX 1/2, isolasi audio anti-dengung via Relay Channel 1, otomasi daya 220V via Relay Channel 2, dan terminal speaker trafo matching 100V vs 4Ω).
+    - Sinkronisasi diagram simulasi [firmware/wokwi_diagram.json](file:///d:/BelSekolah/firmware/wokwi_diagram.json): Menambahkan seluruh visual komponen lengkap di Wokwi: Board ESP, Modul RTC DS3231, Modul DFPlayer Mini MP3, Resistor 1kΩ, dan Modul Dual Relay (Mute & Power).
+  - Pembuatan paket simulasi online mandiri untuk **Mokxi** (https://app.mokxi.com/):
+    - Dibuat folder [firmware/mokxi/](file:///d:/BelSekolah/firmware/mokxi/) berisi [README.md](file:///d:/BelSekolah/firmware/mokxi/README.md), [mokxi_diagram_esp32.json](file:///d:/BelSekolah/firmware/mokxi/mokxi_diagram_esp32.json), [mokxi_diagram_esp8266.json](file:///d:/BelSekolah/firmware/mokxi/mokxi_diagram_esp8266.json), [libraries.txt](file:///d:/BelSekolah/firmware/mokxi/libraries.txt), dan sketch interaktif [sketch_simulation.ino](file:///d:/BelSekolah/firmware/mokxi/sketch_simulation.ino) yang siap diimpor atau disalin langsung ke browser Mokxi.
+  - Penyesuaian dokumen belanja [DAFTAR_BELANJA.md](file:///d:/BelSekolah/DAFTAR_BELANJA.md):
+    - Memperbarui status kepemilikan pengguna: ESP8266, Relay 2-Channel, dan MicroSD sudah dimiliki.
+    - Menghitung ulang estimasi belanja riil yang perlu dibeli menjadi hanya DFPlayer Mini, RTC DS3231, dan Resistor 1kΩ (total sekitar Rp 43.000). Menambahkan rincian modul display LCD 1602 I2C opsional.
+

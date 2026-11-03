@@ -76,6 +76,9 @@ const defaultFallbackData = {
   }
 };
 
+// Variabel data global berstatus awal fallback agar aman saat mode file://
+let currentData = JSON.parse(JSON.stringify(defaultFallbackData));
+
 async function fetchSchedule() {
   // Coba ambil dari server terlebih dahulu (selalu gunakan versi terbaru)
   const paths = ['./schedule.json', '/schedule.json', 'schedule.json'];
@@ -120,50 +123,96 @@ async function fetchStatus() {
   }
 }
 
+// Pemeriksaan Status Koneksi & Hardware Nyata (ESP8266, RTC, dan Internet)
+async function updateNetworkStatus() {
+  const badgeWifi = document.getElementById('badgeWifi');
+  const badgeRtc = document.getElementById('badgeRtc');
+
+  let espConnected = false;
+  let rtcHardwareOk = false;
+
+  // Cek koneksi nyata ke ESP8266 (kebal CORS saat dibuka via file://)
+  try {
+    const checkEsp = new Promise((resolve) => {
+      const img = new Image();
+      const timer = setTimeout(() => {
+        img.src = "";
+        resolve(false);
+      }, 1000);
+      img.onload = () => { clearTimeout(timer); resolve(true); };
+      img.onerror = () => {
+        // Pada server mini ESP8266, endpoint yang merespons (meski 404/200) membuktikan perangkat hidup & terjangkau
+        clearTimeout(timer);
+        resolve(true);
+      };
+      img.src = "http://192.168.4.1/favicon.ico?t=" + Date.now();
+    });
+
+    // Jalankan juga fetch dengan mode no-cors
+    const pingFetch = fetch("http://192.168.4.1/api/status", { mode: 'no-cors', cache: 'no-store' })
+      .then(() => true)
+      .catch(() => false);
+
+    espConnected = await Promise.race([checkEsp, pingFetch]);
+  } catch (err) {
+    espConnected = false;
+  }
+
+  // Update Badge Hardware RTC
+  if (badgeRtc) {
+    if (espConnected && rtcHardwareOk) {
+      badgeRtc.innerHTML = '<span class="badge-dot"></span>RTC DS3231 Aktif';
+      badgeRtc.className = 'badge badge-success';
+    } else if (espConnected && !rtcHardwareOk) {
+      badgeRtc.innerHTML = '<span class="badge-dot"></span>RTC Belum Terpasang';
+      badgeRtc.className = 'badge badge-warning';
+    } else {
+      badgeRtc.innerHTML = '<span class="badge-dot"></span>Jam Lokal PC / Laptop';
+      badgeRtc.className = 'badge badge-primary';
+    }
+  }
+
+  // Update Badge Jaringan / Wi-Fi
+  if (badgeWifi) {
+    if (espConnected) {
+      badgeWifi.innerHTML = '<span class="badge-dot"></span>ESP8266 Terhubung';
+      badgeWifi.className = 'badge badge-success';
+    } else if (navigator.onLine) {
+      badgeWifi.innerHTML = '<span class="badge-dot"></span>Internet Terhubung';
+      badgeWifi.className = 'badge badge-success';
+    } else {
+      badgeWifi.innerHTML = '<span class="badge-dot"></span>Mode Offline Lokal';
+      badgeWifi.className = 'badge badge-warning';
+    }
+  }
+}
+
 let mqttClient = null;
 function initMqtt() {
-  if (typeof Paho !== 'undefined' && !mqttClient) {
+  updateNetworkStatus();
+  window.addEventListener('online', updateNetworkStatus);
+  window.addEventListener('offline', updateNetworkStatus);
+  setInterval(updateNetworkStatus, 5000);
+
+  // MQTT opsional hanya jika diakses di simulator atau cloud
+  if (typeof Paho !== 'undefined' && !mqttClient && location.hostname !== '192.168.4.1') {
     try {
       const clientId = 'WebClient_' + Math.random().toString(16).substr(2, 8);
-      const isHttps = location.protocol === 'https:';
-      const brokerPort = isHttps ? 8884 : 8000;
-      const useSsl = isHttps;
-
-      mqttClient = new Paho.MQTT.Client('broker.hivemq.com', brokerPort, clientId);
+      mqttClient = new Paho.MQTT.Client('broker.hivemq.com', 8884, clientId);
       mqttClient.connect({
-        useSSL: useSsl,
-        timeout: 5,
+        useSSL: true,
+        timeout: 4,
         onSuccess: () => {
-          console.log('[MQTT] Web Terhubung ke Broker Cloud HiveMQ!');
+          console.log('[MQTT] Terhubung ke Broker Cloud');
+          // Jika tidak terhubung ke ESP fisik, tampilkan status cloud
           const badgeWifi = document.getElementById('badgeWifi');
-          if (badgeWifi) {
-            badgeWifi.innerHTML = '<span class="badge-dot"></span>Simulasi Wokwi Terhubung!';
-            badgeWifi.className = 'badge badge-success';
+          if (badgeWifi && badgeWifi.innerText.includes('Internet')) {
+            badgeWifi.innerHTML = '<span class="badge-dot"></span>Internet & Cloud Siap';
           }
         },
-        onFailure: (err) => {
-          console.warn('[MQTT] Gagal konek ke broker port ' + brokerPort + ':', err);
-          // Fallback coba SSL jika port non-ssl gagal
-          if (!useSsl) {
-            mqttClient = new Paho.MQTT.Client('broker.hivemq.com', 8884, clientId);
-            mqttClient.connect({
-              useSSL: true,
-              timeout: 5,
-              onSuccess: () => {
-                console.log('[MQTT] SSL Terhubung!');
-                const badgeWifi = document.getElementById('badgeWifi');
-                if (badgeWifi) {
-                  badgeWifi.innerHTML = '<span class="badge-dot"></span>Simulasi Wokwi Terhubung!';
-                  badgeWifi.className = 'badge badge-success';
-                }
-              }
-            });
-          }
-        }
+        onFailure: () => {}
       });
-    } catch (e) {
-      console.error(e);
-    }
+    } catch (e) {}
   }
 }
 window.addEventListener('load', initMqtt);

@@ -1,0 +1,33 @@
+{
+  "version": 1,
+  "author": "BelSekolah ESP8266 - Mokxi Edition",
+  "editor": "wokwi",
+  "parts": [
+    { "type": "wokwi-esp8266-nodemcu", "id": "nodemcu", "top": 20, "left": 10, "attrs": {} },
+    { "type": "wokwi-ds1307", "id": "rtc", "top": -140, "left": -80, "attrs": { "label": "RTC DS3231/DS1307" } },
+    { "type": "board-dfplayer-mini", "id": "dfplayer", "top": -140, "left": 130, "attrs": { "label": "DFPlayer Mini MP3" } },
+    { "type": "wokwi-resistor", "id": "r_tx", "top": -45, "left": 105, "attrs": { "value": "1000", "label": "1k Ohm" } },
+    { "type": "wokwi-relay-module", "id": "relay_mute", "top": -140, "left": 310, "attrs": { "label": "Relay CH1: Audio Mute (D7)" } },
+    { "type": "wokwi-relay-module", "id": "relay_power", "top": -140, "left": 460, "attrs": { "label": "Relay CH2: Power TOA (D0)" } }
+  ],
+  "connections": [
+    [ "nodemcu:TX", "$serialMonitor:RX", "", [] ],
+    [ "nodemcu:RX", "$serialMonitor:TX", "", [] ],
+    [ "rtc:GND", "nodemcu:GND.1", "black", [ "v0" ] ],
+    [ "rtc:5V", "nodemcu:VIN", "red", [ "v0" ] ],
+    [ "rtc:SDA", "nodemcu:D2", "green", [ "v0" ] ],
+    [ "rtc:SCL", "nodemcu:D1", "yellow", [ "v0" ] ],
+    [ "dfplayer:VCC", "nodemcu:VIN", "red", [ "v0" ] ],
+    [ "dfplayer:GND", "nodemcu:GND.2", "black", [ "v0" ] ],
+    [ "nodemcu:D6", "r_tx:1", "cyan", [ "v0" ] ],
+    [ "r_tx:2", "dfplayer:RX", "cyan", [ "v0" ] ],
+    [ "dfplayer:TX", "nodemcu:D5", "blue", [ "v0" ] ],
+    [ "relay_mute:GND", "nodemcu:GND.2", "black", [ "v0" ] ],
+    [ "relay_mute:VCC", "nodemcu:VIN", "red", [ "v0" ] ],
+    [ "relay_mute:IN", "nodemcu:D7", "orange", [ "v0" ] ],
+    [ "relay_power:GND", "nodemcu:GND.2", "black", [ "v0" ] ],
+    [ "relay_power:VCC", "nodemcu:VIN", "red", [ "v0" ] ],
+    [ "relay_power:IN", "nodemcu:D0", "purple", [ "v0" ] ]
+  ],
+  "dependencies": {}
+}

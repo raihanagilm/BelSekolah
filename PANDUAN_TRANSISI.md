@@ -37,9 +37,43 @@ Gunakan tabel pemetaan ini saat menancapkan kabel jumper pada papan roti (Breadb
        └─────────────────────────────┘
 ```
 
-> **PERHATIAN KHUSUS DFPLAYER MINI**:
-> - Jangan lupa memasang **Resistor 1kΩ seri** antara pin **GPIO 17 ESP32** ke **RX DFPlayer Mini**. Tegangan logika ESP32 adalah 3.3V sementara RX DFPlayer rentan noise tegangan 5V. Resistor ini meredam desis dan bunyi *kresek*.
-> - Hubungkan kaki **SPK_1** dan **SPK_2** DFPlayer langsung ke speaker kecil meja saat uji coba, atau hubungkan kaki **DAC_R** dan **GND** ke jack AUX 3.5mm untuk disambung ke mixer pengeras suara sekolah.
+> **PERHATIAN KHUSUS DFPLAYER MINI & AUDIO AMPLIFIER**:
+> - Jangan lupa memasang **Resistor 1kΩ seri** antara pin **D6 ESP8266** ke **RX DFPlayer Mini**. Tegangan logika ESP8266 adalah 3.3V sementara RX DFPlayer rentan noise tegangan 5V. Resistor ini meredam desis dan bunyi *kresek*.
+> - Hubungkan kaki **SPK_1** dan **SPK_2** DFPlayer langsung ke speaker kecil meja saat uji coba.
+> - **Integrasi ke Mixer Amplifier TOA ZA-2120**: Hubungkan pin **DAC_R** (atau **DAC_L**) dan **GND** melalui Relay Channel 1 menuju input **AUX 1** atau **AUX 2** di panel belakang amplifier TOA menggunakan kabel Jack 3.5mm ke RCA.
+
+---
+
+## 3. Integrasi Fisik Modul Relay 5V 2-Channel & TOA ZA-2120
+
+Sistem menggunakan **Modul Relay 5V 2-Channel (Optocoupler)** dengan pembagian peran:
+
+### A. Pengkabelan Kontrol Sinyal (ESP8266 ke Modul Relay)
+| Pin Modul Relay | Sambungkan ke Pin ESP8266 | Keterangan |
+|---|---|---|
+| **VCC** | **VIN / VU** (5V USB) | Sumber daya 5V untuk koil elektromagnet relay |
+| **GND** | **GND** | Ground bersama (*common ground*) |
+| **IN 1** | **D7** (GPIO 13) | Sinyal kendali Relay Channel 1 (*Mute Audio Jack*) |
+| **IN 2** | **D0** (GPIO 16) | Sinyal kendali Relay Channel 2 (*Saklar Daya Listrik PLN Amplifier*) |
+
+*(Biarkan jumper biru **VCC - JD-VCC** tetap terpasang jika menggunakan catu daya 5V USB yang sama).*
+
+### B. Pengkabelan Terminal Baut Biru Relay (Sisi Beban)
+1. **Channel 1 (Mute Jalur Audio AUX TOA - Mencegah Suara Dengung):**
+   - Kabel sinyal inti audio dari pin **DAC_R** DFPlayer $\rightarrow$ masuk ke terminal **COM 1**.
+   - Kabel sinyal inti menuju ujung **Jack RCA (AUX 1 / AUX 2 Ampli TOA)** $\rightarrow$ masuk ke terminal **NO 1** (*Normally Open*).
+   - Kabel ground (serabut) dari pin **GND** DFPlayer $\rightarrow$ sambung langsung ke *outer shield* Jack RCA tanpa melewati relay.
+   - *Prinsip kerja*: Relay hanya menutup saat ada nada bel berbunyi. Ketika diam, jalur audio terputus total sehingga speaker sekolah hening tanpa desis/humming.
+
+2. **Channel 2 (Saklar Otomatis Daya Listrik PLN Amplifier TOA ZA-2120):**
+   - Kabel fasa listrik PLN 220V $\rightarrow$ masuk ke terminal **COM 2**.
+   - Kabel fasa menuju colokan kabel power ampli TOA $\rightarrow$ masuk ke terminal **NO 2**.
+   - *Prinsip kerja*: Otomatis menyalakan ampli 2-3 detik sebelum audio mulai (*pre-roll*) dan mematikannya kembali setelah nada selesai. Jika ampli ingin dinyalakan manual secara kontinu, Channel 2 boleh dibiarkan kosong tanpa kabel.
+
+3. **Output TOA ZA-2120 Menuju Speaker Sekolah:**
+   - Gunakan kabel speaker 2-core (NYZ/NYMHY).
+   - **Sistem Trafo Matching 100V (Umum Sekolah):** Sambungkan ke terminal baut **`COM`** dan **`100V`** di panel belakang TOA ZA-2120.
+   - **Sistem Low Impedance (4-16 Ohm):** Sambungkan ke terminal baut **`COM`** dan **`4Ω`**.
 
 ---
 

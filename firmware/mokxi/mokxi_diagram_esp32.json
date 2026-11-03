@@ -1,0 +1,38 @@
+{
+  "version": 1,
+  "author": "BelSekolah ESP32 - Mokxi Edition",
+  "editor": "wokwi",
+  "parts": [
+    { "type": "board-esp32-devkit-c-v4", "id": "esp", "top": 20, "left": 10, "attrs": {} },
+    { "type": "wokwi-ds1307", "id": "rtc", "top": -140, "left": -80, "attrs": { "label": "RTC DS3231/DS1307" } },
+    { "type": "board-dfplayer-mini", "id": "dfplayer", "top": -140, "left": 120, "attrs": { "label": "DFPlayer Mini MP3" } },
+    { "type": "wokwi-resistor", "id": "r_tx", "top": -45, "left": 95, "attrs": { "value": "1000", "label": "1k Ohm Resistor" } },
+    { "type": "wokwi-relay-module", "id": "relay_mute", "top": -140, "left": 310, "attrs": { "label": "Relay CH1: Audio Mute" } },
+    { "type": "wokwi-relay-module", "id": "relay_power", "top": -140, "left": 460, "attrs": { "label": "Relay CH2: Power TOA" } },
+    { "type": "wokwi-led", "id": "led", "top": 170, "left": 180, "attrs": { "color": "blue", "label": "Status Indikator Bel" } },
+    { "type": "wokwi-resistor", "id": "r1", "top": 210, "left": 180, "attrs": { "value": "220" } }
+  ],
+  "connections": [
+    [ "esp:TX", "$serialMonitor:RX", "", [] ],
+    [ "esp:RX", "$serialMonitor:TX", "", [] ],
+    [ "rtc:GND", "esp:GND.1", "black", [ "v0" ] ],
+    [ "rtc:5V", "esp:5V", "red", [ "v0" ] ],
+    [ "rtc:SDA", "esp:21", "green", [ "v0" ] ],
+    [ "rtc:SCL", "esp:22", "yellow", [ "v0" ] ],
+    [ "dfplayer:VCC", "esp:5V", "red", [ "v0" ] ],
+    [ "dfplayer:GND", "esp:GND.2", "black", [ "v0" ] ],
+    [ "esp:17", "r_tx:1", "cyan", [ "v0" ] ],
+    [ "r_tx:2", "dfplayer:RX", "cyan", [ "v0" ] ],
+    [ "dfplayer:TX", "esp:16", "blue", [ "v0" ] ],
+    [ "relay_mute:GND", "esp:GND.2", "black", [ "v0" ] ],
+    [ "relay_mute:VCC", "esp:5V", "red", [ "v0" ] ],
+    [ "relay_mute:IN", "esp:4", "orange", [ "v0" ] ],
+    [ "relay_power:GND", "esp:GND.2", "black", [ "v0" ] ],
+    [ "relay_power:VCC", "esp:5V", "red", [ "v0" ] ],
+    [ "relay_power:IN", "esp:5", "purple", [ "v0" ] ],
+    [ "esp:2", "led:A", "blue", [ "v0" ] ],
+    [ "led:C", "r1:1", "black", [ "v0" ] ],
+    [ "r1:2", "esp:GND.2", "black", [ "v0" ] ]
+  ],
+  "dependencies": {}
+}

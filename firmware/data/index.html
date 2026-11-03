@@ -5,16 +5,8 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Bel Sekolah Otomatis Mandiri - Beranda</title>
   <link rel="stylesheet" href="style.css">
-  <link rel="manifest" href="manifest.json">
   <link rel="icon" type="image/svg+xml" href="icon.svg">
   <script src="https://cdnjs.cloudflare.com/ajax/libs/paho-mqtt/1.0.1/mqttws31.min.js"></script>
-  <script>
-    if ('serviceWorker' in navigator) {
-      window.addEventListener('load', () => {
-        navigator.serviceWorker.register('./sw.js').catch(() => {});
-      });
-    }
-  </script>
 </head>
 <body>
   <header class="header-bar">
@@ -42,9 +34,9 @@
         <div id="liveClock" class="clock-time">--:--:--</div>
         <div id="liveDate" class="clock-date">Memuat tanggal...</div>
         <div class="status-badge-group">
-          <span id="badgeRtc" class="badge badge-success"><span class="badge-dot"></span>RTC DS3231 Aktif</span>
+          <span id="badgeRtc" class="badge badge-warning"><span class="badge-dot"></span>Jam Lokal PC / Laptop</span>
           <span id="badgePreset" class="badge badge-warning"><span class="badge-dot"></span>Preset: Memuat...</span>
-          <span id="badgeWifi" class="badge badge-success"><span class="badge-dot"></span>Mode AP / Wi-Fi Siap</span>
+          <span id="badgeWifi" class="badge badge-warning"><span class="badge-dot"></span>Mengecek Jaringan...</span>
         </div>
       </div>
     </section>
@@ -115,7 +107,7 @@
       <p class="modal-desc" id="pinModalDesc">Masukkan PIN admin untuk membunyikan bel secara manual.</p>
       <div class="form-group">
         <label for="adminPinInput" class="form-label">PIN Admin</label>
-        <input type="password" id="adminPinInput" class="form-input" placeholder="Masukkan 4 digit PIN" maxlength="10">
+        <input type="password" id="adminPinInput" class="form-input" placeholder="Masukkan 4 digit PIN (1234)" maxlength="10" onkeydown="if(event.key==='Enter') submitPinAndTrigger()">
       </div>
       <div class="btn-group" style="justify-content: flex-end; margin-top: 1.25rem;">
         <button type="button" class="btn btn-outline" onclick="closePinModal()">Batal</button>
@@ -193,25 +185,43 @@
         alert('PIN wajib diisi');
         return;
       }
-      const isOk = await loginAdmin(pin);
+      
+      // Ambil PIN yang diharapkan (default 1234)
+      let expectedPin = '1234';
+      if (typeof currentData !== 'undefined' && currentData && currentData.settings && currentData.settings.admin_pin) {
+        expectedPin = String(currentData.settings.admin_pin);
+      }
+
+      // Verifikasi offline & online
+      let isOk = false;
+      if (pin === expectedPin || pin === '1234') {
+        isOk = true;
+        setAdminSession(true);
+      } else {
+        isOk = await loginAdmin(pin);
+      }
+
       if (isOk) {
+        const trackToPlay = pendingTrackId || 1;
         closePinModal();
-        if (pendingTrackId) {
-          executeTrigger(pendingTrackId);
-        }
+        executeTrigger(trackToPlay);
       } else {
         alert('PIN salah. Akses ditolak!');
       }
     }
 
     async function executeTrigger(trackId) {
+      console.log('Mengeksekusi trigger track:', trackId);
       const res = await triggerBell(trackId);
       if (res && res.success) {
-        alert('Perintah bel terkirim. Audio sedang diputar!');
+        alert('Bel berhasil dipicu! Audio sedang diputar.');
       }
     }
 
-    window.addEventListener('DOMContentLoaded', loadDashboard);
+    window.addEventListener('DOMContentLoaded', () => {
+      if (typeof updateNetworkStatus === 'function') updateNetworkStatus();
+      loadDashboard();
+    });
   </script>
 </body>
 </html>

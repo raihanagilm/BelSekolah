@@ -399,7 +399,9 @@ void registerHttpRoutes() {
 
     String out;
     serializeJson(res, out);
-    request->send(200, "application/json", out);
+    AsyncWebServerResponse *response = request->beginResponse(200, "application/json", out);
+    response->addHeader("Access-Control-Allow-Origin", "*");
+    request->send(response);
   });
 
   // REST API: Manual Trigger (Mendukung GET dan POST agar bisa diuji via address bar browser)
@@ -411,7 +413,9 @@ void registerHttpRoutes() {
     // Eksekusi trigger bel secara non-blocking
     triggerBellAsync(track);
 
-    request->send(200, "application/json", "{\"success\":true,\"message\":\"Bel sedang diputar\"}");
+    AsyncWebServerResponse *response = request->beginResponse(200, "application/json", "{\"success\":true,\"message\":\"Bel sedang diputar\"}");
+    response->addHeader("Access-Control-Allow-Origin", "*");
+    request->send(response);
   };
 
   server.on("/api/trigger", HTTP_POST, handleTrigger);

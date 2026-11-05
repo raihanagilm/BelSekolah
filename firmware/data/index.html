@@ -6,6 +6,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Bel Sekolah Otomatis Mandiri - Beranda</title>
   <link rel="stylesheet" href="style.css">
+  <link rel="icon" type="image/x-icon" href="favicon.ico">
   <link rel="icon" type="image/svg+xml" href="icon.svg">
   <script src="https://cdnjs.cloudflare.com/ajax/libs/paho-mqtt/1.0.1/mqttws31.min.js"></script>
 </head>
@@ -255,16 +256,12 @@
       const data = await fetchSchedule();
       if (!data) return;
 
-      const resolvedKey = getResolvedPresetKey(data);
+      const today = new Date().getDay(); // 0: Minggu, 1: Senin, dst.
+      const resolvedKey = getResolvedPresetKeyForDay(data, today) || getResolvedPresetKey(data);
       const presetObj = data.presets[resolvedKey];
-
-      const isAuto = (!data.active_preset || data.active_preset === 'auto');
-      const presetLabel = presetObj 
-        ? (isAuto ? `${presetObj.name} (Otomatis Hari Ini)` : `${presetObj.name} (Terkunci Khusus)`)
-        : resolvedKey;
+      const presetLabel = presetObj ? presetObj.name : resolvedKey;
       document.getElementById('sidebarPresetName').textContent = presetLabel;
 
-      const today = new Date().getDay(); // 0: Minggu, 1: Senin, dst.
       const feedContainer = document.getElementById('todayTimelineFeed');
       feedContainer.innerHTML = '';
 
@@ -332,7 +329,8 @@
 
       updateNextBellWidget(nextItem);
 
-      todaySchedules.forEach(item => {
+      todaySchedules.forEach((item, index) => {
+        const no = index + 1;
         const parts = item.time.split(':');
         const itemMinutes = parseInt(parts[0], 10) * 60 + parseInt(parts[1], 10);
 
@@ -351,6 +349,7 @@
         div.className = `timeline-item ${statusClass}`;
         div.innerHTML = `
           <div class="timeline-left">
+            <span style="font-weight: 700; font-size: 0.8125rem; color: var(--text-muted); width: 24px; text-align: center; flex-shrink: 0;">${no}</span>
             <span class="timeline-time-badge">${item.time}</span>
             <div class="timeline-meta">
               <span class="timeline-title">${item.label}</span>

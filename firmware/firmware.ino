@@ -295,16 +295,42 @@ void checkScheduledBell() {
 
   if (err) return;
 
-  String targetPreset = activePreset;
-  if (targetPreset == "auto" || targetPreset == "") {
-    if (currentDay == 1 && doc["presets"]["senin"].is<JsonObject>()) {
-      targetPreset = "senin";
-    } else if (currentDay == 5 && doc["presets"]["jumat"].is<JsonObject>()) {
-      targetPreset = "jumat";
-    } else if (doc["presets"]["selasa_kamis"].is<JsonObject>()) {
-      targetPreset = "selasa_kamis";
-    } else {
-      targetPreset = "reguler";
+  String targetPreset = "";
+  
+  // 1. Cek dari array active_presets (Multi Kategori Aktif)
+  if (doc["active_presets"].is<JsonArray>()) {
+    JsonArray activeList = doc["active_presets"].as<JsonArray>();
+    for (const char* pKey : activeList) {
+      if (pKey && doc["presets"][pKey].is<JsonObject>()) {
+        JsonArray scheds = doc["presets"][pKey]["schedules"].as<JsonArray>();
+        for (JsonObject s : scheds) {
+          JsonArray days = s["days"].as<JsonArray>();
+          for (int d : days) {
+            if (d == currentDay) {
+              targetPreset = String(pKey);
+              break;
+            }
+          }
+          if (targetPreset.length() > 0) break;
+        }
+      }
+      if (targetPreset.length() > 0) break;
+    }
+  }
+
+  // 2. Fallback ke activePreset tunggal
+  if (targetPreset.length() == 0) {
+    targetPreset = activePreset;
+    if (targetPreset == "auto" || targetPreset == "") {
+      if (currentDay == 1 && doc["presets"]["senin"].is<JsonObject>()) {
+        targetPreset = "senin";
+      } else if (currentDay == 5 && doc["presets"]["jumat"].is<JsonObject>()) {
+        targetPreset = "jumat";
+      } else if (doc["presets"]["selasa_kamis"].is<JsonObject>()) {
+        targetPreset = "selasa_kamis";
+      } else {
+        targetPreset = "reguler";
+      }
     }
   }
 

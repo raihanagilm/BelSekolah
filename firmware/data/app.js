@@ -1,6 +1,7 @@
 // Default data cadangan untuk preview offline / Live Server
 const defaultFallbackData = {
-  "active_preset": "auto",
+  "active_presets": ["senin", "selasa_kamis", "jumat"],
+  "active_preset": "senin",
   "presets": {
     "senin": {
       "name": "Senin (Upacara Bendera)",
@@ -18,6 +19,23 @@ const defaultFallbackData = {
         { "id": 11, "days": [1], "time": "13:30", "track": 10, "label": "Jam Pelajaran 07" },
         { "id": 12, "days": [1], "time": "14:15", "track": 12, "label": "Jam Pelajaran 08" },
         { "id": 13, "days": [1], "time": "15:00", "track": 16, "label": "Siswa Pulang Sekolah" }
+      ]
+    },
+    "senin_tanpa_upacara": {
+      "name": "Senin (Tanpa Upacara)",
+      "schedules": [
+        { "id": 1, "days": [1], "time": "07:00", "track": 1, "label": "Bel Masuk / Jam Pelajaran 01" },
+        { "id": 2, "days": [1], "time": "07:45", "track": 3, "label": "Jam Pelajaran 02" },
+        { "id": 3, "days": [1], "time": "08:30", "track": 4, "label": "Jam Pelajaran 03" },
+        { "id": 4, "days": [1], "time": "09:15", "track": 5, "label": "Jam Pelajaran 04" },
+        { "id": 5, "days": [1], "time": "10:00", "track": 6, "label": "Istirahat Pertama" },
+        { "id": 6, "days": [1], "time": "10:30", "track": 7, "label": "Jam Pelajaran 05" },
+        { "id": 7, "days": [1], "time": "11:15", "track": 8, "label": "Jam Pelajaran 06" },
+        { "id": 8, "days": [1], "time": "12:00", "track": 11, "label": "Istirahat Sholat Dzuhur" },
+        { "id": 9, "days": [1], "time": "12:45", "track": 9, "label": "Jam Pelajaran 07" },
+        { "id": 10, "days": [1], "time": "13:30", "track": 10, "label": "Jam Pelajaran 08" },
+        { "id": 11, "days": [1], "time": "14:15", "track": 12, "label": "Jam Pelajaran 09" },
+        { "id": 12, "days": [1], "time": "15:00", "track": 16, "label": "Siswa Pulang Sekolah" }
       ]
     },
     "selasa_kamis": {
@@ -354,21 +372,49 @@ function formatDayName(dayNum) {
   return days[dayNum] || 'Hari ' + dayNum;
 }
 
-// Mendapatkan kunci preset aktif secara dinamis (mendukung mode auto-calendar)
-function getResolvedPresetKey(data) {
-  if (!data || !data.presets) return 'selasa_kamis';
-  const setting = data.active_preset || 'auto';
-  if (setting !== 'auto' && data.presets[setting]) {
-    return setting; // Override terkunci ke preset tertentu
+// Mendapatkan daftar hari yang digunakan oleh suatu kategori preset
+function getPresetDays(presetObj) {
+  if (!presetObj || !presetObj.schedules) return [];
+  const daysSet = new Set();
+  presetObj.schedules.forEach(s => {
+    if (Array.isArray(s.days)) {
+      s.days.forEach(d => daysSet.add(d));
+    }
+  });
+  return Array.from(daysSet).sort((a, b) => a - b);
+}
+
+// Mendapatkan kunci preset aktif untuk hari tertentu (berdasarkan daftar active_presets)
+function getResolvedPresetKeyForDay(data, targetDay) {
+  if (!data || !data.presets) return null;
+  const activeList = Array.isArray(data.active_presets) 
+    ? data.active_presets 
+    : (data.active_preset ? [data.active_preset] : []);
+
+  for (const key of activeList) {
+    const preset = data.presets[key];
+    if (preset) {
+      const days = getPresetDays(preset);
+      if (days.includes(targetDay)) {
+        return key;
+      }
+    }
   }
-  // Mode otomatis berdasarkan hari kalender
-  const day = new Date().getDay(); // 0: Minggu, 1: Senin, 2: Selasa, ... 5: Jumat, 6: Sabtu
-  if (day === 1 && data.presets['senin']) return 'senin';
-  if (day === 5 && data.presets['jumat']) return 'jumat';
-  if ((day === 2 || day === 3 || day === 4) && data.presets['selasa_kamis']) return 'selasa_kamis';
-  
-  // Jika hari Sabtu/Minggu atau fallback pertama
-  if (data.presets['selasa_kamis']) return 'selasa_kamis';
+  return null;
+}
+
+// Mendapatkan kunci preset aktif hari ini secara cerdas
+function getResolvedPresetKey(data) {
+  if (!data || !data.presets) return 'senin';
+  const today = new Date().getDay();
+  const match = getResolvedPresetKeyForDay(data, today);
+  if (match) return match;
+
+  // Fallback jika hari ini (misal Minggu) tidak ada di kategori aktif
+  const activeList = Array.isArray(data.active_presets) ? data.active_presets : [];
+  if (activeList.length > 0 && data.presets[activeList[0]]) {
+    return activeList[0];
+  }
   const keys = Object.keys(data.presets);
   return keys.length > 0 ? keys[0] : 'senin';
 }
@@ -391,7 +437,9 @@ function startLocalScheduler() {
     if (currentMin === lastBellMinute && currentDay === lastBellDay) return;
 
     const timeStr = `${String(currentHour).padStart(2, '0')}:${String(currentMin).padStart(2, '0')}`;
-    const activeKey = getResolvedPresetKey(currentData);
+    const activeKey = getResolvedPresetKeyForDay(currentData, currentDay);
+    if (!activeKey) return;
+    
     const preset = currentData.presets && currentData.presets[activeKey];
     if (!preset || !preset.schedules) return;
 

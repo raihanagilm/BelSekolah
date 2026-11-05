@@ -223,7 +223,31 @@ Setiap agen AI wajib memverifikasi checklist berikut sebelum menyerahkan tugas:
   - Penyesuaian Jadwal Sekolah Realistis (Pemisahan Hari Senin & Fleksibilitas Hapus):
     - Memisahkan jadwal hari Senin yang memiliki **Upacara Bendera** (mulai KBM jam 07:45) dengan **Selasa - Kamis** di [`schedule.json`](file:///d:/BelSekolah/firmware/data/schedule.json).
     - Melonggarkan batasan hapus jadwal: kategori jadwal apa pun kini dapat dihapus atau diubah namanya selama masih ada minimal 1 jadwal tersisa di sistem.
-  - Implementasi Fitur "Bunyikan Jam Ini Sekarang" & Sistem Otomatisasi Jadwal:
+  - Penambahan & Resolusi File Favicon (`favicon.ico`):
+    - Menyediakan file `favicon.ico` di direktori root dan folder `firmware/data/` (diambil dari ikon resmi [launcher/app.ico](file:///d:/BelSekolah/launcher/app.ico)).
+    - Mendaftarkan `<link rel="icon" type="image/x-icon" href="favicon.ico">` pada seluruh template web (`index.html`, `schedule.html`, `audio.html`, `settings.html`) sehingga browser tidak lagi melempar error 404.
+  - Perbaikan Bug JavaScript & Penambahan Nomor Urut Kartu Kategori:
+    - Memperbaiki error `ReferenceError: renderTabs is not defined` di [schedule.html](file:///d:/BelSekolah/firmware/data/schedule.html) dengan menyinkronkannya ke `renderCategoryDropdown()`.
+    - Memperbaiki deklarasi ganda variabel `const today` di [index.html](file:///d:/BelSekolah/firmware/data/index.html) (`Uncaught SyntaxError: Identifier 'today' has already been declared`).
+    - Menampilkan nomor urut murni (`1.`, `2.`, `3.`...) tanpa kotak/border (anti box-in-box) pada setiap kartu kategori jadwal sehingga tampak bersih, menyatu alami dengan judul, dan sangat rapi.
+    - Mengembalikan model kartu berstruktur dua baris yang disukai pengguna:
+      - Baris Atas: Nama Kategori Jadwal + Status Teks (*"Aktif"* warna biru cerah / *"Nonaktif"* warna abu-abu netral) + Keterangan Hari & Total Jam Bel.
+      - Baris Bawah: Penanda Navigasi (*"Sedang Dipilih"* / *"Pilih Kategori"*) + Tombol Aksi (*"Aktifkan"* / *"Nonaktifkan"*).
+    - Menjaga kebersihan kode dari simbol bullet mentah (`●`, `•`).
+    - Mengganti teks yang membingungkan (*"Aktif"* vs *"Nonaktifkan"*) menjadi status yang sangat tegas:
+      - Status Mesin Bel: Lencana hijau tebal **`AKTIF BERJALAN`** (sedang membunyikan bel) vs abu-abu **`TIDAK DIGUNAKAN`** (jadwal cadangan).
+      - Tombol Aksi: **`Gunakan Jadwal`** (untuk menyalakan) vs **`Matikan Jadwal`** (untuk mematikan).
+      - Teks Navigasi: **`Buka Jadwal Ini`** (kartu yang sedang ditinjau di tabel bawah).
+    - Memverifikasi dan menghapus seluruh simbol bullet/dot dekoratif mentah (`●` dan `•`) dari template [schedule.html](file:///d:/BelSekolah/firmware/data/schedule.html).
+    - Mengganti teks status menjadi tipografi semantik yang bersih (*"Sedang Dipilih"*, *"Pilih Kategori"*, pemisah pipa `|`).
+    - Menghilangkan 100% elemen dropdown/dropbox yang sempit dan memotong teks.
+    - Menampilkan seluruh kategori jadwal secara terbuka dalam bentuk kartu grid profesional.
+    - Setiap kartu menyajikan Nama Jadwal, Hari Aktif, status Aktif/Mati, dan tombol saklar aktivasi mandiri.
+    - Mengklik kartu langsung membuka alur jam bel kategori tersebut, tombol `Ubah Nama`, `Hapus Kategori`, dan `+ Tambah Jam Bel` tersusun rapi di kepala tabel alur.
+    - Memungkinkan sistem mengaktifkan beberapa kategori sekaligus dalam sepekan (contoh: *Senin Tanpa Upacara*, *Selasa-Kamis Reguler*, dan *Jumat Pendek* bekerja bersamaan).
+    - Proteksi Benturan Hari Otomatis: Saat kategori baru diaktifkan, sistem mendeteksi apakah ada kategori aktif lain yang menggunakan hari yang sama (misal Hari Senin). Jika ada, kategori lama untuk hari tersebut otomatis dilepas dan digantikan oleh yang baru sehingga tidak ada duplikasi jam bel atau jadwal bertabrakan.
+    - Menambahkan Strip Rangkuman Jadwal Aktif Sepekan di [schedule.html](file:///d:/BelSekolah/firmware/data/schedule.html) yang dapat diklik untuk navigasi cepat.
+    - Sinkronisasi evaluasi jadwal multi-aktif di [app.js](file:///d:/BelSekolah/firmware/data/app.js) dan firmware C++ ([firmware.ino](file:///d:/BelSekolah/firmware/firmware.ino) / [main.cpp](file:///d:/BelSekolah/firmware/src/main.cpp)).
     - Di Beranda ([index.html](file:///d:/BelSekolah/firmware/data/index.html)): Tombol pada baris timeline diubah menjadi **`Bunyikan Sekarang`** yang berfungsi mempercepat/memposisikan alur hari ini secara instan tanpa merusak data master jadwal.
     - Di Kelola Jadwal ([schedule.html](file:///d:/BelSekolah/firmware/data/schedule.html)): Mengganti tab panjang dengan **Dropdown Pemilih Kategori** yang rapi dan elegan, tombol baris jadwal diubah menjadi **`Tes Nada`** (hanya untuk mendengar audio).
     - Mode Otomatisasi Kalender (`active_preset: "auto"`): Sistem secara cerdas mengaktifkan kategori sesuai hari kalender (Senin -> upacara, Selasa-Kamis -> reguler, Jumat -> KBM pendek), sekaligus menyediakan opsi kunci khusus (override) untuk masa ujian tanpa risiko benturan jadwal.

@@ -6,6 +6,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Kelola Jadwal - Bel Sekolah Otomatis Mandiri</title>
   <link rel="stylesheet" href="style.css">
+  <link rel="icon" type="image/x-icon" href="favicon.ico">
   <link rel="icon" type="image/svg+xml" href="icon.svg">
   <script src="https://cdnjs.cloudflare.com/ajax/libs/paho-mqtt/1.0.1/mqttws31.min.js"></script>
 </head>
@@ -64,57 +65,24 @@
     <main class="workspace-canvas">
       <header class="canvas-topbar">
         <div class="canvas-topbar-title">Atur Jadwal Bel</div>
-        <button type="button" class="btn btn-outline btn-sm" onclick="openCreatePresetModal()">
-          + Tambah Kategori Baru
-        </button>
       </header>
 
       <div class="canvas-content">
-        <!-- Panel Kontrol Kategori Jadwal (Radio Button Mode & Combo Box) -->
+        <!-- Pilihan Kategori Jadwal (Bilah Kartu Terbuka Tanpa Dropdown) -->
         <div class="card" style="margin-bottom: 1.25rem;">
-          <div style="display: flex; flex-direction: column; gap: 1rem;">
-            <!-- Baris 1: Mode Operasi Sistem (Radio Button) -->
-            <div style="display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 0.75rem; border-bottom: 1px solid var(--border); padding-bottom: 0.75rem;">
-              <div style="display: flex; align-items: center; gap: 1.25rem; flex-wrap: wrap;">
-                <span style="font-size: 0.875rem; font-weight: 600; color: var(--text-main);">Mode Bel:</span>
-                <label style="display: inline-flex; align-items: center; gap: 0.4rem; font-size: 0.875rem; cursor: pointer; color: var(--text-main);">
-                  <input type="radio" name="scheduleModeRadio" value="auto" onchange="handleModeRadioChange(this.value)" id="radioModeAuto">
-                  <strong>Otomatis Sesuai Hari</strong> (Rekomendasi)
-                </label>
-                <label style="display: inline-flex; align-items: center; gap: 0.4rem; font-size: 0.875rem; cursor: pointer; color: var(--text-main);">
-                  <input type="radio" name="scheduleModeRadio" value="lock" onchange="handleModeRadioChange(this.value)" id="radioModeLock">
-                  <strong>Kunci Jadwal Khusus</strong> (Ujian / Acara)
-                </label>
-              </div>
-
-              <span id="categoryActiveBadge" class="timeline-status-tag active" style="margin: 0;">
-                Mode Otomatis Aktif
-              </span>
+          <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 0.75rem; flex-wrap: wrap; gap: 0.5rem;">
+            <div>
+              <span style="font-size: 0.875rem; font-weight: 700; color: var(--navy-900);">Pilih Kategori Jadwal</span>
+              <span style="font-size: 0.8125rem; color: var(--text-muted); margin-left: 0.5rem;">(Klik kartu untuk melihat jam bel, klik saklar untuk mengaktifkan)</span>
             </div>
+            <button type="button" class="btn btn-outline btn-sm" onclick="openCreatePresetModal()" title="Tambah Kategori Baru">
+              + Tambah Kategori Baru
+            </button>
+          </div>
 
-            <!-- Baris 2: Combo Box Pilih Kategori & Tombol Aksi -->
-            <div style="display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 1rem;">
-              <div style="display: flex; align-items: center; gap: 0.75rem; flex: 1; min-width: 280px;">
-                <label for="categoryDropdown" style="font-size: 0.875rem; font-weight: 600; white-space: nowrap; color: var(--text-main);">
-                  Kategori Ditampilkan:
-                </label>
-                <select id="categoryDropdown" class="form-select" style="flex: 1; min-width: 240px; font-weight: 500;" onchange="handleDropdownChange(this.value)">
-                  <!-- Diisi secara dinamis -->
-                </select>
-              </div>
-
-              <div class="btn-group">
-                <button type="button" class="btn btn-outline btn-sm" id="btnEditPresetName" onclick="openEditPresetModal()" title="Ubah Nama Kategori Ini">
-                  Ubah Nama
-                </button>
-                <button type="button" class="btn btn-danger btn-sm" id="btnDeletePreset" onclick="deleteCurrentPreset()" title="Hapus Kategori Ini">
-                  Hapus
-                </button>
-                <button type="button" class="btn btn-outline btn-sm" onclick="openCreatePresetModal()" title="Tambah Kategori Baru">
-                  + Kategori Baru
-                </button>
-              </div>
-            </div>
+          <!-- Grid Kartu Kategori Terbuka -->
+          <div id="categoryCardsGrid" style="display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 0.75rem;">
+            <!-- Diisi secara dinamis oleh JavaScript -->
           </div>
         </div>
 
@@ -127,9 +95,17 @@
                 Memuat daftar jam bel...
               </div>
             </div>
-            <button type="button" class="btn btn-primary" onclick="openAddScheduleModal()">
-              + Tambah Jam Bel
-            </button>
+            <div class="btn-group">
+              <button type="button" class="btn btn-outline btn-sm" id="btnEditPresetName" onclick="openEditPresetModal()" title="Ubah Nama Kategori Ini">
+                Ubah Nama
+              </button>
+              <button type="button" class="btn btn-danger btn-sm" id="btnDeletePreset" onclick="deleteCurrentPreset()" title="Hapus Kategori Ini">
+                Hapus Kategori
+              </button>
+              <button type="button" class="btn btn-primary" onclick="openAddScheduleModal()">
+                + Tambah Jam Bel
+              </button>
+            </div>
           </div>
 
           <!-- Timeline Alur Jam Bel (Sama persis dengan Beranda) -->
@@ -233,38 +209,84 @@
       }
     }
 
+    function getActivePresetsList() {
+      if (!currentData) return [];
+      if (Array.isArray(currentData.active_presets)) {
+        return currentData.active_presets;
+      }
+      if (currentData.active_preset) {
+        return [currentData.active_preset];
+      }
+      return ['senin', 'selasa_kamis', 'jumat'];
+    }
+
     function renderCategoryDropdown() {
-      const select = document.getElementById('categoryDropdown');
-      select.innerHTML = '';
+      const grid = document.getElementById('categoryCardsGrid');
+      grid.innerHTML = '';
       if (!currentData || !currentData.presets) return;
 
-      const isAuto = (!currentData.active_preset || currentData.active_preset === 'auto');
-      const resolved = getResolvedPresetKey(currentData);
+      const activeList = getActivePresetsList();
 
-      // Sinkronkan radio button
-      const radioAuto = document.getElementById('radioModeAuto');
-      const radioLock = document.getElementById('radioModeLock');
-      if (radioAuto) radioAuto.checked = isAuto;
-      if (radioLock) radioLock.checked = !isAuto;
-
-      // Isi opsi combo box hanya dengan kategori jadwal murni
+      let cardIndex = 1;
       for (const [key, pObj] of Object.entries(currentData.presets)) {
-        const opt = document.createElement('option');
-        opt.value = key;
-        const isCurrentActive = isAuto ? (key === resolved) : (key === currentData.active_preset);
-        opt.textContent = `${pObj.name || key} ${isCurrentActive ? '✓ (Aktif)' : ''}`;
-        opt.selected = (key === activePreset);
-        select.appendChild(opt);
-      }
+        const isCurrentActive = activeList.includes(key);
+        const isSelected = (key === activePreset);
+        const days = getPresetDays(pObj).map(d => formatDayName(d).slice(0, 3)).join(', ') || 'Belum diatur';
+        const cardNo = cardIndex++;
 
-      // Update lencana status
-      const badge = document.getElementById('categoryActiveBadge');
-      if (isAuto) {
-        badge.className = 'timeline-status-tag active';
-        badge.textContent = `Mode Otomatis Aktif (${formatDayName(new Date().getDay())} -> ${currentData.presets[resolved]?.name || resolved})`;
-      } else {
-        badge.className = 'timeline-status-tag upcoming';
-        badge.textContent = `Mode Kunci: ${currentData.presets[currentData.active_preset]?.name || currentData.active_preset}`;
+        const card = document.createElement('div');
+        card.style.cssText = `
+          border: 1.5px solid ${isSelected ? 'var(--accent)' : 'var(--border)'};
+          background: ${isSelected ? 'var(--primary-subtle)' : 'var(--surface)'};
+          border-radius: var(--radius-md);
+          padding: 0.85rem 1rem;
+          display: flex;
+          flex-direction: column;
+          justify-content: space-between;
+          cursor: pointer;
+          transition: all 0.15s ease;
+          min-height: 110px;
+        `;
+
+        card.onclick = (e) => {
+          if (!e.target.closest('button')) {
+            activePreset = key;
+            renderCategoryDropdown();
+            renderTimeline();
+          }
+        };
+
+        const statusTag = isCurrentActive
+          ? '<span style="font-size: 0.75rem; font-weight: 700; color: var(--accent);">Aktif</span>'
+          : '<span style="font-size: 0.75rem; font-weight: 600; color: var(--text-muted);">Nonaktif</span>';
+
+        card.innerHTML = `
+          <div>
+            <div style="display: flex; justify-content: space-between; align-items: flex-start; gap: 0.5rem; margin-bottom: 0.35rem;">
+              <div style="display: flex; align-items: baseline; gap: 0.45rem;">
+                <span style="font-size: 0.9375rem; font-weight: 700; color: var(--accent);">${cardNo}.</span>
+                <span style="font-weight: 700; font-size: 0.9375rem; color: var(--navy-900); line-height: 1.3;">
+                  ${pObj.name || key}
+                </span>
+              </div>
+              ${statusTag}
+            </div>
+            <div style="font-size: 0.75rem; color: var(--text-muted); margin-bottom: 0.75rem;">
+              Hari: <strong>${days}</strong> | ${pObj.schedules ? pObj.schedules.length : 0} Jam Bel
+            </div>
+          </div>
+
+          <div style="display: flex; justify-content: space-between; align-items: center; padding-top: 0.6rem; border-top: 1px dashed var(--border);">
+            <span style="font-size: 0.75rem; font-weight: 600; color: ${isSelected ? 'var(--accent)' : 'var(--text-subtle)'};">
+              ${isSelected ? 'Sedang Dipilih' : 'Pilih Kategori'}
+            </span>
+            <button type="button" class="btn ${isCurrentActive ? 'btn-outline' : 'btn-primary'} btn-sm" style="font-size: 0.75rem; padding: 0.3rem 0.75rem;" onclick="togglePresetActivation('${key}', event)">
+              ${isCurrentActive ? 'Nonaktifkan' : 'Aktifkan'}
+            </button>
+          </div>
+        `;
+
+        grid.appendChild(card);
       }
 
       // Periksa apakah masih ada lebih dari 1 kategori jadwal
@@ -277,31 +299,54 @@
       document.getElementById('activeCategorySubtitle').textContent = `Terdapat ${totalCount} jam bel yang terdaftar pada kategori ini.`;
     }
 
-    async function handleModeRadioChange(mode) {
-      if (mode === 'auto') {
-        currentData.active_preset = 'auto';
-        activePreset = getResolvedPresetKey(currentData);
-        AppToast.show('Mode otomatis diaktifkan (jadwal berganti sesuai hari)', 'success');
+    async function togglePresetActivation(targetKey, event) {
+      if (event) event.stopPropagation();
+
+      let activeList = [...getActivePresetsList()];
+      const isCurrentlyActive = activeList.includes(targetKey);
+
+      if (isCurrentlyActive) {
+        if (activeList.length <= 1) {
+          AppToast.show('Minimal harus ada 1 kategori jadwal yang aktif!', 'warning');
+          return;
+        }
+        activeList = activeList.filter(k => k !== targetKey);
+        AppToast.show(`Kategori '${currentData.presets[targetKey]?.name}' dinonaktifkan.`, 'info');
       } else {
-        currentData.active_preset = activePreset;
-        AppToast.show(`Jadwal dikunci ke: ${currentData.presets[activePreset]?.name || activePreset}`, 'info');
+        // PERIKSA KONFLIK HARI (ANTI BENTURAN HARI)
+        const newPresetDays = getPresetDays(currentData.presets[targetKey]);
+        const replacedCategories = [];
+
+        activeList = activeList.filter(k => {
+          const existingDays = getPresetDays(currentData.presets[k]);
+          const hasConflict = existingDays.some(d => newPresetDays.includes(d));
+          if (hasConflict) {
+            replacedCategories.push(currentData.presets[k]?.name || k);
+            return false; // Gantikan yang bentrok hari
+          }
+          return true;
+        });
+
+        activeList.push(targetKey);
+
+        if (replacedCategories.length > 0) {
+          AppToast.show(`Menggantikan ${replacedCategories.join(', ')} untuk hari yang sama agar tidak bentrok.`, 'info', 4500);
+        } else {
+          AppToast.show(`Kategori '${currentData.presets[targetKey]?.name}' berhasil diaktifkan!`, 'success');
+        }
       }
 
+      currentData.active_presets = activeList;
+      currentData.active_preset = activeList[0] || targetKey;
+
       renderCategoryDropdown();
-      renderTimeline();
       await persistScheduleData();
     }
 
     async function handleDropdownChange(value) {
       activePreset = value;
-      // Jika dalam mode kunci, perbarui target yang dikunci
-      if (currentData.active_preset !== 'auto') {
-        currentData.active_preset = value;
-      }
-
       renderCategoryDropdown();
       renderTimeline();
-      await persistScheduleData();
     }
 
     async function persistScheduleData() {
@@ -341,16 +386,18 @@
 
       const sorted = [...schedules].sort((a, b) => a.time.localeCompare(b.time));
 
-      sorted.forEach(item => {
+      sorted.forEach((item, index) => {
+        const no = index + 1;
         const dayNames = item.days.map(d => formatDayName(d).slice(0, 3)).join(', ');
         const div = document.createElement('div');
         div.className = 'timeline-item';
         div.innerHTML = `
           <div class="timeline-left">
+            <span style="font-weight: 700; font-size: 0.8125rem; color: var(--text-muted); width: 24px; text-align: center; flex-shrink: 0;">${no}</span>
             <span class="timeline-time-badge">${item.time}</span>
             <div class="timeline-meta">
               <span class="timeline-title">${item.label}</span>
-              <span class="timeline-sub">Hari: ${dayNames} • Nada: Track #${item.track}</span>
+              <span class="timeline-sub">Hari: ${dayNames} | Audio: Track #${item.track}</span>
             </div>
           </div>
           <div class="timeline-right">
@@ -449,7 +496,7 @@
       }
 
       closeScheduleModal();
-      renderTabs();
+      renderCategoryDropdown();
       renderTimeline();
       await saveFullSchedule();
     }
@@ -464,7 +511,7 @@
 
       const preset = currentData.presets[activePreset];
       preset.schedules = preset.schedules.filter(s => s.id !== id);
-      renderTabs();
+      renderCategoryDropdown();
       renderTimeline();
       await saveFullSchedule();
       AppToast.show('Jam bel berhasil dihapus.', 'success');
@@ -490,7 +537,10 @@
         schedules: []
       };
 
-      await switchCategory(cleanKey);
+      activePreset = cleanKey;
+      renderCategoryDropdown();
+      renderTimeline();
+      await saveFullSchedule();
       AppToast.show(`Kategori "${name.trim()}" berhasil dibuat. Silakan tambahkan jam bel.`, 'success');
     }
 
@@ -505,7 +555,7 @@
       if (!newName || !newName.trim()) return;
 
       currentData.presets[activePreset].name = newName.trim();
-      renderTabs();
+      renderCategoryDropdown();
       await saveFullSchedule();
       AppToast.show('Nama kategori berhasil diubah.', 'success');
     }
@@ -529,7 +579,7 @@
       const remainingKeys = Object.keys(currentData.presets);
       activePreset = remainingKeys[0];
       currentData.active_preset = remainingKeys[0];
-      renderTabs();
+      renderCategoryDropdown();
       renderTimeline();
       await saveFullSchedule();
       AppToast.show('Kategori jadwal berhasil dihapus.', 'success');

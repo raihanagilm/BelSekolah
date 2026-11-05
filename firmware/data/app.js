@@ -1,27 +1,45 @@
 // Default data cadangan untuk preview offline / Live Server
 const defaultFallbackData = {
-  "active_preset": "reguler",
+  "active_preset": "auto",
   "presets": {
-    "reguler": {
-      "name": "Jadwal Reguler (Senin - Kamis)",
+    "senin": {
+      "name": "Senin (Upacara Bendera)",
       "schedules": [
-        { "id": 1, "days": [1, 2, 3, 4], "time": "06:45", "track": 1, "label": "Siswa Datang / Bel Masuk" },
-        { "id": 2, "days": [1, 2, 3, 4], "time": "07:00", "track": 2, "label": "Jam Pelajaran 01" },
-        { "id": 3, "days": [1, 2, 3, 4], "time": "07:45", "track": 3, "label": "Jam Pelajaran 02" },
-        { "id": 4, "days": [1, 2, 3, 4], "time": "08:30", "track": 4, "label": "Jam Pelajaran 03" },
-        { "id": 5, "days": [1, 2, 3, 4], "time": "09:15", "track": 5, "label": "Jam Pelajaran 04" },
-        { "id": 6, "days": [1, 2, 3, 4], "time": "10:00", "track": 6, "label": "Istirahat Pertama" },
-        { "id": 7, "days": [1, 2, 3, 4], "time": "10:30", "track": 7, "label": "Jam Pelajaran 05" },
-        { "id": 8, "days": [1, 2, 3, 4], "time": "11:15", "track": 8, "label": "Jam Pelajaran 06" },
-        { "id": 9, "days": [1, 2, 3, 4], "time": "12:00", "track": 11, "label": "Istirahat Kedua / Dzuhur" },
-        { "id": 10, "days": [1, 2, 3, 4], "time": "12:45", "track": 9, "label": "Jam Pelajaran 07" },
-        { "id": 11, "days": [1, 2, 3, 4], "time": "13:30", "track": 10, "label": "Jam Pelajaran 08" },
-        { "id": 12, "days": [1, 2, 3, 4], "time": "14:15", "track": 12, "label": "Jam Pelajaran 09" },
-        { "id": 13, "days": [1, 2, 3, 4], "time": "15:00", "track": 16, "label": "Siswa Pulang / Akhir Pelajaran" }
+        { "id": 1, "days": [1], "time": "06:45", "track": 1, "label": "Siswa Datang / Persiapan Upacara" },
+        { "id": 2, "days": [1], "time": "07:00", "track": 1, "label": "Upacara Bendera Dimulai" },
+        { "id": 3, "days": [1], "time": "07:45", "track": 2, "label": "Jam Pelajaran 01 (Setelah Upacara)" },
+        { "id": 4, "days": [1], "time": "08:30", "track": 3, "label": "Jam Pelajaran 02" },
+        { "id": 5, "days": [1], "time": "09:15", "track": 4, "label": "Jam Pelajaran 03" },
+        { "id": 6, "days": [1], "time": "10:00", "track": 6, "label": "Istirahat Pertama" },
+        { "id": 7, "days": [1], "time": "10:30", "track": 7, "label": "Jam Pelajaran 04" },
+        { "id": 8, "days": [1], "time": "11:15", "track": 8, "label": "Jam Pelajaran 05" },
+        { "id": 9, "days": [1], "time": "12:00", "track": 11, "label": "Istirahat Sholat Dzuhur" },
+        { "id": 10, "days": [1], "time": "12:45", "track": 9, "label": "Jam Pelajaran 06" },
+        { "id": 11, "days": [1], "time": "13:30", "track": 10, "label": "Jam Pelajaran 07" },
+        { "id": 12, "days": [1], "time": "14:15", "track": 12, "label": "Jam Pelajaran 08" },
+        { "id": 13, "days": [1], "time": "15:00", "track": 16, "label": "Siswa Pulang Sekolah" }
+      ]
+    },
+    "selasa_kamis": {
+      "name": "Selasa - Kamis (KBM Reguler)",
+      "schedules": [
+        { "id": 1, "days": [2, 3, 4], "time": "06:45", "track": 1, "label": "Siswa Datang / Bel Masuk" },
+        { "id": 2, "days": [2, 3, 4], "time": "07:00", "track": 2, "label": "Jam Pelajaran 01 (Literasi/KBM)" },
+        { "id": 3, "days": [2, 3, 4], "time": "07:45", "track": 3, "label": "Jam Pelajaran 02" },
+        { "id": 4, "days": [2, 3, 4], "time": "08:30", "track": 4, "label": "Jam Pelajaran 03" },
+        { "id": 5, "days": [2, 3, 4], "time": "09:15", "track": 5, "label": "Jam Pelajaran 04" },
+        { "id": 6, "days": [2, 3, 4], "time": "10:00", "track": 6, "label": "Istirahat Pertama" },
+        { "id": 7, "days": [2, 3, 4], "time": "10:30", "track": 7, "label": "Jam Pelajaran 05" },
+        { "id": 8, "days": [2, 3, 4], "time": "11:15", "track": 8, "label": "Jam Pelajaran 06" },
+        { "id": 9, "days": [2, 3, 4], "time": "12:00", "track": 11, "label": "Istirahat Sholat Dzuhur" },
+        { "id": 10, "days": [2, 3, 4], "time": "12:45", "track": 9, "label": "Jam Pelajaran 07" },
+        { "id": 11, "days": [2, 3, 4], "time": "13:30", "track": 10, "label": "Jam Pelajaran 08" },
+        { "id": 12, "days": [2, 3, 4], "time": "14:15", "track": 12, "label": "Jam Pelajaran 09" },
+        { "id": 13, "days": [2, 3, 4], "time": "15:00", "track": 16, "label": "Siswa Pulang Sekolah" }
       ]
     },
     "jumat": {
-      "name": "Jadwal Khusus Hari Jumat",
+      "name": "Jumat (KBM Pendek)",
       "schedules": [
         { "id": 1, "days": [5], "time": "06:45", "track": 1, "label": "Siswa Datang / Bel Masuk" },
         { "id": 2, "days": [5], "time": "07:00", "track": 2, "label": "Jam Pelajaran 01" },
@@ -34,7 +52,7 @@ const defaultFallbackData = {
       ]
     },
     "ujian": {
-      "name": "Jadwal Penilaian / Ujian (UNAS/PTS/PAS)",
+      "name": "Masa Penilaian / Ujian",
       "schedules": [
         { "id": 1, "days": [1, 2, 3, 4, 5], "time": "07:15", "track": 17, "label": "Ujian: Masuk Ruang Ujian" },
         { "id": 2, "days": [1, 2, 3, 4, 5], "time": "07:20", "track": 18, "label": "Ujian: Mulai Dalam 10 Menit" },
@@ -148,7 +166,7 @@ async function updateNetworkStatus() {
     } catch (err) {
       espConnected = false;
     }
-  } else {
+  } else if (location.hostname !== '127.0.0.1' && location.hostname !== 'localhost') {
     // Jika dibuka dari file:// lokal di PC/Laptop
     try {
       const controller = new AbortController();
@@ -165,9 +183,11 @@ async function updateNetworkStatus() {
         rtcHardwareOk = !!stat.rtc_ok;
       }
     } catch (err) {
-      // Tidak terhubung ke ESP8266 (timeout atau unreachable)
       espConnected = false;
     }
+  } else {
+    // Mode pengujian lokal di Live Server (127.0.0.1)
+    espConnected = false;
   }
 
   // Update Status Hardware RTC
@@ -334,6 +354,25 @@ function formatDayName(dayNum) {
   return days[dayNum] || 'Hari ' + dayNum;
 }
 
+// Mendapatkan kunci preset aktif secara dinamis (mendukung mode auto-calendar)
+function getResolvedPresetKey(data) {
+  if (!data || !data.presets) return 'selasa_kamis';
+  const setting = data.active_preset || 'auto';
+  if (setting !== 'auto' && data.presets[setting]) {
+    return setting; // Override terkunci ke preset tertentu
+  }
+  // Mode otomatis berdasarkan hari kalender
+  const day = new Date().getDay(); // 0: Minggu, 1: Senin, 2: Selasa, ... 5: Jumat, 6: Sabtu
+  if (day === 1 && data.presets['senin']) return 'senin';
+  if (day === 5 && data.presets['jumat']) return 'jumat';
+  if ((day === 2 || day === 3 || day === 4) && data.presets['selasa_kamis']) return 'selasa_kamis';
+  
+  // Jika hari Sabtu/Minggu atau fallback pertama
+  if (data.presets['selasa_kamis']) return 'selasa_kamis';
+  const keys = Object.keys(data.presets);
+  return keys.length > 0 ? keys[0] : 'senin';
+}
+
 // Background Scheduler di Browser (Mode Offline / Hybrid)
 let lastBellMinute = -1;
 let lastBellDay = -1;
@@ -352,7 +391,7 @@ function startLocalScheduler() {
     if (currentMin === lastBellMinute && currentDay === lastBellDay) return;
 
     const timeStr = `${String(currentHour).padStart(2, '0')}:${String(currentMin).padStart(2, '0')}`;
-    const activeKey = currentData.active_preset || 'reguler';
+    const activeKey = getResolvedPresetKey(currentData);
     const preset = currentData.presets && currentData.presets[activeKey];
     if (!preset || !preset.schedules) return;
 
@@ -360,7 +399,7 @@ function startLocalScheduler() {
       if (item.time === timeStr && item.days.includes(currentDay)) {
         lastBellMinute = currentMin;
         lastBellDay = currentDay;
-        console.log(`[JADWAL COCOK] ${timeStr} - Memutar Track #${item.track}: ${item.label}`);
+        console.log(`[JADWAL COCOK] (${activeKey}) ${timeStr} - Memutar Track #${item.track}: ${item.label}`);
         await triggerBell(item.track);
         break;
       }

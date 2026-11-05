@@ -64,360 +64,358 @@
     <main class="workspace-canvas">
       <header class="canvas-topbar">
         <div class="canvas-topbar-title">Atur Jadwal Bel</div>
+        <button type="button" class="btn btn-outline btn-sm" onclick="openCreatePresetModal()">
+          + Tambah Kategori Baru
+        </button>
       </header>
+
       <div class="canvas-content">
-        <section class="card">
-          <div class="card-header-clean">
-            <h2 class="card-title">Kelola Jadwal Sekolah</h2>
-            <button type="button" class="btn btn-primary btn-sm" onclick="toggleAddPresetForm()">+ Tambah Jadwal
-              Baru</button>
-          </div>
-          <div class="form-row-2">
-            <div class="form-group">
-              <label for="presetSelect" class="form-label">Jadwal yang Sedang Aktif</label>
-              <div style="display: flex; gap: 0.5rem; flex-wrap: wrap;">
-                <select id="presetSelect" class="form-select" style="flex: 1; min-width: 220px;"
-                  onchange="changeActivePreset()">
-                  <option value="reguler">Jadwal Reguler (Senin - Kamis)</option>
-                  <option value="jumat">Jadwal Khusus Hari Jumat</option>
-                  <option value="ujian">Jadwal Penilaian / Ujian (PTS/PAS)</option>
-                </select>
-                <button type="button" id="btnEditPreset" class="btn btn-outline btn-sm" onclick="toggleEditPresetForm()"
-                  title="Ubah Nama Jadwal Ini">Ubah Nama</button>
-                <button type="button" id="btnDeletePreset" class="btn btn-danger btn-sm" onclick="deleteCurrentPreset()"
-                  title="Hapus Jadwal Ini">Hapus</button>
+        <!-- Panel Kontrol Kategori Jadwal (Radio Button Mode & Combo Box) -->
+        <div class="card" style="margin-bottom: 1.25rem;">
+          <div style="display: flex; flex-direction: column; gap: 1rem;">
+            <!-- Baris 1: Mode Operasi Sistem (Radio Button) -->
+            <div style="display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 0.75rem; border-bottom: 1px solid var(--border); padding-bottom: 0.75rem;">
+              <div style="display: flex; align-items: center; gap: 1.25rem; flex-wrap: wrap;">
+                <span style="font-size: 0.875rem; font-weight: 600; color: var(--text-main);">Mode Bel:</span>
+                <label style="display: inline-flex; align-items: center; gap: 0.4rem; font-size: 0.875rem; cursor: pointer; color: var(--text-main);">
+                  <input type="radio" name="scheduleModeRadio" value="auto" onchange="handleModeRadioChange(this.value)" id="radioModeAuto">
+                  <strong>Otomatis Sesuai Hari</strong> (Rekomendasi)
+                </label>
+                <label style="display: inline-flex; align-items: center; gap: 0.4rem; font-size: 0.875rem; cursor: pointer; color: var(--text-main);">
+                  <input type="radio" name="scheduleModeRadio" value="lock" onchange="handleModeRadioChange(this.value)" id="radioModeLock">
+                  <strong>Kunci Jadwal Khusus</strong> (Ujian / Acara)
+                </label>
               </div>
+
+              <span id="categoryActiveBadge" class="timeline-status-tag active" style="margin: 0;">
+                Mode Otomatis Aktif
+              </span>
             </div>
-            <div style="display: flex; align-items: flex-end; margin-bottom: 0.85rem;">
-              <span id="presetSaveStatus" style="font-size: 0.85rem; color: var(--success); font-weight: 600;"></span>
-            </div>
-          </div>
 
-          <!-- Form Tambah Preset Baru (Hidden Default) -->
-          <div id="addPresetContainer"
-            style="display: none; background: #f8fafc; border: 1px solid var(--border); padding: 1.25rem; border-radius: var(--radius-md); margin-top: 1rem;">
-            <h3 style="font-size: 0.975rem; font-weight: 700; color: var(--navy-900); margin-bottom: 0.75rem;">Buat
-              Kategori Jadwal Baru</h3>
-            <form onsubmit="handleCreatePreset(event)">
-              <div class="form-row-2">
-                <div class="form-group">
-                  <label for="newPresetKey" class="form-label">Kode Jadwal (Huruf Kecil Tanpa Spasi)</label>
-                  <input type="text" id="newPresetKey" class="form-input" placeholder="contoh: ramadhan, classmeeting"
-                    pattern="[a-zA-Z0-9_-]+" required>
-                </div>
-                <div class="form-group">
-                  <label for="newPresetName" class="form-label">Nama Kategori Jadwal</label>
-                  <input type="text" id="newPresetName" class="form-input" placeholder="contoh: Jadwal Khusus Ramadhan"
-                    required>
-                </div>
-              </div>
-              <div class="btn-group" style="margin-top: 0.75rem;">
-                <button type="submit" class="btn btn-primary btn-sm">Simpan Jadwal</button>
-                <button type="button" class="btn btn-outline btn-sm" onclick="toggleAddPresetForm()">Batal</button>
-              </div>
-            </form>
-          </div>
-
-          <!-- Form Edit Nama Preset (Hidden Default) -->
-          <div id="editPresetContainer"
-            style="display: none; background: #f8fafc; border: 1px solid var(--border); padding: 1.25rem; border-radius: var(--radius-md); margin-top: 1rem;">
-            <h3 style="font-size: 0.975rem; font-weight: 700; color: var(--navy-900); margin-bottom: 0.75rem;">Ubah Nama
-              Kategori Jadwal</h3>
-            <form onsubmit="handleUpdatePresetName(event)">
-              <div class="form-group">
-                <label for="editPresetNameInput" class="form-label">Nama Kategori</label>
-                <input type="text" id="editPresetNameInput" class="form-input" required>
-              </div>
-              <div class="btn-group" style="margin-top: 0.75rem;">
-                <button type="submit" class="btn btn-primary btn-sm">Simpan Perubahan</button>
-                <button type="button" class="btn btn-outline btn-sm" onclick="toggleEditPresetForm()">Batal</button>
-              </div>
-            </form>
-          </div>
-        </section>
-
-        <section class="card">
-          <div class="card-header-clean">
-            <h2 id="formScheduleTitle" class="card-title">Tambah Jam Bel Baru</h2>
-          </div>
-          <form id="addScheduleForm" onsubmit="handleAddSchedule(event)">
-            <div class="form-row-3">
-              <div class="form-group">
-                <label for="newTime" class="form-label">Jam & Menit (HH:MM)</label>
-                <input type="time" id="newTime" class="form-input" required>
-              </div>
-              <div class="form-group">
-                <label for="newTrack" class="form-label">Pilihan Nada Bel</label>
-                <select id="newTrack" class="form-select" required>
-                  <option value="">Memuat pilihan nada bel...</option>
+            <!-- Baris 2: Combo Box Pilih Kategori & Tombol Aksi -->
+            <div style="display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 1rem;">
+              <div style="display: flex; align-items: center; gap: 0.75rem; flex: 1; min-width: 280px;">
+                <label for="categoryDropdown" style="font-size: 0.875rem; font-weight: 600; white-space: nowrap; color: var(--text-main);">
+                  Kategori Ditampilkan:
+                </label>
+                <select id="categoryDropdown" class="form-select" style="flex: 1; min-width: 240px; font-weight: 500;" onchange="handleDropdownChange(this.value)">
+                  <!-- Diisi secara dinamis -->
                 </select>
               </div>
-              <div class="form-group">
-                <label for="newLabel" class="form-label">Keterangan Bel</label>
-                <input type="text" id="newLabel" class="form-input" placeholder="Contoh: Bel Masuk Kelas" required>
+
+              <div class="btn-group">
+                <button type="button" class="btn btn-outline btn-sm" id="btnEditPresetName" onclick="openEditPresetModal()" title="Ubah Nama Kategori Ini">
+                  Ubah Nama
+                </button>
+                <button type="button" class="btn btn-danger btn-sm" id="btnDeletePreset" onclick="deleteCurrentPreset()" title="Hapus Kategori Ini">
+                  Hapus
+                </button>
+                <button type="button" class="btn btn-outline btn-sm" onclick="openCreatePresetModal()" title="Tambah Kategori Baru">
+                  + Kategori Baru
+                </button>
               </div>
             </div>
+          </div>
+        </div>
 
-            <div class="form-group" style="margin-top: 0.5rem;">
-              <label class="form-label">Hari Aktif</label>
-              <div class="day-selector-group">
-                <label class="day-checkbox-label"><input type="checkbox" name="days" value="1" checked> Senin</label>
-                <label class="day-checkbox-label"><input type="checkbox" name="days" value="2" checked> Selasa</label>
-                <label class="day-checkbox-label"><input type="checkbox" name="days" value="3" checked> Rabu</label>
-                <label class="day-checkbox-label"><input type="checkbox" name="days" value="4" checked> Kamis</label>
-                <label class="day-checkbox-label"><input type="checkbox" name="days" value="5"> Jumat</label>
-                <label class="day-checkbox-label"><input type="checkbox" name="days" value="6"> Sabtu</label>
-              </div>
-            </div>
-
-            <div style="margin-top: 1rem;">
-              <button type="submit" class="btn btn-primary">Simpan ke Jadwal</button>
-            </div>
-          </form>
-        </section>
-
+        <!-- Kartu Utama Daftar Jam Bel (Identik dengan Beranda) -->
         <section class="card">
-          <h2 class="card-title">Daftar Jam Bel pada Jadwal Ini</h2>
-          <div class="table-container">
-            <table class="table-custom">
-              <thead>
-                <tr>
-                  <th>Waktu</th>
-                  <th>Keterangan</th>
-                  <th>Hari</th>
-                  <th>Track</th>
-                  <th>Aksi</th>
-                </tr>
-              </thead>
-              <tbody id="scheduleTableBody">
-                <tr>
-                  <td colspan="5" style="text-align: center; color: var(--text-muted);">Memuat daftar jadwal...</td>
-                </tr>
-              </tbody>
-            </table>
+          <div class="card-header-clean">
+            <div>
+              <h2 class="card-title" id="activeCategoryHeading">Jadwal Reguler (Senin - Kamis)</h2>
+              <div class="card-subtitle" id="activeCategorySubtitle" style="margin-bottom: 0;">
+                Memuat daftar jam bel...
+              </div>
+            </div>
+            <button type="button" class="btn btn-primary" onclick="openAddScheduleModal()">
+              + Tambah Jam Bel
+            </button>
+          </div>
+
+          <!-- Timeline Alur Jam Bel (Sama persis dengan Beranda) -->
+          <div class="timeline-feed" id="scheduleTimelineFeed">
+            <div style="text-align: center; color: var(--text-muted); padding: 2rem;">
+              Memuat daftar jam bel...
+            </div>
           </div>
         </section>
       </div>
     </main>
   </div>
 
+  <!-- Modal Tambah / Edit Jam Bel -->
+  <div id="scheduleModal" class="modal-overlay">
+    <div class="modal-box" style="max-width: 520px;">
+      <h3 class="modal-title" id="scheduleModalTitle">Tambah Jam Bel Baru</h3>
+      <p class="modal-desc">Atur waktu, pilihan nada suara, dan hari aktif untuk jam bel ini.</p>
+      
+      <form id="scheduleForm" onsubmit="handleSaveSchedule(event)">
+        <div class="form-row-2">
+          <div class="form-group">
+            <label for="modalTime" class="form-label">Jam & Menit (HH:MM)</label>
+            <input type="time" id="modalTime" class="form-input" required>
+          </div>
+          <div class="form-group">
+            <label for="modalTrack" class="form-label">Pilihan Nada Bel</label>
+            <select id="modalTrack" class="form-select" required>
+              <option value="">Memuat daftar nada suara...</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label for="modalLabel" class="form-label">Keterangan Bel</label>
+          <input type="text" id="modalLabel" class="form-input" placeholder="Contoh: Bel Masuk Kelas" required>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label">Hari Aktif</label>
+          <div style="display: flex; gap: 0.5rem; margin-bottom: 0.5rem; flex-wrap: wrap;">
+            <button type="button" class="btn btn-outline btn-sm" onclick="setQuickDays('senin')">Hanya Senin</button>
+            <button type="button" class="btn btn-outline btn-sm" onclick="setQuickDays('selasa_kamis')">Selasa - Kamis</button>
+            <button type="button" class="btn btn-outline btn-sm" onclick="setQuickDays('jumat')">Hanya Jumat</button>
+            <button type="button" class="btn btn-outline btn-sm" onclick="setQuickDays('all')">Semua Hari (Senin - Jumat)</button>
+          </div>
+          <div class="day-selector-group">
+            <label class="day-checkbox-label"><input type="checkbox" name="modalDays" value="1"> Senin</label>
+            <label class="day-checkbox-label"><input type="checkbox" name="modalDays" value="2"> Selasa</label>
+            <label class="day-checkbox-label"><input type="checkbox" name="modalDays" value="3"> Rabu</label>
+            <label class="day-checkbox-label"><input type="checkbox" name="modalDays" value="4"> Kamis</label>
+            <label class="day-checkbox-label"><input type="checkbox" name="modalDays" value="5"> Jumat</label>
+            <label class="day-checkbox-label"><input type="checkbox" name="modalDays" value="6"> Sabtu</label>
+          </div>
+        </div>
+
+        <div class="btn-group" style="justify-content: flex-end; margin-top: 1.25rem;">
+          <button type="button" class="btn btn-outline" onclick="closeScheduleModal()">Batal</button>
+          <button type="submit" class="btn btn-primary" id="modalSubmitBtn">Simpan Jam Bel</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
   <script>
     document.write('<script src="app.js?v=' + Date.now() + '"><\/script>');
   </script>
   <script>
-    let activePreset = 'reguler';
+    let activePreset = 'senin';
+    let editingScheduleId = null;
 
     async function initSchedulePage() {
       const data = await fetchSchedule();
       if (!data) return;
 
-      activePreset = data.active_preset || 'reguler';
-      populatePresetSelect();
+      const keys = Object.keys(data.presets || {});
+      const resolved = getResolvedPresetKey(data);
+      activePreset = (currentData.active_preset && currentData.active_preset !== 'auto') 
+        ? currentData.active_preset 
+        : resolved;
 
-      // Populate pilihan track audio dinamis dari 21 data audio riil
-      const trackSelect = document.getElementById('newTrack');
-      trackSelect.innerHTML = '';
-      if (data.audio_tracks && data.audio_tracks.length > 0) {
-        data.audio_tracks.forEach(t => {
-          const opt = document.createElement('option');
-          opt.value = t.track;
-          opt.textContent = `Track ${t.track} - ${t.title}`;
-          trackSelect.appendChild(opt);
-        });
+      if (!keys.includes(activePreset) && keys.length > 0) {
+        activePreset = keys[0];
       }
 
-      renderTable();
+      populateTrackSelect();
+      renderCategoryDropdown();
+      renderTimeline();
     }
 
-    function populatePresetSelect() {
-      const select = document.getElementById('presetSelect');
+    function populateTrackSelect() {
+      const select = document.getElementById('modalTrack');
+      select.innerHTML = '';
+      if (currentData && currentData.audio_tracks) {
+        currentData.audio_tracks.forEach(t => {
+          const opt = document.createElement('option');
+          opt.value = t.track;
+          opt.textContent = `Track #${t.track} - ${t.title}`;
+          select.appendChild(opt);
+        });
+      }
+    }
+
+    function renderCategoryDropdown() {
+      const select = document.getElementById('categoryDropdown');
       select.innerHTML = '';
       if (!currentData || !currentData.presets) return;
 
+      const isAuto = (!currentData.active_preset || currentData.active_preset === 'auto');
+      const resolved = getResolvedPresetKey(currentData);
+
+      // Sinkronkan radio button
+      const radioAuto = document.getElementById('radioModeAuto');
+      const radioLock = document.getElementById('radioModeLock');
+      if (radioAuto) radioAuto.checked = isAuto;
+      if (radioLock) radioLock.checked = !isAuto;
+
+      // Isi opsi combo box hanya dengan kategori jadwal murni
       for (const [key, pObj] of Object.entries(currentData.presets)) {
         const opt = document.createElement('option');
         opt.value = key;
-        opt.textContent = pObj.name || key;
+        const isCurrentActive = isAuto ? (key === resolved) : (key === currentData.active_preset);
+        opt.textContent = `${pObj.name || key} ${isCurrentActive ? '✓ (Aktif)' : ''}`;
+        opt.selected = (key === activePreset);
         select.appendChild(opt);
       }
-      select.value = activePreset;
-      // Jangan izinkan hapus preset bawaan 'reguler'
-      document.getElementById('btnDeletePreset').style.display = (activePreset === 'reguler') ? 'none' : 'inline-block';
+
+      // Update lencana status
+      const badge = document.getElementById('categoryActiveBadge');
+      if (isAuto) {
+        badge.className = 'timeline-status-tag active';
+        badge.textContent = `Mode Otomatis Aktif (${formatDayName(new Date().getDay())} -> ${currentData.presets[resolved]?.name || resolved})`;
+      } else {
+        badge.className = 'timeline-status-tag upcoming';
+        badge.textContent = `Mode Kunci: ${currentData.presets[currentData.active_preset]?.name || currentData.active_preset}`;
+      }
+
+      // Periksa apakah masih ada lebih dari 1 kategori jadwal
+      const totalCategories = Object.keys(currentData.presets).length;
+      document.getElementById('btnDeletePreset').style.display = (totalCategories > 1) ? 'inline-block' : 'none';
+
+      const currentObj = currentData.presets[activePreset];
+      document.getElementById('activeCategoryHeading').textContent = currentObj?.name || 'Jadwal Sekolah';
+      const totalCount = currentObj?.schedules ? currentObj.schedules.length : 0;
+      document.getElementById('activeCategorySubtitle').textContent = `Terdapat ${totalCount} jam bel yang terdaftar pada kategori ini.`;
     }
 
-    function toggleAddPresetForm() {
-      const box = document.getElementById('addPresetContainer');
-      const editBox = document.getElementById('editPresetContainer');
-      editBox.style.display = 'none';
-      box.style.display = (box.style.display === 'none' || box.style.display === '') ? 'block' : 'none';
-      if (box.style.display === 'block') {
-        document.getElementById('newPresetKey').focus();
+    async function handleModeRadioChange(mode) {
+      if (mode === 'auto') {
+        currentData.active_preset = 'auto';
+        activePreset = getResolvedPresetKey(currentData);
+        AppToast.show('Mode otomatis diaktifkan (jadwal berganti sesuai hari)', 'success');
+      } else {
+        currentData.active_preset = activePreset;
+        AppToast.show(`Jadwal dikunci ke: ${currentData.presets[activePreset]?.name || activePreset}`, 'info');
+      }
+
+      renderCategoryDropdown();
+      renderTimeline();
+      await persistScheduleData();
+    }
+
+    async function handleDropdownChange(value) {
+      activePreset = value;
+      // Jika dalam mode kunci, perbarui target yang dikunci
+      if (currentData.active_preset !== 'auto') {
+        currentData.active_preset = value;
+      }
+
+      renderCategoryDropdown();
+      renderTimeline();
+      await persistScheduleData();
+    }
+
+    async function persistScheduleData() {
+      // Simpan selalu ke penyimpanan lokal browser
+      localStorage.setItem('bell_schedule_local', JSON.stringify(currentData));
+
+      // Kirim POST hanya jika terhubung ke server hardware ESP
+      if (location.hostname !== '127.0.0.1' && location.hostname !== 'localhost') {
+        try {
+          await fetch('/api/schedule/save', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(currentData)
+          });
+        } catch (err) {}
       }
     }
 
-    function toggleEditPresetForm() {
-      const box = document.getElementById('editPresetContainer');
-      const addBox = document.getElementById('addPresetContainer');
-      addBox.style.display = 'none';
-      box.style.display = (box.style.display === 'none' || box.style.display === '') ? 'block' : 'none';
-      if (box.style.display === 'block') {
-        const input = document.getElementById('editPresetNameInput');
-        input.value = currentData?.presets[activePreset]?.name || activePreset;
-        input.focus();
-      }
-    }
+    function renderTimeline() {
+      const feed = document.getElementById('scheduleTimelineFeed');
+      feed.innerHTML = '';
 
-    async function handleUpdatePresetName(e) {
-      e.preventDefault();
-      const newName = document.getElementById('editPresetNameInput').value.trim();
-      if (!newName || !currentData || !currentData.presets[activePreset]) return;
+      if (!currentData || !currentData.presets[activePreset]) return;
+      const schedules = currentData.presets[activePreset].schedules || [];
 
-      currentData.presets[activePreset].name = newName;
-      toggleEditPresetForm();
-      populatePresetSelect();
-      await saveFullSchedule();
-      AppToast.show(`Nama preset berhasil diubah menjadi "${newName}"`, 'success');
-    }
-
-    async function handleCreatePreset(e) {
-      e.preventDefault();
-      const key = document.getElementById('newPresetKey').value.trim().toLowerCase();
-      const name = document.getElementById('newPresetName').value.trim();
-
-      if (!key || !name) return;
-      if (currentData.presets[key]) {
-        AppToast.show('ID Preset sudah ada. Gunakan ID unik lain.', 'warning');
+      if (schedules.length === 0) {
+        feed.innerHTML = `
+          <div style="text-align: center; color: var(--text-muted); padding: 2.5rem 1rem;">
+            Belum ada jam bel pada kategori ini.<br>
+            <button type="button" class="btn btn-outline btn-sm" style="margin-top: 0.75rem;" onclick="openAddScheduleModal()">
+              + Tambah Jam Bel Pertama
+            </button>
+          </div>
+        `;
         return;
       }
 
-      currentData.presets[key] = {
-        name: name,
-        schedules: []
-      };
-
-      activePreset = key;
-      currentData.active_preset = key;
-      toggleAddPresetForm();
-      populatePresetSelect();
-      renderTable();
-      await saveFullSchedule();
-      AppToast.show(`Preset baru "${name}" berhasil dibuat! Silakan tambahkan jadwalnya.`, 'success');
-      document.getElementById('newPresetKey').value = '';
-      document.getElementById('newPresetName').value = '';
-    }
-
-    async function deleteCurrentPreset() {
-      if (activePreset === 'reguler') {
-        AppToast.show('Preset utama (Reguler) tidak boleh dihapus.', 'warning');
-        return;
-      }
-      const presetName = currentData.presets[activePreset]?.name || activePreset;
-      const ok = await AppDialog.confirm(
-        'Hapus Preset',
-        `Apakah Anda yakin ingin menghapus preset "${presetName}" beserta seluruh jadwal di dalamnya?`,
-        { confirmText: 'Hapus Preset', cancelText: 'Batal', danger: true }
-      );
-      if (!ok) return;
-
-      delete currentData.presets[activePreset];
-      activePreset = 'reguler';
-      currentData.active_preset = 'reguler';
-      populatePresetSelect();
-      renderTable();
-      await saveFullSchedule();
-      AppToast.show('Preset berhasil dihapus.', 'success');
-    }
-
-    function renderTable() {
-      if (!currentData) return;
-      const preset = currentData.presets[activePreset];
-      const tbody = document.getElementById('scheduleTableBody');
-      tbody.innerHTML = '';
-
-      if (!preset || !preset.schedules || preset.schedules.length === 0) {
-        tbody.innerHTML = '<tr><td colspan="5" style="text-align: center; color: var(--text-muted);">Belum ada jadwal yang ditambahkan.</td></tr>';
-        return;
-      }
-
-      const sorted = [...preset.schedules].sort((a, b) => a.time.localeCompare(b.time));
+      const sorted = [...schedules].sort((a, b) => a.time.localeCompare(b.time));
 
       sorted.forEach(item => {
-        const tr = document.createElement('tr');
         const dayNames = item.days.map(d => formatDayName(d).slice(0, 3)).join(', ');
-        tr.innerHTML = `
-          <td style="font-weight: 700; color: var(--primary);">${item.time}</td>
-          <td>${item.label}</td>
-          <td>${dayNames}</td>
-          <td>Track #${item.track}</td>
-          <td>
-            <div class="btn-group">
-              <button type="button" class="btn btn-outline btn-sm" onclick="triggerBell(${item.track})">Uji Nada</button>
-              <button type="button" class="btn btn-outline btn-sm" onclick="editScheduleItem(${item.id})">Edit</button>
-              <button type="button" class="btn btn-danger btn-sm" onclick="deleteScheduleItem(${item.id})">Hapus</button>
+        const div = document.createElement('div');
+        div.className = 'timeline-item';
+        div.innerHTML = `
+          <div class="timeline-left">
+            <span class="timeline-time-badge">${item.time}</span>
+            <div class="timeline-meta">
+              <span class="timeline-title">${item.label}</span>
+              <span class="timeline-sub">Hari: ${dayNames} • Nada: Track #${item.track}</span>
             </div>
-          </td>
+          </div>
+          <div class="timeline-right">
+            <button type="button" class="btn btn-outline btn-sm" onclick="triggerBell(${item.track})" title="Dengarkan contoh nada suara">Tes Nada</button>
+            <button type="button" class="btn btn-outline btn-sm" onclick="openEditScheduleModal(${item.id})">Ubah</button>
+            <button type="button" class="btn btn-danger btn-sm" onclick="deleteScheduleItem(${item.id})">Hapus</button>
+          </div>
         `;
-        tbody.appendChild(tr);
+        feed.appendChild(div);
       });
     }
 
-    async function changeActivePreset() {
-      const newPreset = document.getElementById('presetSelect').value;
-      activePreset = newPreset;
-      currentData.active_preset = newPreset;
-      renderTable();
-
-      const statusEl = document.getElementById('presetSaveStatus');
-      statusEl.textContent = 'Menyimpan...';
-
-      try {
-        const res = await fetch('/api/schedule/save', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify(currentData)
-        });
-        const resData = await res.json();
-        if (resData.success) {
-          statusEl.textContent = 'Preset aktif tersimpan!';
-          setTimeout(() => { statusEl.textContent = ''; }, 2500);
-        } else {
-          statusEl.textContent = 'Gagal menyimpan preset.';
-        }
-      } catch (err) {
-        statusEl.textContent = 'Gagal koneksi ke ESP32.';
-      }
+    function openAddScheduleModal() {
+      editingScheduleId = null;
+      document.getElementById('scheduleModalTitle').textContent = 'Tambah Jam Bel Baru';
+      document.getElementById('modalSubmitBtn').textContent = 'Simpan Jam Bel';
+      document.getElementById('modalTime').value = '';
+      document.getElementById('modalLabel').value = '';
+      setQuickDays('weekdays');
+      document.getElementById('scheduleModal').classList.add('active');
     }
 
-    let editingScheduleId = null;
-
-    function editScheduleItem(id) {
+    function openEditScheduleModal(id) {
       const preset = currentData.presets[activePreset];
       const item = preset.schedules.find(s => s.id === id);
       if (!item) return;
 
       editingScheduleId = id;
-      document.getElementById('newTime').value = item.time;
-      document.getElementById('newTrack').value = item.track;
-      document.getElementById('newLabel').value = item.label;
+      document.getElementById('scheduleModalTitle').textContent = 'Ubah Jam Bel';
+      document.getElementById('modalSubmitBtn').textContent = 'Simpan Perubahan';
+      document.getElementById('modalTime').value = item.time;
+      document.getElementById('modalTrack').value = item.track;
+      document.getElementById('modalLabel').value = item.label;
 
-      document.querySelectorAll('input[name="days"]').forEach(cb => {
+      document.querySelectorAll('input[name="modalDays"]').forEach(cb => {
         cb.checked = item.days.includes(parseInt(cb.value));
       });
 
-      const submitBtn = document.querySelector('#addScheduleForm button[type="submit"]');
-      submitBtn.textContent = 'Perbarui Jadwal';
-      submitBtn.className = 'btn btn-warning';
-      document.getElementById('newTime').focus();
+      document.getElementById('scheduleModal').classList.add('active');
     }
 
-    async function handleAddSchedule(e) {
+    function closeScheduleModal() {
+      document.getElementById('scheduleModal').classList.remove('active');
+      editingScheduleId = null;
+    }
+
+    function setQuickDays(type) {
+      const checkboxes = document.querySelectorAll('input[name="modalDays"]');
+      checkboxes.forEach(cb => {
+        const val = parseInt(cb.value);
+        if (type === 'senin') cb.checked = (val === 1);
+        else if (type === 'selasa_kamis') cb.checked = (val >= 2 && val <= 4);
+        else if (type === 'jumat') cb.checked = (val === 5);
+        else if (type === 'all') cb.checked = (val >= 1 && val <= 5);
+      });
+    }
+
+    async function handleSaveSchedule(e) {
       e.preventDefault();
-      const time = document.getElementById('newTime').value;
-      const track = parseInt(document.getElementById('newTrack').value);
-      const label = document.getElementById('newLabel').value.trim();
+      const time = document.getElementById('modalTime').value;
+      const track = parseInt(document.getElementById('modalTrack').value);
+      const label = document.getElementById('modalLabel').value.trim();
 
       const selectedDays = [];
-      document.querySelectorAll('input[name="days"]:checked').forEach(cb => {
+      document.querySelectorAll('input[name="modalDays"]:checked').forEach(cb => {
         selectedDays.push(parseInt(cb.value));
       });
 
@@ -430,7 +428,6 @@
       if (!preset.schedules) preset.schedules = [];
 
       if (editingScheduleId !== null) {
-        // Mode Update
         const target = preset.schedules.find(s => s.id === editingScheduleId);
         if (target) {
           target.time = time;
@@ -438,12 +435,8 @@
           target.label = label;
           target.days = selectedDays;
         }
-        editingScheduleId = null;
-        const submitBtn = document.querySelector('#addScheduleForm button[type="submit"]');
-        submitBtn.textContent = 'Tambah ke Jadwal';
-        submitBtn.className = 'btn btn-primary';
+        AppToast.show('Jam bel berhasil diperbarui.', 'success');
       } else {
-        // Mode Tambah Baru
         const newId = preset.schedules.length > 0 ? Math.max(...preset.schedules.map(s => s.id || 0)) + 1 : 1;
         preset.schedules.push({
           id: newId,
@@ -452,49 +445,111 @@
           track: track,
           label: label
         });
+        AppToast.show('Jam bel baru berhasil ditambahkan.', 'success');
       }
 
-      renderTable();
+      closeScheduleModal();
+      renderTabs();
+      renderTimeline();
       await saveFullSchedule();
-      document.getElementById('addScheduleForm').reset();
     }
 
     async function deleteScheduleItem(id) {
       const ok = await AppDialog.confirm(
-        'Hapus Jadwal',
-        'Apakah Anda yakin ingin menghapus jadwal ini?',
-        { confirmText: 'Hapus', cancelText: 'Batal', danger: true }
+        'Hapus Jam Bel',
+        'Apakah Anda yakin ingin menghapus jam bel ini dari daftar?',
+        { confirmText: 'Hapus Jam', cancelText: 'Batal', danger: true }
       );
       if (!ok) return;
 
       const preset = currentData.presets[activePreset];
       preset.schedules = preset.schedules.filter(s => s.id !== id);
-      renderTable();
+      renderTabs();
+      renderTimeline();
       await saveFullSchedule();
-      AppToast.show('Jadwal berhasil dihapus.', 'success');
+      AppToast.show('Jam bel berhasil dihapus.', 'success');
+    }
+
+    async function openCreatePresetModal() {
+      const name = await AppDialog.prompt(
+        'Tambah Kategori Jadwal Baru',
+        'Masukkan nama jadwal baru (contoh: Jadwal Bulan Ramadhan / Jadwal Ujian):',
+        { placeholder: 'Nama jadwal baru...', confirmText: 'Buat Jadwal', cancelText: 'Batal' }
+      );
+
+      if (!name || !name.trim()) return;
+
+      const cleanKey = name.trim().toLowerCase().replace(/[^a-z0-9]/g, '_');
+      if (currentData.presets[cleanKey]) {
+        AppToast.show('Kategori jadwal tersebut sudah ada.', 'warning');
+        return;
+      }
+
+      currentData.presets[cleanKey] = {
+        name: name.trim(),
+        schedules: []
+      };
+
+      await switchCategory(cleanKey);
+      AppToast.show(`Kategori "${name.trim()}" berhasil dibuat. Silakan tambahkan jam bel.`, 'success');
+    }
+
+    async function openEditPresetModal() {
+      const currentName = currentData.presets[activePreset]?.name || activePreset;
+      const newName = await AppDialog.prompt(
+        'Ubah Nama Kategori Jadwal',
+        `Ubah nama untuk kategori jadwal "${currentName}":`,
+        { placeholder: currentName, confirmText: 'Simpan Nama', cancelText: 'Batal' }
+      );
+
+      if (!newName || !newName.trim()) return;
+
+      currentData.presets[activePreset].name = newName.trim();
+      renderTabs();
+      await saveFullSchedule();
+      AppToast.show('Nama kategori berhasil diubah.', 'success');
+    }
+
+    async function deleteCurrentPreset() {
+      const totalCategories = Object.keys(currentData.presets).length;
+      if (totalCategories <= 1) {
+        AppToast.show('Minimal harus ada 1 jadwal tersisa di sistem.', 'warning');
+        return;
+      }
+      const presetName = currentData.presets[activePreset]?.name || activePreset;
+      const ok = await AppDialog.confirm(
+        'Hapus Kategori Jadwal',
+        `Apakah Anda yakin ingin menghapus seluruh kategori "${presetName}" beserta seluruh jam bel di dalamnya?`,
+        { confirmText: 'Hapus Kategori', cancelText: 'Batal', danger: true }
+      );
+      if (!ok) return;
+
+      delete currentData.presets[activePreset];
+      // Beralih ke kategori pertama yang tersisa
+      const remainingKeys = Object.keys(currentData.presets);
+      activePreset = remainingKeys[0];
+      currentData.active_preset = remainingKeys[0];
+      renderTabs();
+      renderTimeline();
+      await saveFullSchedule();
+      AppToast.show('Kategori jadwal berhasil dihapus.', 'success');
     }
 
     async function saveFullSchedule() {
-      // Simpan selalu ke localStorage untuk preview / testing offline
       localStorage.setItem('bell_schedule_local', JSON.stringify(currentData));
-
-      try {
-        const res = await fetch('/api/schedule/save', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify(currentData)
-        });
-        const resData = await res.json();
-        if (!resData.success) {
-          console.warn('Peringatan: Gagal menyimpan perubahan ke flash ESP32.');
-        }
-      } catch (err) {
-        console.warn('Mode Offline: Jadwal tersimpan di penyimpanan browser lokal.');
+      // Hanya kirim POST jika bukan Live Server lokal
+      if (location.hostname !== '127.0.0.1' && location.hostname !== 'localhost') {
+        try {
+          await fetch('/api/schedule/save', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(currentData)
+          });
+        } catch (err) {}
       }
     }
 
     window.addEventListener('DOMContentLoaded', initSchedulePage);
   </script>
 </body>
-
 </html>

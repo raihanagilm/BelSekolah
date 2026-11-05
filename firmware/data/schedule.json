@@ -1,26 +1,44 @@
 {
-  "active_preset": "reguler",
+  "active_preset": "auto",
   "presets": {
-    "reguler": {
-      "name": "Jadwal Reguler (Senin - Kamis)",
+    "senin": {
+      "name": "Senin (Upacara Bendera)",
       "schedules": [
-        { "id": 1, "days": [1, 2, 3, 4], "time": "06:45", "track": 1, "label": "Siswa Datang / Bel Masuk" },
-        { "id": 2, "days": [1, 2, 3, 4], "time": "07:00", "track": 2, "label": "Jam Pelajaran 01" },
-        { "id": 3, "days": [1, 2, 3, 4], "time": "07:45", "track": 3, "label": "Jam Pelajaran 02" },
-        { "id": 4, "days": [1, 2, 3, 4], "time": "08:30", "track": 4, "label": "Jam Pelajaran 03" },
-        { "id": 5, "days": [1, 2, 3, 4], "time": "09:15", "track": 5, "label": "Jam Pelajaran 04" },
-        { "id": 6, "days": [1, 2, 3, 4], "time": "10:00", "track": 6, "label": "Istirahat Pertama" },
-        { "id": 7, "days": [1, 2, 3, 4], "time": "10:30", "track": 7, "label": "Jam Pelajaran 05" },
-        { "id": 8, "days": [1, 2, 3, 4], "time": "11:15", "track": 8, "label": "Jam Pelajaran 06" },
-        { "id": 9, "days": [1, 2, 3, 4], "time": "12:00", "track": 11, "label": "Istirahat Kedua / Dzuhur" },
-        { "id": 10, "days": [1, 2, 3, 4], "time": "12:45", "track": 9, "label": "Jam Pelajaran 07" },
-        { "id": 11, "days": [1, 2, 3, 4], "time": "13:30", "track": 10, "label": "Jam Pelajaran 08" },
-        { "id": 12, "days": [1, 2, 3, 4], "time": "14:15", "track": 12, "label": "Jam Pelajaran 09" },
-        { "id": 13, "days": [1, 2, 3, 4], "time": "15:00", "track": 16, "label": "Siswa Pulang / Akhir Pelajaran" }
+        { "id": 1, "days": [1], "time": "06:45", "track": 1, "label": "Siswa Datang / Persiapan Upacara" },
+        { "id": 2, "days": [1], "time": "07:00", "track": 1, "label": "Upacara Bendera Dimulai" },
+        { "id": 3, "days": [1], "time": "07:45", "track": 2, "label": "Jam Pelajaran 01 (Setelah Upacara)" },
+        { "id": 4, "days": [1], "time": "08:30", "track": 3, "label": "Jam Pelajaran 02" },
+        { "id": 5, "days": [1], "time": "09:15", "track": 4, "label": "Jam Pelajaran 03" },
+        { "id": 6, "days": [1], "time": "10:00", "track": 6, "label": "Istirahat Pertama" },
+        { "id": 7, "days": [1], "time": "10:30", "track": 7, "label": "Jam Pelajaran 04" },
+        { "id": 8, "days": [1], "time": "11:15", "track": 8, "label": "Jam Pelajaran 05" },
+        { "id": 9, "days": [1], "time": "12:00", "track": 11, "label": "Istirahat Sholat Dzuhur" },
+        { "id": 10, "days": [1], "time": "12:45", "track": 9, "label": "Jam Pelajaran 06" },
+        { "id": 11, "days": [1], "time": "13:30", "track": 10, "label": "Jam Pelajaran 07" },
+        { "id": 12, "days": [1], "time": "14:15", "track": 12, "label": "Jam Pelajaran 08" },
+        { "id": 13, "days": [1], "time": "15:00", "track": 16, "label": "Siswa Pulang Sekolah" }
+      ]
+    },
+    "selasa_kamis": {
+      "name": "Selasa - Kamis (KBM Reguler)",
+      "schedules": [
+        { "id": 1, "days": [2, 3, 4], "time": "06:45", "track": 1, "label": "Siswa Datang / Bel Masuk" },
+        { "id": 2, "days": [2, 3, 4], "time": "07:00", "track": 2, "label": "Jam Pelajaran 01 (Literasi/KBM)" },
+        { "id": 3, "days": [2, 3, 4], "time": "07:45", "track": 3, "label": "Jam Pelajaran 02" },
+        { "id": 4, "days": [2, 3, 4], "time": "08:30", "track": 4, "label": "Jam Pelajaran 03" },
+        { "id": 5, "days": [2, 3, 4], "time": "09:15", "track": 5, "label": "Jam Pelajaran 04" },
+        { "id": 6, "days": [2, 3, 4], "time": "10:00", "track": 6, "label": "Istirahat Pertama" },
+        { "id": 7, "days": [2, 3, 4], "time": "10:30", "track": 7, "label": "Jam Pelajaran 05" },
+        { "id": 8, "days": [2, 3, 4], "time": "11:15", "track": 8, "label": "Jam Pelajaran 06" },
+        { "id": 9, "days": [2, 3, 4], "time": "12:00", "track": 11, "label": "Istirahat Sholat Dzuhur" },
+        { "id": 10, "days": [2, 3, 4], "time": "12:45", "track": 9, "label": "Jam Pelajaran 07" },
+        { "id": 11, "days": [2, 3, 4], "time": "13:30", "track": 10, "label": "Jam Pelajaran 08" },
+        { "id": 12, "days": [2, 3, 4], "time": "14:15", "track": 12, "label": "Jam Pelajaran 09" },
+        { "id": 13, "days": [2, 3, 4], "time": "15:00", "track": 16, "label": "Siswa Pulang Sekolah" }
       ]
     },
     "jumat": {
-      "name": "Jadwal Khusus Hari Jumat",
+      "name": "Jumat (KBM Pendek)",
       "schedules": [
         { "id": 1, "days": [5], "time": "06:45", "track": 1, "label": "Siswa Datang / Bel Masuk" },
         { "id": 2, "days": [5], "time": "07:00", "track": 2, "label": "Jam Pelajaran 01" },
@@ -33,7 +51,7 @@
       ]
     },
     "ujian": {
-      "name": "Jadwal Penilaian / Ujian (UNAS/PTS/PAS)",
+      "name": "Masa Penilaian / Ujian",
       "schedules": [
         { "id": 1, "days": [1, 2, 3, 4, 5], "time": "07:15", "track": 17, "label": "Ujian: Masuk Ruang Ujian" },
         { "id": 2, "days": [1, 2, 3, 4, 5], "time": "07:20", "track": 18, "label": "Ujian: Mulai Dalam 10 Menit" },

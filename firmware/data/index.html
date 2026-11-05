@@ -248,16 +248,20 @@
   <script>
     startClock('liveClock', 'liveDate');
     let pendingTrackId = null;
+    let pendingFastForwardTime = null;
     let todaySchedules = [];
 
     async function loadDashboard() {
       const data = await fetchSchedule();
       if (!data) return;
 
-      const activePresetKey = data.active_preset || 'reguler';
-      const presetObj = data.presets[activePresetKey];
+      const resolvedKey = getResolvedPresetKey(data);
+      const presetObj = data.presets[resolvedKey];
 
-      const presetLabel = presetObj ? presetObj.name : activePresetKey;
+      const isAuto = (!data.active_preset || data.active_preset === 'auto');
+      const presetLabel = presetObj 
+        ? (isAuto ? `${presetObj.name} (Otomatis Hari Ini)` : `${presetObj.name} (Terkunci Khusus)`)
+        : resolvedKey;
       document.getElementById('sidebarPresetName').textContent = presetLabel;
 
       const today = new Date().getDay(); // 0: Minggu, 1: Senin, dst.
@@ -283,14 +287,49 @@
       setInterval(updateTimelineStatusLive, 1000);
     }
 
+    // Mengambil timestamp loncat jam manual jika operator mempercepat alur hari ini
+    function getTodaySkippedMinutes() {
+      const todayStr = new Date().toDateString();
+      const stored = sessionStorage.getItem('bell_fast_forward');
+      if (stored) {
+        try {
+          const parsed = JSON.parse(stored);
+          if (parsed.date === todayStr) {
+            return parsed.minutes;
+          }
+        } catch (e) {}
+      }
+      return -1;
+    }
+
+    function setTodaySkippedMinutes(minutes) {
+      sessionStorage.setItem('bell_fast_forward', JSON.stringify({
+        date: new Date().toDateString(),
+        minutes: minutes
+      }));
+    }
+
     function renderTimelineItems() {
       const feedContainer = document.getElementById('todayTimelineFeed');
       feedContainer.innerHTML = '';
 
       const now = new Date();
       const currentMinutes = now.getHours() * 60 + now.getMinutes();
+      const skippedMinutes = getTodaySkippedMinutes();
+      const effectiveMinutes = Math.max(currentMinutes, skippedMinutes);
 
-      const nextItem = calculateNextBell(todaySchedules);
+      // Hitung next bell berdasarkan effectiveMinutes jika ada jam yang dipercepat
+      const remainingItems = todaySchedules.filter(item => {
+        const parts = item.time.split(':');
+        const itemMins = parseInt(parts[0], 10) * 60 + parseInt(parts[1], 10);
+        return itemMins > effectiveMinutes;
+      });
+
+      const nextItem = remainingItems.length > 0 ? {
+        ...remainingItems[0],
+        diffSeconds: calculateDiffSeconds(remainingItems[0].time)
+      } : null;
+
       updateNextBellWidget(nextItem);
 
       todaySchedules.forEach(item => {
@@ -300,7 +339,7 @@
         let statusClass = 'upcoming';
         let statusTag = '<span class="timeline-status-tag upcoming">Menunggu</span>';
 
-        if (itemMinutes < currentMinutes) {
+        if (itemMinutes <= effectiveMinutes) {
           statusClass = 'past';
           statusTag = '<span class="timeline-status-tag past">Selesai</span>';
         } else if (nextItem && nextItem.time === item.time) {
@@ -320,13 +359,43 @@
           </div>
           <div class="timeline-right">
             ${statusTag}
-            <button type="button" class="btn btn-outline btn-sm" onclick="openManualTrigger(${item.track}, '${item.label}')" title="Uji dengar nada ini">
-              Bunyikan
+            <button type="button" class="btn btn-outline btn-sm" onclick="openFastForwardTrigger(${item.track}, '${item.time}', '${item.label}')" title="Bunyikan sekarang dan posisikan agenda hari ini ke jam ini">
+              Bunyikan Sekarang
             </button>
           </div>
         `;
         feedContainer.appendChild(div);
       });
+    }
+
+    function calculateDiffSeconds(targetTimeStr) {
+      const now = new Date();
+      const parts = targetTimeStr.split(':');
+      const target = new Date();
+      target.setHours(parseInt(parts[0], 10), parseInt(parts[1], 10), 0, 0);
+      return Math.max(0, Math.floor((target.getTime() - now.getTime()) / 1000));
+    }
+
+    function openFastForwardTrigger(trackId, timeStr, label) {
+      pendingTrackId = trackId;
+      pendingFastForwardTime = timeStr;
+      if (verifyAdminSession()) {
+        executeFastForward(trackId, timeStr, label);
+        return;
+      }
+      document.getElementById('pinModalDesc').textContent = `Masukkan PIN admin untuk membunyikan dan memposisikan alur hari ini ke: ${label} (${timeStr}).`;
+      document.getElementById('adminPinInput').value = '';
+      document.getElementById('pinModal').classList.add('active');
+    }
+
+    async function executeFastForward(trackId, timeStr, label) {
+      const parts = timeStr.split(':');
+      const itemMinutes = parseInt(parts[0], 10) * 60 + parseInt(parts[1], 10);
+      setTodaySkippedMinutes(itemMinutes);
+
+      AppToast.show(`Membunyikan sekarang: ${label} (${timeStr})`, 'info');
+      await triggerBell(trackId);
+      renderTimelineItems();
     }
 
     function updateTimelineStatusLive() {
@@ -397,8 +466,14 @@
 
       if (isOk) {
         const trackToPlay = pendingTrackId || 1;
+        const fastForwardTime = pendingFastForwardTime;
         closePinModal();
-        executeTrigger(trackToPlay);
+        if (fastForwardTime) {
+          executeFastForward(trackToPlay, fastForwardTime, 'Bel Manual');
+          pendingFastForwardTime = null;
+        } else {
+          executeTrigger(trackToPlay);
+        }
       } else {
         AppToast.show('PIN salah. Akses ditolak!', 'danger');
       }

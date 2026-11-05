@@ -295,7 +295,20 @@ void checkScheduledBell() {
 
   if (err) return;
 
-  JsonArray schedList = doc["presets"][activePreset]["schedules"].as<JsonArray>();
+  String targetPreset = activePreset;
+  if (targetPreset == "auto" || targetPreset == "") {
+    if (currentDay == 1 && doc["presets"]["senin"].is<JsonObject>()) {
+      targetPreset = "senin";
+    } else if (currentDay == 5 && doc["presets"]["jumat"].is<JsonObject>()) {
+      targetPreset = "jumat";
+    } else if (doc["presets"]["selasa_kamis"].is<JsonObject>()) {
+      targetPreset = "selasa_kamis";
+    } else {
+      targetPreset = "reguler";
+    }
+  }
+
+  JsonArray schedList = doc["presets"][targetPreset]["schedules"].as<JsonArray>();
   for (JsonObject item : schedList) {
     const char* schedTime = item["time"];
     if (schedTime && strcmp(schedTime, timeStr) == 0) {

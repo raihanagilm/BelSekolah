@@ -216,4 +216,16 @@ Setiap agen AI wajib memverifikasi checklist berikut sebelum menyerahkan tugas:
     - Menghapus 100% elemen dekoratif dot (`status-dot`) dari seluruh template HTML, skrip JS, dan CSS, menggantikannya dengan tipografi semantik yang bersih.
   - Perbaikan Bahasa & Diksi Antarmuka (Natural Copywriting):
     - Menyempurnakan istilah kaku/mesin di seluruh template HTML (`index.html`, `schedule.html`, `audio.html`, `settings.html`): mengganti istilah pabrik/jargon (*"Dashboard Operasional"*, *"Pemicu Cepat"*, *"Preset"*, *"Waktu Sistem"*, *"Keterangan Aktivitas"*) menjadi bahasa sekolah alami (*"Panel Utama"*, *"Bunyikan Bel Manual"*, *"Jadwal Sekolah"*, *"Jam Sekarang"*, *"Keterangan Bel"*).
+  - Penyelarasan Alur & Tampilan Halaman Jadwal (Sama dengan Beranda):
+    - Mengganti dropdown preset kaku dan tabel konvensional di `schedule.html` dengan **Tab Kategori Jadwal Sekolah** dan **Timeline Feed** yang identik dengan Beranda.
+    - Menghilangkan form raksasa statis di tengah layar; pembuatan jam bel baru kini menggunakan tombol **`+ Tambah Jam Bel`** dengan modal dialog interaktif ringkas dilengkapi shortcut hari (*Hanya Senin*, *Selasa-Kamis*, *Hanya Jumat*, *Semua Hari*).
+    - Menambahkan tombol **`+ Tambah Kategori Baru`** pada topbar untuk membuat jadwal musiman baru (misal: *Ramadhan*, *PTS/PAS*) secara instan tanpa kebingungan input database ID.
+  - Penyesuaian Jadwal Sekolah Realistis (Pemisahan Hari Senin & Fleksibilitas Hapus):
+    - Memisahkan jadwal hari Senin yang memiliki **Upacara Bendera** (mulai KBM jam 07:45) dengan **Selasa - Kamis** di [`schedule.json`](file:///d:/BelSekolah/firmware/data/schedule.json).
+    - Melonggarkan batasan hapus jadwal: kategori jadwal apa pun kini dapat dihapus atau diubah namanya selama masih ada minimal 1 jadwal tersisa di sistem.
+  - Implementasi Fitur "Bunyikan Jam Ini Sekarang" & Sistem Otomatisasi Jadwal:
+    - Di Beranda ([index.html](file:///d:/BelSekolah/firmware/data/index.html)): Tombol pada baris timeline diubah menjadi **`Bunyikan Sekarang`** yang berfungsi mempercepat/memposisikan alur hari ini secara instan tanpa merusak data master jadwal.
+    - Di Kelola Jadwal ([schedule.html](file:///d:/BelSekolah/firmware/data/schedule.html)): Mengganti tab panjang dengan **Dropdown Pemilih Kategori** yang rapi dan elegan, tombol baris jadwal diubah menjadi **`Tes Nada`** (hanya untuk mendengar audio).
+    - Mode Otomatisasi Kalender (`active_preset: "auto"`): Sistem secara cerdas mengaktifkan kategori sesuai hari kalender (Senin -> upacara, Selasa-Kamis -> reguler, Jumat -> KBM pendek), sekaligus menyediakan opsi kunci khusus (override) untuk masa ujian tanpa risiko benturan jadwal.
+    - Sinkronisasi logika otomatisasi jadwal pada firmware C++ ([firmware.ino](file:///d:/BelSekolah/firmware/firmware.ino) & [main.cpp](file:///d:/BelSekolah/firmware/src/main.cpp)) dan hybrid background scheduler browser ([app.js](file:///d:/BelSekolah/firmware/data/app.js)).
 

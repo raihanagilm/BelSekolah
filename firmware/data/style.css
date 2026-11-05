@@ -820,8 +820,53 @@ body {
 }
 
 /* ==========================================================================
-   Buttons
+   Modern Category Tabs for Schedule
    ========================================================================== */
+.schedule-tabs-container {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+  margin-bottom: 0.5rem;
+}
+
+.schedule-tabs-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem;
+  align-items: center;
+}
+
+.schedule-tab-btn {
+  padding: 0.6rem 1rem;
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: var(--text-muted);
+  background-color: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  cursor: pointer;
+  transition: all 0.15s ease;
+  font-family: inherit;
+}
+
+.schedule-tab-btn:hover {
+  border-color: var(--border-strong);
+  color: var(--navy-900);
+}
+
+.schedule-tab-btn.active {
+  background-color: var(--navy-900);
+  border-color: var(--navy-900);
+  color: #ffffff;
+}
+
+.day-badge-pill {
+  font-size: 0.75rem;
+  font-weight: 500;
+  color: var(--text-muted);
+}
 .btn {
   display: inline-flex;
   align-items: center;
@@ -1329,34 +1374,18 @@ body {
   pointer-events: auto;
   min-width: 260px;
   max-width: 380px;
-  padding: 0.8rem 1rem;
+  padding: 0.85rem 1.15rem;
   border-radius: var(--radius-md);
   background: var(--surface);
-  border: 1px solid var(--border);
+  border: 1px solid var(--border-strong);
   box-shadow: var(--shadow-elevated);
   display: flex;
   align-items: center;
-  gap: 0.65rem;
+  gap: 0.75rem;
   font-size: 0.875rem;
   color: var(--text-main);
   animation: toastSlideIn 0.25s cubic-bezier(0.16, 1, 0.3, 1) forwards;
   transition: opacity 0.2s ease, transform 0.2s ease;
-}
-
-.app-toast.success {
-  border-left: 4px solid var(--success);
-}
-
-.app-toast.danger {
-  border-left: 4px solid var(--danger);
-}
-
-.app-toast.warning {
-  border-left: 4px solid var(--warning);
-}
-
-.app-toast.info {
-  border-left: 4px solid var(--accent);
 }
 
 @keyframes toastSlideIn {

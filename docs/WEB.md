@@ -33,7 +33,7 @@ Frontend dibagi menjadi 4 halaman terpisah untuk menjaga kejelasan alur kerja:
 | File Halaman | Nama Menu | Tanggung Jawab & Fitur Utama |
 |---|---|---|
 | `index.html` | Beranda / Dashboard | - Hero Grid: Live Digital Clock `font-mono` & Smart Next-Bell Countdown<br>- Pemicu Cepat Manual (Quick Action Strip) untuk bel utama & darurat<br>- Timeline Alur Agenda Bel Hari Ini dengan penanda status dinamis (selesai/aktif/menunggu)<br>- Sidebar status koneksi & preset |
-| `schedule.html` | Kelola Jadwal | - Switch preset aktif (`reguler`, `jumat`, `ujian`)<br>- Form tambah jadwal bel baru (jam, menit, track, hari)<br>- Tabel jadwal aktif dengan tombol Uji Coba & Hapus per baris |
+| `schedule.html` | Kelola Jadwal | - Tab Navigasi Kategori Jadwal (Senin Upacara, Selasa-Kamis, Jumat, Ujian)<br>- Tombol interaktif `+ Tambah Jam Bel` via modal dialog terpadu<br>- Feed Timeline Jadwal Sekolah (identik dengan Beranda) dengan aksi Uji Coba & Hapus per jam<br>- Pengelolaan kategori: Tambah Kategori Baru & Ubah Nama Kategori |
 | `audio.html` | Pustaka Audio | - Daftar pemetaan file MP3 MicroSD (`0001.mp3` s/d `0008.mp3`)<br>- Form edit judul nada bel dan penambahan pemetaan track baru<br>- Tombol uji dengar per track langsung ke speaker/amplifier |
 | `settings.html` | Pengaturan | - Tombol 1-klik sinkronisasi jam RTC DS3231 dengan jam browser<br>- Konfigurasi volume nada dering (0-30)<br>- Pengaturan jeda waktu pre-roll relay amplifier<br>- Form ganti PIN Admin keamanan sistem<br>- Zona Pemeliharaan: Mulai Ulang (Soft Reboot), Reset Parameter, & Reset Pabrik |
 

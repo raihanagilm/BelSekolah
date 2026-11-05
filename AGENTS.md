@@ -201,4 +201,17 @@ Setiap agen AI wajib memverifikasi checklist berikut sebelum menyerahkan tugas:
     - Diimplementasikan modul dialog kustom `AppDialog` (`alert`, `confirm`, `prompt`) berbasis Promise dengan backdrop blur, icon semantik, dan token desain resmi di [firmware/data/app.js](file:///d:/BelSekolah/firmware/data/app.js) & [firmware/data/style.css](file:///d:/BelSekolah/firmware/data/style.css).
     - Ditambahkan sistem notifikasi melayang non-intrusif `AppToast` untuk konfirmasi sukses/info/peringatan.
     - Dimutakhirkan alur konfirmasi pada [settings.html](file:///d:/BelSekolah/firmware/data/settings.html), [schedule.html](file:///d:/BelSekolah/firmware/data/schedule.html), [index.html](file:///d:/BelSekolah/firmware/data/index.html), dan [audio.html](file:///d:/BelSekolah/firmware/data/audio.html).
+  - Transformasi Tampilan Modern Workspace (Opsi B - Sidebar Layout & Smart Timeline):
+    - Merestrukturisasi tata letak web dari navbar atas konvensional menjadi **Sidebar Workspace Navigation** profesional (macOS / SaaS style) yang seragam di `index.html`, `schedule.html`, `audio.html`, dan `settings.html`.
+    - Merombak halaman Beranda (`index.html`) menjadi **Command Center Dashboard**:
+      - **Hero Grid**: Jam digital `font-mono` dipadukan dengan **Kartu Cerdas Bel Berikutnya (Smart Next-Bell Detector)** yang menghitung mundur menit/detik secara otomatis lengkap dengan progress bar.
+      - **Pemicu Cepat Bel Manual (Quick Action Strip)**: Grid kartu aksi sekali-klik ringkas dengan ikon SVG untuk jam masuk, istirahat, dzuhur, pulang, dan darurat.
+      - **Alur Timeline Agenda Hari Ini**: Menggantikan tabel polos menjadi alur feed kegiatan terstruktur (status selesai redup, status aktif berikutnya disorot biru, status mendatang siaga).
+  - Remediasi Temuan Audit Impeccable & Runtime Service Worker:
+    - Memperbaiki penanganan `fetch` pada [sw.js](file:///d:/BelSekolah/firmware/data/sw.js) agar selalu mengembalikan objek `Response` valid dan mengabaikan endpoint REST API `/api/` sehingga menghilangkan rentetan error `Uncaught TypeError: Failed to convert value to 'Response'`.
+    - Menghilangkan *AI tells* (border-left tebal dan gradasi warna cyan/biru/ungu) pada kartu bel berikutnya dan progress bar di [style.css](file:///d:/BelSekolah/firmware/data/style.css).
+    - Memperbaiki kontras warna WCAG AA menjadi $\ge 4.5:1$ pada teks judul section sidebar (`#cbd5e1`) dan lencana bel berikutnya (`#1e3a8a` di latar `#eff6ff`).
+    - Menambah ukuran font body status koneksi (`#badgeWifi`) menjadi 13px (`0.8125rem`).
+    - Mengoptimalkan performa animasi progress bar menggunakan `transform: scaleX()` terakselerasi GPU untuk menggantikan pemicu *layout reflow* `transition: width`.
+    - Menghapus 100% elemen dekoratif dot (`status-dot`) dari seluruh template HTML, skrip JS, dan CSS, menggantikannya dengan tipografi semantik yang bersih.
 

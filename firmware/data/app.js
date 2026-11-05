@@ -173,13 +173,13 @@ async function updateNetworkStatus() {
   // Update Status Hardware RTC
   if (badgeRtc) {
     if (espConnected && rtcHardwareOk) {
-      badgeRtc.innerHTML = '<span class="status-dot status-dot-success"></span>RTC DS3231 Aktif';
+      badgeRtc.textContent = 'RTC DS3231 Aktif';
       badgeRtc.className = 'status-item';
     } else if (espConnected && !rtcHardwareOk) {
-      badgeRtc.innerHTML = '<span class="status-dot status-dot-warning"></span>RTC Belum Terpasang';
+      badgeRtc.textContent = 'RTC Belum Terpasang';
       badgeRtc.className = 'status-item';
     } else {
-      badgeRtc.innerHTML = '<span class="status-dot status-dot-primary"></span>Jam Komputer / Laptop';
+      badgeRtc.textContent = 'Jam Komputer / Laptop';
       badgeRtc.className = 'status-item';
     }
   }
@@ -187,13 +187,13 @@ async function updateNetworkStatus() {
   // Update Status Jaringan / Hardware
   if (badgeWifi) {
     if (espConnected) {
-      badgeWifi.innerHTML = '<span class="status-dot status-dot-success"></span>ESP8266 Terhubung';
+      badgeWifi.textContent = 'Koneksi: ESP8266 Terhubung';
       badgeWifi.className = 'status-item';
     } else if (navigator.onLine) {
-      badgeWifi.innerHTML = '<span class="status-dot status-dot-warning"></span>ESP8266 Belum Terhubung';
+      badgeWifi.textContent = 'Koneksi: ESP8266 Belum Terhubung';
       badgeWifi.className = 'status-item';
     } else {
-      badgeWifi.innerHTML = '<span class="status-dot status-dot-warning"></span>Mode Offline (ESP8266 Belum Terhubung)';
+      badgeWifi.textContent = 'Koneksi: Mode Offline';
       badgeWifi.className = 'status-item';
     }
   }
@@ -216,10 +216,9 @@ function initMqtt() {
         timeout: 4,
         onSuccess: () => {
           console.log('[MQTT] Terhubung ke Broker Cloud');
-          // Jika tidak terhubung ke ESP fisik, tampilkan status cloud
           const badgeWifi = document.getElementById('badgeWifi');
           if (badgeWifi && badgeWifi.innerText.includes('Internet')) {
-            badgeWifi.innerHTML = '<span class="status-dot status-dot-success"></span>Internet & Cloud Siap';
+            badgeWifi.textContent = 'Koneksi: Internet & Cloud Siap';
           }
         },
         onFailure: () => {}
@@ -587,3 +586,44 @@ window.nativeAlert = window.alert;
 window.alert = (msg) => {
   AppToast.show(msg, 'info');
 };
+
+/* ==========================================================================
+   Smart Next-Bell Detector (Komputasi Jadwal Bel Berikutnya)
+   ========================================================================== */
+function calculateNextBell(schedules) {
+  if (!schedules || schedules.length === 0) return null;
+
+  const now = new Date();
+  const currentTotalSeconds = now.getHours() * 3600 + now.getMinutes() * 60 + now.getSeconds();
+
+  let nextItem = null;
+  let minDiff = Infinity;
+
+  for (const item of schedules) {
+    const parts = item.time.split(':');
+    const itemSec = parseInt(parts[0], 10) * 3600 + parseInt(parts[1], 10) * 60;
+    const diff = itemSec - currentTotalSeconds;
+
+    if (diff > 0 && diff < minDiff) {
+      minDiff = diff;
+      nextItem = { ...item, diffSeconds: diff, targetSec: itemSec };
+    }
+  }
+
+  return nextItem;
+}
+
+function formatCountdown(totalSec) {
+  if (totalSec <= 0) return 'Sedang Berbunyi';
+  const hours = Math.floor(totalSec / 3600);
+  const minutes = Math.floor((totalSec % 3600) / 60);
+  const seconds = totalSec % 60;
+
+  if (hours > 0) {
+    return `${hours} jam ${minutes} menit lagi`;
+  }
+  if (minutes > 0) {
+    return `${minutes} menit ${seconds} detik lagi`;
+  }
+  return `${seconds} detik lagi`;
+}

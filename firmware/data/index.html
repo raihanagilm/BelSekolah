@@ -9,98 +9,169 @@
   <script src="https://cdnjs.cloudflare.com/ajax/libs/paho-mqtt/1.0.1/mqttws31.min.js"></script>
 </head>
 <body>
-  <header class="header-bar">
-    <div class="header-container">
-      <div class="brand-wrapper">
-        <div class="brand-icon">B</div>
-        <div class="brand-text">
-          <h1>Bel Sekolah Mandiri</h1>
-          <p>Sistem Pengendali Waktu & Audio Sekolah ESP32</p>
+  <div class="workspace-wrapper">
+    <!-- Sidebar Workspace (Bilah Sisi Kiri) -->
+    <aside class="workspace-sidebar">
+      <div class="sidebar-brand">
+        <div class="sidebar-brand-icon">B</div>
+        <div class="sidebar-brand-text">
+          <h1>Bel Sekolah</h1>
+          <p>Sistem Mandiri ESP</p>
         </div>
       </div>
-      <nav class="nav-links">
-        <a href="index.html" class="nav-link active">Beranda</a>
-        <a href="schedule.html" class="nav-link">Jadwal</a>
-        <a href="audio.html" class="nav-link">Pustaka Audio</a>
-        <a href="settings.html" class="nav-link">Pengaturan</a>
-      </nav>
-    </div>
-  </header>
 
-  <main class="main-content">
-    <section class="card">
-      <div class="clock-display">
-        <div class="clock-meta-top">Waktu Sistem (RTC DS3231)</div>
-        <div id="liveClock" class="clock-time">--:--:--</div>
-        <div id="liveDate" class="clock-date">Memuat tanggal...</div>
-        <div class="status-badge-group">
-          <span id="badgeRtc" class="status-item"><span class="status-dot status-dot-primary"></span>Jam Komputer / Laptop</span>
-          <span id="badgePreset" class="status-item"><span class="status-dot status-dot-primary"></span>Preset: Memuat...</span>
-          <span id="badgeWifi" class="status-item"><span class="status-dot status-dot-warning"></span>ESP8266 Belum Terhubung</span>
+      <div class="sidebar-menu">
+        <div class="sidebar-section-title">Menu Utama</div>
+        <a href="index.html" class="sidebar-nav-link active">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path><polyline points="9 22 9 12 15 12 15 22"></polyline></svg>
+          Beranda
+        </a>
+        <a href="schedule.html" class="sidebar-nav-link">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect><line x1="16" y1="2" x2="16" y2="6"></line><line x1="8" y1="2" x2="8" y2="6"></line><line x1="3" y1="10" x2="21" y2="10"></line></svg>
+          Kelola Jadwal
+        </a>
+        <a href="audio.html" class="sidebar-nav-link">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 18V5l12-2v13"></path><circle cx="6" cy="18" r="3"></circle><circle cx="18" cy="16" r="3"></circle></svg>
+          Pustaka Audio
+        </a>
+        <a href="settings.html" class="sidebar-nav-link">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"></circle><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path></svg>
+          Pengaturan
+        </a>
+      </div>
+
+      <div class="sidebar-footer">
+        <div class="sidebar-status-card">
+          <div class="sidebar-status-header">
+            <span>PRESET AKTIF</span>
+          </div>
+          <div class="sidebar-status-preset" id="sidebarPresetName">Memuat...</div>
+          <div style="margin-top: 0.5rem; color: #cbd5e1; font-size: 0.8125rem; font-weight: 500;" id="badgeWifi">
+            Koneksi: Memeriksa...
+          </div>
         </div>
       </div>
-    </section>
+    </aside>
 
-    <section class="card">
-      <div class="card-header-clean">
-        <h2 class="card-title">Trigger Manual Bel Sekolah</h2>
-      </div>
-      <p class="card-subtitle">
-        Pilih nada bel di bawah ini untuk membunyikan bel darurat atau pengumuman secara langsung tanpa menunggu jadwal otomatis.
-      </p>
-      <div class="trigger-grid" id="manualTriggerGrid">
-        <button type="button" class="trigger-card-btn" onclick="openManualTrigger(1, 'Bel Masuk Kelas')">
-          <span class="btn-track-label">Track 01</span>
-          <span class="btn-track-title">Masuk Kelas / Bel Mulai</span>
-        </button>
-        <button type="button" class="trigger-card-btn" onclick="openManualTrigger(6, 'Istirahat Pertama')">
-          <span class="btn-track-label">Track 06</span>
-          <span class="btn-track-title">Istirahat Pertama</span>
-        </button>
-        <button type="button" class="trigger-card-btn" onclick="openManualTrigger(11, 'Istirahat Kedua / Dzuhur')">
-          <span class="btn-track-label">Track 11</span>
-          <span class="btn-track-title">Istirahat Kedua / Dzuhur</span>
-        </button>
-        <button type="button" class="trigger-card-btn" onclick="openManualTrigger(16, 'Bel Pulang Sekolah')">
-          <span class="btn-track-label">Track 16</span>
-          <span class="btn-track-title">Siswa Pulang Sekolah</span>
-        </button>
-        <button type="button" class="trigger-card-btn" onclick="openManualTrigger(17, 'Masuk Ruang Ujian')">
-          <span class="btn-track-label">Track 17</span>
-          <span class="btn-track-title">Ujian: Masuk Ruangan</span>
-        </button>
-        <button type="button" class="trigger-card-btn danger-action" onclick="openManualTrigger(8, 'Panggilan Darurat / Khusus')">
-          <span class="btn-track-label">Khusus</span>
-          <span class="btn-track-title">Panggilan / Peringatan</span>
-        </button>
-      </div>
-    </section>
+    <!-- Canvas Utama (Main Workspace Canvas) -->
+    <main class="workspace-canvas">
+      <!-- Topbar Tipis -->
+      <header class="canvas-topbar">
+        <div class="canvas-topbar-title">Dashboard Operasional</div>
+        <div class="status-item" id="topbarRtcStatus">
+          <span id="liveDate">Memuat tanggal...</span>
+        </div>
+      </header>
 
-    <section class="card">
-      <div class="card-header-clean">
-        <h2 class="card-title">Agenda Bel Hari Ini</h2>
-        <a href="schedule.html" class="btn btn-outline btn-sm">Kelola Jadwal Lengkap</a>
-      </div>
-      <div class="table-container">
-        <table class="table-custom">
-          <thead>
-            <tr>
-              <th>Waktu</th>
-              <th>Keterangan</th>
-              <th>Track Audio</th>
-              <th>Status</th>
-            </tr>
-          </thead>
-          <tbody id="todayScheduleList">
-            <tr>
-              <td colspan="4" style="text-align: center; color: var(--text-muted); padding: 1.5rem;">Memuat agenda bel hari ini...</td>
-            </tr>
-          </tbody>
-        </table>
-      </div>
-    </section>
-  </main>
+      <!-- Isi Kanvas -->
+      <div class="canvas-content">
+        <!-- Hero Grid: Jam Utama + Kartu Bel Berikutnya -->
+        <section class="hero-countdown-grid">
+          <!-- Kotak Jam Digital -->
+          <div class="hero-clock-box">
+            <span class="hero-clock-meta">WAKTU SISTEM</span>
+            <div id="liveClock" class="hero-clock-time">--:--:--</div>
+            <div class="hero-clock-date" id="heroClockDay">WIB (Waktu Indonesia Barat)</div>
+          </div>
 
+          <!-- Kotak Bel Berikutnya Interaktif -->
+          <div class="hero-next-box" id="nextBellCard">
+            <div>
+              <div class="hero-next-header">
+                <div class="hero-next-label">BEL BERIKUTNYA</div>
+                <span class="hero-next-countdown" id="nextBellCountdown">Menghitung waktu...</span>
+              </div>
+              <div class="hero-next-title" id="nextBellTitle">Memuat agenda terdekat...</div>
+              <div class="hero-next-detail" id="nextBellDetail">Sistem siap memantau alur jam sekolah.</div>
+            </div>
+            <div class="hero-next-progress-bar">
+              <div class="hero-next-progress-fill" id="nextBellProgress"></div>
+            </div>
+          </div>
+        </section>
+
+        <!-- Pemicu Cepat Manual (Quick Action Strip) -->
+        <section>
+          <div class="card-header-clean" style="margin-bottom: 0.75rem;">
+            <h2 class="card-title">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"></polygon><path d="M19.07 4.93a10 10 0 0 1 0 14.14M15.54 8.46a5 5 0 0 1 0 7.07"></path></svg>
+              Pemicu Cepat Bel Manual
+            </h2>
+          </div>
+          <div class="quick-action-strip">
+            <div class="quick-action-card" onclick="openManualTrigger(1, 'Bel Masuk Kelas')">
+              <div class="quick-action-icon">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"></path><path d="M13.73 21a2 2 0 0 1-3.46 0"></path></svg>
+              </div>
+              <div class="quick-action-info">
+                <span class="quick-action-label">Track #01</span>
+                <span class="quick-action-title">Masuk Kelas</span>
+              </div>
+            </div>
+
+            <div class="quick-action-card" onclick="openManualTrigger(6, 'Istirahat Pertama')">
+              <div class="quick-action-icon">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M18 8h1a4 4 0 0 1 0 8h-1"></path><path d="M2 8h16v9a4 4 0 0 1-4 4H6a4 4 0 0 1-4-4V8z"></path><line x1="6" y1="1" x2="6" y2="4"></line><line x1="10" y1="1" x2="10" y2="4"></line><line x1="14" y1="1" x2="14" y2="4"></line></svg>
+              </div>
+              <div class="quick-action-info">
+                <span class="quick-action-label">Track #06</span>
+                <span class="quick-action-title">Istirahat 1</span>
+              </div>
+            </div>
+
+            <div class="quick-action-card" onclick="openManualTrigger(11, 'Istirahat Dzuhur')">
+              <div class="quick-action-icon">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="12" cy="12" r="5"></circle><line x1="12" y1="1" x2="12" y2="3"></line><line x1="12" y1="21" x2="12" y2="23"></line><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line><line x1="1" y1="12" x2="3" y2="12"></line><line x1="21" y1="12" x2="23" y2="12"></line><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line></svg>
+              </div>
+              <div class="quick-action-info">
+                <span class="quick-action-label">Track #11</span>
+                <span class="quick-action-title">Sholat Dzuhur</span>
+              </div>
+            </div>
+
+            <div class="quick-action-card" onclick="openManualTrigger(16, 'Bel Pulang Sekolah')">
+              <div class="quick-action-icon">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path><polyline points="9 22 9 12 15 12 15 22"></polyline></svg>
+              </div>
+              <div class="quick-action-info">
+                <span class="quick-action-label">Track #16</span>
+                <span class="quick-action-title">Pulang Sekolah</span>
+              </div>
+            </div>
+
+            <div class="quick-action-card danger" onclick="openManualTrigger(8, 'Panggilan Darurat / Khusus')">
+              <div class="quick-action-icon">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"></path><line x1="12" y1="9" x2="12" y2="13"></line><line x1="12" y1="17" x2="12.01" y2="17"></line></svg>
+              </div>
+              <div class="quick-action-info">
+                <span class="quick-action-label" style="color: var(--danger);">Khusus</span>
+                <span class="quick-action-title">Panggilan / Peringatan</span>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- Timeline Alur Kegiatan Hari Ini -->
+        <section class="card">
+          <div class="card-header-clean">
+            <h2 class="card-title">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="8" y1="6" x2="21" y2="6"></line><line x1="8" y1="12" x2="21" y2="12"></line><line x1="8" y1="18" x2="21" y2="18"></line><line x1="3" y1="6" x2="3.01" y2="6"></line><line x1="3" y1="12" x2="3.01" y2="12"></line><line x1="3" y1="18" x2="3.01" y2="18"></line></svg>
+              Agenda Alur Bel Hari Ini
+            </h2>
+            <a href="schedule.html" class="btn btn-outline btn-sm">Kelola Jadwal Lengkap</a>
+          </div>
+
+          <div class="timeline-feed" id="todayTimelineFeed">
+            <div style="text-align: center; color: var(--text-muted); padding: 1.5rem;">
+              Memuat agenda kegiatan hari ini...
+            </div>
+          </div>
+        </section>
+      </div>
+    </main>
+  </div>
+
+  <!-- Modal Konfirmasi PIN Admin -->
   <div id="pinModal" class="modal-overlay">
     <div class="modal-box">
       <h3 class="modal-title">Konfirmasi PIN Keamanan</h3>
@@ -116,14 +187,11 @@
     </div>
   </div>
 
-  <footer class="footer-bar">
-    Bel Sekolah Otomatis Mandiri ESP32 - Sistem Mandiri Tanpa PC Server
-  </footer>
-
   <script src="app.js"></script>
   <script>
     startClock('liveClock', 'liveDate');
     let pendingTrackId = null;
+    let todaySchedules = [];
 
     async function loadDashboard() {
       const data = await fetchSchedule();
@@ -131,36 +199,107 @@
 
       const activePresetKey = data.active_preset || 'reguler';
       const presetObj = data.presets[activePresetKey];
-      document.getElementById('badgePreset').innerHTML = '<span class="status-dot status-dot-primary"></span>Preset: ' + (presetObj ? presetObj.name : activePresetKey);
+      
+      const presetLabel = presetObj ? presetObj.name : activePresetKey;
+      document.getElementById('sidebarPresetName').textContent = presetLabel;
 
       const today = new Date().getDay(); // 0: Minggu, 1: Senin, dst.
-      const tbody = document.getElementById('todayScheduleList');
-      tbody.innerHTML = '';
+      const feedContainer = document.getElementById('todayTimelineFeed');
+      feedContainer.innerHTML = '';
 
       if (!presetObj || !presetObj.schedules || presetObj.schedules.length === 0) {
-        tbody.innerHTML = '<tr><td colspan="4" style="text-align: center; padding: 1.5rem; color: var(--text-muted);">Tidak ada jadwal bel pada preset ini.</td></tr>';
+        feedContainer.innerHTML = '<div style="text-align: center; padding: 1.5rem; color: var(--text-muted);">Tidak ada jadwal bel pada preset ini.</div>';
         return;
       }
 
-      const todayItems = presetObj.schedules
+      todaySchedules = presetObj.schedules
         .filter(item => item.days.includes(today))
         .sort((a, b) => a.time.localeCompare(b.time));
 
-      if (todayItems.length === 0) {
-        tbody.innerHTML = '<tr><td colspan="4" style="text-align: center; padding: 1.5rem; color: var(--text-muted);">Tidak ada agenda bel untuk hari ini.</td></tr>';
+      if (todaySchedules.length === 0) {
+        feedContainer.innerHTML = '<div style="text-align: center; padding: 1.5rem; color: var(--text-muted);">Tidak ada agenda bel untuk hari ini.</div>';
+        updateNextBellWidget(null);
         return;
       }
 
-      todayItems.forEach(item => {
-        const tr = document.createElement('tr');
-        tr.innerHTML = `
-          <td><span class="table-time-badge">${item.time}</span></td>
-          <td style="font-weight: 500;">${item.label}</td>
-          <td>Track #${item.track}</td>
-          <td><span class="status-item"><span class="status-dot status-dot-success"></span>Aktif</span></td>
+      renderTimelineItems();
+      setInterval(updateTimelineStatusLive, 1000);
+    }
+
+    function renderTimelineItems() {
+      const feedContainer = document.getElementById('todayTimelineFeed');
+      feedContainer.innerHTML = '';
+
+      const now = new Date();
+      const currentMinutes = now.getHours() * 60 + now.getMinutes();
+
+      const nextItem = calculateNextBell(todaySchedules);
+      updateNextBellWidget(nextItem);
+
+      todaySchedules.forEach(item => {
+        const parts = item.time.split(':');
+        const itemMinutes = parseInt(parts[0], 10) * 60 + parseInt(parts[1], 10);
+        
+        let statusClass = 'upcoming';
+        let statusTag = '<span class="timeline-status-tag upcoming">Menunggu</span>';
+
+        if (itemMinutes < currentMinutes) {
+          statusClass = 'past';
+          statusTag = '<span class="timeline-status-tag past">Selesai</span>';
+        } else if (nextItem && nextItem.time === item.time) {
+          statusClass = 'active';
+          statusTag = '<span class="timeline-status-tag active">Bel Berikutnya</span>';
+        }
+
+        const div = document.createElement('div');
+        div.className = `timeline-item ${statusClass}`;
+        div.innerHTML = `
+          <div class="timeline-left">
+            <span class="timeline-time-badge">${item.time}</span>
+            <div class="timeline-meta">
+              <span class="timeline-title">${item.label}</span>
+              <span class="timeline-sub">Memutar Audio Track #${item.track}</span>
+            </div>
+          </div>
+          <div class="timeline-right">
+            ${statusTag}
+            <button type="button" class="btn btn-outline btn-sm" onclick="openManualTrigger(${item.track}, '${item.label}')" title="Uji dengar nada ini">
+              Bunyikan
+            </button>
+          </div>
         `;
-        tbody.appendChild(tr);
+        feedContainer.appendChild(div);
       });
+    }
+
+    function updateTimelineStatusLive() {
+      const nextItem = calculateNextBell(todaySchedules);
+      updateNextBellWidget(nextItem);
+    }
+
+    function updateNextBellWidget(nextItem) {
+      const countdownEl = document.getElementById('nextBellCountdown');
+      const titleEl = document.getElementById('nextBellTitle');
+      const detailEl = document.getElementById('nextBellDetail');
+      const progressEl = document.getElementById('nextBellProgress');
+
+      if (!nextItem) {
+        countdownEl.textContent = 'Semua Selesai';
+        titleEl.textContent = 'Seluruh Bel Hari Ini Telah Berbunyi';
+        detailEl.textContent = 'Tidak ada lagi agenda bel yang tersisa untuk hari ini.';
+        progressEl.style.transform = 'scaleX(1)';
+        return;
+      }
+
+      countdownEl.textContent = formatCountdown(nextItem.diffSeconds);
+      titleEl.innerHTML = `<span class="hero-next-time-highlight">${nextItem.time}</span> - ${nextItem.label}`;
+      detailEl.textContent = `Akan memutar Track Audio #${nextItem.track}. Persiapan bagi guru piket dan siswa.`;
+
+      // Hitung persentase rasio transform scaleX (GPU accelerated, no re-layout)
+      const baseSpan = 3600;
+      const elapsed = Math.max(0, baseSpan - nextItem.diffSeconds);
+      const ratio = Math.min(1, Math.max(0.05, elapsed / baseSpan));
+      progressEl.style.transform = `scaleX(${ratio})`;
     }
 
     function openManualTrigger(trackId, title) {
@@ -186,13 +325,11 @@
         return;
       }
       
-      // Ambil PIN yang diharapkan (default 1234)
       let expectedPin = '1234';
       if (typeof currentData !== 'undefined' && currentData && currentData.settings && currentData.settings.admin_pin) {
         expectedPin = String(currentData.settings.admin_pin);
       }
 
-      // Verifikasi offline & online
       let isOk = false;
       if (pin === expectedPin || pin === '1234') {
         isOk = true;

@@ -1,4 +1,4 @@
-const CACHE_NAME = 'bel-sekolah-cache-v1';
+const CACHE_NAME = 'bel-sekolah-cache-v2';
 const ASSETS_TO_CACHE = [
   './',
   './index.html',
@@ -15,7 +15,7 @@ const ASSETS_TO_CACHE = [
 self.addEventListener('install', (e) => {
   e.waitUntil(
     caches.open(CACHE_NAME).then((cache) => {
-      return cache.addAll(ASSETS_TO_CACHE);
+      return cache.addAll(ASSETS_TO_CACHE).catch(() => {});
     }).then(() => self.skipWaiting())
   );
 });
@@ -31,19 +31,29 @@ self.addEventListener('activate', (e) => {
 });
 
 self.addEventListener('fetch', (e) => {
-  // Hanya cache GET request untuk file statis
-  if (e.request.method !== 'GET') return;
+  // Hanya proses request GET yang berasal dari protokol http/https
+  if (e.request.method !== 'GET' || !e.request.url.startsWith('http')) return;
+
+  // Lewatkan panggilan API mikrokontroler agar tidak pernah macet di cache
+  if (e.request.url.includes('/api/')) {
+    return;
+  }
 
   e.respondWith(
     caches.match(e.request).then((cached) => {
-      // Prioritaskan network jika online, fallback ke cache jika offline
-      return fetch(e.request).then((networkRes) => {
-        if (networkRes && networkRes.status === 200) {
-          const resClone = networkRes.clone();
-          caches.open(CACHE_NAME).then((cache) => cache.put(e.request, resClone));
-        }
-        return networkRes;
-      }).catch(() => cached);
+      return fetch(e.request)
+        .then((networkRes) => {
+          if (networkRes && networkRes.status === 200 && networkRes.type === 'basic') {
+            const resClone = networkRes.clone();
+            caches.open(CACHE_NAME).then((cache) => cache.put(e.request, resClone));
+          }
+          return networkRes;
+        })
+        .catch(() => {
+          if (cached) return cached;
+          // Kembalikan Response kosong yang valid agar tidak melempar Uncaught TypeError
+          return new Response('', { status: 408, statusText: 'Offline / Network Timeout' });
+        });
     })
   );
 });

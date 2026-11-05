@@ -42,49 +42,49 @@
     <!-- Canvas Utama -->
     <main class="workspace-canvas">
       <header class="canvas-topbar">
-        <div class="canvas-topbar-title">Pengaturan Sistem & Pemeliharaan</div>
+        <div class="canvas-topbar-title">Pengaturan Alat & Waktu</div>
       </header>
       <div class="canvas-content">
     <section class="card">
       <div class="card-header-clean">
-        <h2 class="card-title">Sinkronisasi Waktu RTC DS3231</h2>
+        <h2 class="card-title">Atur Ulang Waktu & Jam Bel</h2>
       </div>
       <p class="card-subtitle">
-        Jika perangkat ESP32 beroperasi mandiri secara luring (offline) tanpa akses internet, Anda dapat menyinkronkan waktu modul RTC DS3231 langsung dengan jam perangkat penjelajah web ini dalam satu klik.
+        Jika alat bel beroperasi mandiri tanpa jaringan internet, Anda dapat menyamakan jam pada modul bel dengan jam di laptop ini dalam sekali klik.
       </p>
-      <button type="button" class="btn btn-primary" onclick="syncTimeWithBrowser()">Sinkronkan Jam RTC Sekarang</button>
+      <button type="button" class="btn btn-primary" onclick="syncTimeWithBrowser()">Samakan Jam Bel Sekarang</button>
     </section>
 
     <section class="card">
-      <h2 class="card-title">Parameter Audio & Relay Anti-Hum</h2>
+      <h2 class="card-title">Pengaturan Suara & Amplifier</h2>
       <form id="settingsForm" onsubmit="handleSaveSettings(event)">
         <div class="form-row-2">
           <div class="form-group">
-            <label for="speakerVolume" class="form-label">Volume Speaker / DFPlayer (0 - 30)</label>
+            <label for="speakerVolume" class="form-label">Tingkat Volume Suara (0 - 30)</label>
             <input type="number" id="speakerVolume" class="form-input" min="0" max="30" value="25" required>
           </div>
           <div class="form-group">
-            <label for="preRollSec" class="form-label">Jeda Relay Pre-Roll (Detik)</label>
+            <label for="preRollSec" class="form-label">Jeda Relay Pengeras Suara (Detik)</label>
             <input type="number" id="preRollSec" class="form-input" min="1" max="10" value="2" required>
           </div>
         </div>
         <div style="margin-top: 1rem;">
-          <button type="submit" class="btn btn-primary">Simpan Parameter</button>
+          <button type="submit" class="btn btn-primary">Simpan Pengaturan</button>
         </div>
       </form>
     </section>
 
     <section class="card">
-      <h2 class="card-title">Keamanan & Ganti PIN Admin</h2>
+      <h2 class="card-title">Keamanan & Ganti PIN Petugas</h2>
       <form id="pinForm" onsubmit="handleChangePin(event)">
         <div class="form-row-2">
           <div class="form-group">
             <label for="oldPin" class="form-label">PIN Lama</label>
-            <input type="password" id="oldPin" class="form-input" placeholder="Default: 1234" required>
+            <input type="password" id="oldPin" class="form-input" placeholder="Bawaan: 1234" required>
           </div>
           <div class="form-group">
-            <label for="newPin" class="form-label">PIN Baru (4-8 Digit)</label>
-            <input type="password" id="newPin" class="form-input" placeholder="Masukkan PIN baru" minlength="4" maxlength="8" required>
+            <label for="newPin" class="form-label">PIN Baru (4-8 Angka)</label>
+            <input type="password" id="newPin" class="form-input" placeholder="Ketik PIN baru" minlength="4" maxlength="8" required>
           </div>
         </div>
         <div style="margin-top: 1rem;">
@@ -95,17 +95,17 @@
 
     <section class="card">
       <div class="card-header-clean">
-        <h2 class="card-title">Zona Pemeliharaan & Reset</h2>
+        <h2 class="card-title">Pemeliharaan & Reset Alat</h2>
       </div>
       <p class="card-subtitle">
-        Peralatan darurat untuk menyegarkan sistem atau mengembalikan konfigurasi ke kondisi awal jika terjadi kendala operasional.
+        Fungsi darurat untuk menyegarkan sistem alat atau mengembalikan pengaturan ke setelan awal jika terjadi kendala.
       </p>
 
       <div class="maintenance-actions">
         <div class="maintenance-item">
           <div class="maintenance-info">
-            <h3>Mulai Ulang Sistem (Reboot)</h3>
-            <p>Memulai ulang mikrokontroler (ESP8266/ESP32) secara halus. Seluruh jadwal dan pengaturan tetap aman tersimpan.</p>
+            <h3>Mulai Ulang Alat Bel</h3>
+            <p>Menyalakan ulang sistem mikrokontroler. Seluruh jadwal bel dan pengaturan tetap tersimpan aman.</p>
           </div>
           <div class="maintenance-btn">
             <button type="button" class="btn btn-outline" onclick="handleSystemReboot()">Mulai Ulang</button>
@@ -114,18 +114,18 @@
 
         <div class="maintenance-item">
           <div class="maintenance-info">
-            <h3>Reset PIN & Parameter Sistem</h3>
-            <p>Mengembalikan PIN admin ke <code>1234</code>, jeda pre-roll ke 2 detik, dan volume DFPlayer ke 25. Seluruh susunan jadwal tidak berubah.</p>
+            <h3>Kembalikan PIN & Volume Bawaan</h3>
+            <p>Mengembalikan PIN petugas ke <code>1234</code> dan volume suara ke 25. Seluruh susunan jadwal bel tidak akan terhapus.</p>
           </div>
           <div class="maintenance-btn">
-            <button type="button" class="btn btn-outline" onclick="handleResetSettingsOnly()">Reset Pengaturan</button>
+            <button type="button" class="btn btn-outline" onclick="handleResetSettingsOnly()">Kembalikan Bawaan</button>
           </div>
         </div>
 
         <div class="maintenance-item">
           <div class="maintenance-info">
-            <h3 style="color: var(--danger);">Reset Data Pabrik (Factory Reset)</h3>
-            <p>Menghapus seluruh modifikasi dan mengembalikan seluruh jadwal ke preset bawaan awal (Reguler, Jumat, Ujian).</p>
+            <h3 style="color: var(--danger);">Reset Data Pabrik (Hapus Semua)</h3>
+            <p>Menghapus seluruh penyesuaian dan mengembalikan jadwal ke setelan awal pabrik (Reguler, Jumat, Ujian).</p>
           </div>
           <div class="maintenance-btn">
             <button type="button" class="btn btn-outline-danger" onclick="handleFactoryReset()">Reset Pabrik</button>

@@ -44,48 +44,48 @@
     <!-- Canvas Utama -->
     <main class="workspace-canvas">
       <header class="canvas-topbar">
-        <div class="canvas-topbar-title">Pustaka Audio DFPlayer Mini</div>
+        <div class="canvas-topbar-title">Pustaka Nada Bel</div>
       </header>
       <div class="canvas-content">
     <section class="card">
       <div class="card-header-clean">
-        <h2 class="card-title">Standar Format File MicroSD</h2>
+        <h2 class="card-title">Panduan File Kartu Memori (MicroSD)</h2>
       </div>
       <p class="card-subtitle">
-        Modul DFPlayer Mini membaca rekaman suara dari direktori <code>/mp3/</code> pada kartu MicroSD berformat FAT32 dengan format penamaan 4-digit numerik terurut.
+        File rekaman nada bel disimpan di dalam folder <code>/mp3/</code> pada kartu MicroSD dengan format penamaan angka 4 digit (misal: <code>0001.mp3</code>).
       </p>
       <div class="status-badge-group" style="justify-content: flex-start; margin-top: 0.75rem;">
-        <span class="status-item">Format: FAT32</span>
-        <span class="status-item">Lokasi: Direktori /mp3/</span>
-        <span class="status-item">Format Berkas: Audio MP3</span>
+        <span class="status-item">Format Memori: FAT32</span>
+        <span class="status-item">Folder: /mp3/</span>
+        <span class="status-item">Format Audio: MP3</span>
       </div>
     </section>
 
     <section class="card">
-      <h2 class="card-title">Tambah / Ubah Judul Track Audio</h2>
+      <h2 class="card-title">Tambah atau Ubah Nama Nada Bel</h2>
       <form id="trackForm" onsubmit="handleSaveTrack(event)">
         <div class="form-row-3">
           <div class="form-group">
-            <label for="trackNumber" class="form-label">Nomor Track (1 - 999)</label>
+            <label for="trackNumber" class="form-label">Nomor Nada (1 - 999)</label>
             <input type="number" id="trackNumber" class="form-input" min="1" max="999" required>
           </div>
           <div class="form-group">
-            <label for="trackFileName" class="form-label">Nama File SD Card</label>
+            <label for="trackFileName" class="form-label">Nama File di Memori</label>
             <input type="text" id="trackFileName" class="form-input" placeholder="0001.mp3" required readonly>
           </div>
           <div class="form-group">
-            <label for="trackTitle" class="form-label">Judul / Keterangan Nada</label>
+            <label for="trackTitle" class="form-label">Nama Nada Bel</label>
             <input type="text" id="trackTitle" class="form-input" placeholder="Contoh: Bel Masuk Kelas" required>
           </div>
         </div>
         <div style="margin-top: 1rem;">
-          <button type="submit" class="btn btn-primary">Simpan Track</button>
+          <button type="submit" class="btn btn-primary">Simpan Nada Bel</button>
         </div>
       </form>
     </section>
 
     <section class="card">
-      <h2 class="card-title">Daftar Pustaka Audio DFPlayer</h2>
+      <h2 class="card-title">Daftar Nada Bel yang Tersedia</h2>
       <div class="table-container">
         <table class="table-custom">
           <thead>

@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="id">
+
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -8,6 +9,7 @@
   <link rel="icon" type="image/svg+xml" href="icon.svg">
   <script src="https://cdnjs.cloudflare.com/ajax/libs/paho-mqtt/1.0.1/mqttws31.min.js"></script>
 </head>
+
 <body>
   <div class="workspace-wrapper">
     <!-- Sidebar Workspace -->
@@ -23,19 +25,36 @@
       <div class="sidebar-menu">
         <div class="sidebar-section-title">Menu Utama</div>
         <a href="index.html" class="sidebar-nav-link">
-          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path><polyline points="9 22 9 12 15 12 15 22"></polyline></svg>
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path>
+            <polyline points="9 22 9 12 15 12 15 22"></polyline>
+          </svg>
           Beranda
         </a>
         <a href="schedule.html" class="sidebar-nav-link active">
-          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect><line x1="16" y1="2" x2="16" y2="6"></line><line x1="8" y1="2" x2="8" y2="6"></line><line x1="3" y1="10" x2="21" y2="10"></line></svg>
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect>
+            <line x1="16" y1="2" x2="16" y2="6"></line>
+            <line x1="8" y1="2" x2="8" y2="6"></line>
+            <line x1="3" y1="10" x2="21" y2="10"></line>
+          </svg>
           Kelola Jadwal
         </a>
         <a href="audio.html" class="sidebar-nav-link">
-          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 18V5l12-2v13"></path><circle cx="6" cy="18" r="3"></circle><circle cx="18" cy="16" r="3"></circle></svg>
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M9 18V5l12-2v13"></path>
+            <circle cx="6" cy="18" r="3"></circle>
+            <circle cx="18" cy="16" r="3"></circle>
+          </svg>
           Pustaka Audio
         </a>
         <a href="settings.html" class="sidebar-nav-link">
-          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"></circle><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path></svg>
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <circle cx="12" cy="12" r="3"></circle>
+            <path
+              d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z">
+            </path>
+          </svg>
           Pengaturan
         </a>
       </div>
@@ -44,130 +63,140 @@
     <!-- Canvas Utama -->
     <main class="workspace-canvas">
       <header class="canvas-topbar">
-        <div class="canvas-topbar-title">Manajemen Jadwal Bel</div>
+        <div class="canvas-topbar-title">Atur Jadwal Bel</div>
       </header>
       <div class="canvas-content">
-    <section class="card">
-      <div class="card-header-clean">
-        <h2 class="card-title">Kelola Preset Jadwal</h2>
-        <button type="button" class="btn btn-primary btn-sm" onclick="toggleAddPresetForm()">+ Tambah Preset Baru</button>
-      </div>
-      <div class="form-row-2">
-        <div class="form-group">
-          <label for="presetSelect" class="form-label">Mode Preset Aktif</label>
-          <div style="display: flex; gap: 0.5rem; flex-wrap: wrap;">
-            <select id="presetSelect" class="form-select" style="flex: 1; min-width: 220px;" onchange="changeActivePreset()">
-              <option value="reguler">Jadwal Reguler (Senin - Kamis)</option>
-              <option value="jumat">Jadwal Khusus Hari Jumat</option>
-              <option value="ujian">Jadwal Penilaian / Ujian (PTS/PAS)</option>
-            </select>
-            <button type="button" id="btnEditPreset" class="btn btn-outline btn-sm" onclick="toggleEditPresetForm()" title="Ubah Nama Preset Ini">Edit Nama</button>
-            <button type="button" id="btnDeletePreset" class="btn btn-danger btn-sm" onclick="deleteCurrentPreset()" title="Hapus Preset Ini">Hapus</button>
+        <section class="card">
+          <div class="card-header-clean">
+            <h2 class="card-title">Kelola Jadwal Sekolah</h2>
+            <button type="button" class="btn btn-primary btn-sm" onclick="toggleAddPresetForm()">+ Tambah Jadwal
+              Baru</button>
           </div>
-        </div>
-        <div style="display: flex; align-items: flex-end; margin-bottom: 0.85rem;">
-          <span id="presetSaveStatus" style="font-size: 0.85rem; color: var(--success); font-weight: 600;"></span>
-        </div>
-      </div>
-
-      <!-- Form Tambah Preset Baru (Hidden Default) -->
-      <div id="addPresetContainer" style="display: none; background: #f8fafc; border: 1px solid var(--border); padding: 1.25rem; border-radius: var(--radius-md); margin-top: 1rem;">
-        <h3 style="font-size: 0.975rem; font-weight: 700; color: var(--navy-900); margin-bottom: 0.75rem;">Buat Preset Jadwal Baru</h3>
-        <form onsubmit="handleCreatePreset(event)">
           <div class="form-row-2">
             <div class="form-group">
-              <label for="newPresetKey" class="form-label">Kode Singkat (ID Unik)</label>
-              <input type="text" id="newPresetKey" class="form-input" placeholder="contoh: ramadhan, classmeeting" pattern="[a-zA-Z0-9_-]+" required>
+              <label for="presetSelect" class="form-label">Jadwal yang Sedang Aktif</label>
+              <div style="display: flex; gap: 0.5rem; flex-wrap: wrap;">
+                <select id="presetSelect" class="form-select" style="flex: 1; min-width: 220px;"
+                  onchange="changeActivePreset()">
+                  <option value="reguler">Jadwal Reguler (Senin - Kamis)</option>
+                  <option value="jumat">Jadwal Khusus Hari Jumat</option>
+                  <option value="ujian">Jadwal Penilaian / Ujian (PTS/PAS)</option>
+                </select>
+                <button type="button" id="btnEditPreset" class="btn btn-outline btn-sm" onclick="toggleEditPresetForm()"
+                  title="Ubah Nama Jadwal Ini">Ubah Nama</button>
+                <button type="button" id="btnDeletePreset" class="btn btn-danger btn-sm" onclick="deleteCurrentPreset()"
+                  title="Hapus Jadwal Ini">Hapus</button>
+              </div>
             </div>
-            <div class="form-group">
-              <label for="newPresetName" class="form-label">Nama Lengkap Preset</label>
-              <input type="text" id="newPresetName" class="form-input" placeholder="contoh: Jadwal Khusus Ramadhan" required>
+            <div style="display: flex; align-items: flex-end; margin-bottom: 0.85rem;">
+              <span id="presetSaveStatus" style="font-size: 0.85rem; color: var(--success); font-weight: 600;"></span>
             </div>
           </div>
-          <div class="btn-group" style="margin-top: 0.75rem;">
-            <button type="submit" class="btn btn-primary btn-sm">Simpan Preset</button>
-            <button type="button" class="btn btn-outline btn-sm" onclick="toggleAddPresetForm()">Batal</button>
-          </div>
-        </form>
-      </div>
 
-      <!-- Form Edit Nama Preset (Hidden Default) -->
-      <div id="editPresetContainer" style="display: none; background: #f8fafc; border: 1px solid var(--border); padding: 1.25rem; border-radius: var(--radius-md); margin-top: 1rem;">
-        <h3 style="font-size: 0.975rem; font-weight: 700; color: var(--navy-900); margin-bottom: 0.75rem;">Ubah Nama Preset</h3>
-        <form onsubmit="handleUpdatePresetName(event)">
-          <div class="form-group">
-            <label for="editPresetNameInput" class="form-label">Nama Preset</label>
-            <input type="text" id="editPresetNameInput" class="form-input" required>
+          <!-- Form Tambah Preset Baru (Hidden Default) -->
+          <div id="addPresetContainer"
+            style="display: none; background: #f8fafc; border: 1px solid var(--border); padding: 1.25rem; border-radius: var(--radius-md); margin-top: 1rem;">
+            <h3 style="font-size: 0.975rem; font-weight: 700; color: var(--navy-900); margin-bottom: 0.75rem;">Buat
+              Kategori Jadwal Baru</h3>
+            <form onsubmit="handleCreatePreset(event)">
+              <div class="form-row-2">
+                <div class="form-group">
+                  <label for="newPresetKey" class="form-label">Kode Jadwal (Huruf Kecil Tanpa Spasi)</label>
+                  <input type="text" id="newPresetKey" class="form-input" placeholder="contoh: ramadhan, classmeeting"
+                    pattern="[a-zA-Z0-9_-]+" required>
+                </div>
+                <div class="form-group">
+                  <label for="newPresetName" class="form-label">Nama Kategori Jadwal</label>
+                  <input type="text" id="newPresetName" class="form-input" placeholder="contoh: Jadwal Khusus Ramadhan"
+                    required>
+                </div>
+              </div>
+              <div class="btn-group" style="margin-top: 0.75rem;">
+                <button type="submit" class="btn btn-primary btn-sm">Simpan Jadwal</button>
+                <button type="button" class="btn btn-outline btn-sm" onclick="toggleAddPresetForm()">Batal</button>
+              </div>
+            </form>
           </div>
-          <div class="btn-group" style="margin-top: 0.75rem;">
-            <button type="submit" class="btn btn-primary btn-sm">Perbarui Nama</button>
-            <button type="button" class="btn btn-outline btn-sm" onclick="toggleEditPresetForm()">Batal</button>
-          </div>
-        </form>
-      </div>
-    </section>
 
-    <section class="card">
-      <div class="card-header-clean">
-        <h2 id="formScheduleTitle" class="card-title">Tambah Jadwal Baru</h2>
-      </div>
-      <form id="addScheduleForm" onsubmit="handleAddSchedule(event)">
-        <div class="form-row-3">
-          <div class="form-group">
-            <label for="newTime" class="form-label">Jam & Menit (HH:MM)</label>
-            <input type="time" id="newTime" class="form-input" required>
+          <!-- Form Edit Nama Preset (Hidden Default) -->
+          <div id="editPresetContainer"
+            style="display: none; background: #f8fafc; border: 1px solid var(--border); padding: 1.25rem; border-radius: var(--radius-md); margin-top: 1rem;">
+            <h3 style="font-size: 0.975rem; font-weight: 700; color: var(--navy-900); margin-bottom: 0.75rem;">Ubah Nama
+              Kategori Jadwal</h3>
+            <form onsubmit="handleUpdatePresetName(event)">
+              <div class="form-group">
+                <label for="editPresetNameInput" class="form-label">Nama Kategori</label>
+                <input type="text" id="editPresetNameInput" class="form-input" required>
+              </div>
+              <div class="btn-group" style="margin-top: 0.75rem;">
+                <button type="submit" class="btn btn-primary btn-sm">Simpan Perubahan</button>
+                <button type="button" class="btn btn-outline btn-sm" onclick="toggleEditPresetForm()">Batal</button>
+              </div>
+            </form>
           </div>
-          <div class="form-group">
-            <label for="newTrack" class="form-label">Nada Bel Audio</label>
-            <select id="newTrack" class="form-select" required>
-              <option value="">Memuat daftar track audio...</option>
-            </select>
-          </div>
-          <div class="form-group">
-            <label for="newLabel" class="form-label">Keterangan Aktivitas</label>
-            <input type="text" id="newLabel" class="form-input" placeholder="Contoh: Bel Masuk Kelas" required>
-          </div>
-        </div>
+        </section>
 
-        <div class="form-group" style="margin-top: 0.5rem;">
-          <label class="form-label">Hari Berlaku</label>
-          <div class="day-selector-group">
-            <label class="day-checkbox-label"><input type="checkbox" name="days" value="1" checked> Senin</label>
-            <label class="day-checkbox-label"><input type="checkbox" name="days" value="2" checked> Selasa</label>
-            <label class="day-checkbox-label"><input type="checkbox" name="days" value="3" checked> Rabu</label>
-            <label class="day-checkbox-label"><input type="checkbox" name="days" value="4" checked> Kamis</label>
-            <label class="day-checkbox-label"><input type="checkbox" name="days" value="5"> Jumat</label>
-            <label class="day-checkbox-label"><input type="checkbox" name="days" value="6"> Sabtu</label>
+        <section class="card">
+          <div class="card-header-clean">
+            <h2 id="formScheduleTitle" class="card-title">Tambah Jam Bel Baru</h2>
           </div>
-        </div>
+          <form id="addScheduleForm" onsubmit="handleAddSchedule(event)">
+            <div class="form-row-3">
+              <div class="form-group">
+                <label for="newTime" class="form-label">Jam & Menit (HH:MM)</label>
+                <input type="time" id="newTime" class="form-input" required>
+              </div>
+              <div class="form-group">
+                <label for="newTrack" class="form-label">Pilihan Nada Bel</label>
+                <select id="newTrack" class="form-select" required>
+                  <option value="">Memuat pilihan nada bel...</option>
+                </select>
+              </div>
+              <div class="form-group">
+                <label for="newLabel" class="form-label">Keterangan Bel</label>
+                <input type="text" id="newLabel" class="form-input" placeholder="Contoh: Bel Masuk Kelas" required>
+              </div>
+            </div>
 
-        <div style="margin-top: 1rem;">
-          <button type="submit" class="btn btn-primary">Tambah ke Jadwal</button>
-        </div>
-      </form>
-    </section>
+            <div class="form-group" style="margin-top: 0.5rem;">
+              <label class="form-label">Hari Aktif</label>
+              <div class="day-selector-group">
+                <label class="day-checkbox-label"><input type="checkbox" name="days" value="1" checked> Senin</label>
+                <label class="day-checkbox-label"><input type="checkbox" name="days" value="2" checked> Selasa</label>
+                <label class="day-checkbox-label"><input type="checkbox" name="days" value="3" checked> Rabu</label>
+                <label class="day-checkbox-label"><input type="checkbox" name="days" value="4" checked> Kamis</label>
+                <label class="day-checkbox-label"><input type="checkbox" name="days" value="5"> Jumat</label>
+                <label class="day-checkbox-label"><input type="checkbox" name="days" value="6"> Sabtu</label>
+              </div>
+            </div>
 
-    <section class="card">
-      <h2 class="card-title">Daftar Jadwal pada Preset Terpilih</h2>
-      <div class="table-container">
-        <table class="table-custom">
-          <thead>
-            <tr>
-              <th>Waktu</th>
-              <th>Keterangan</th>
-              <th>Hari</th>
-              <th>Track</th>
-              <th>Aksi</th>
-            </tr>
-          </thead>
-          <tbody id="scheduleTableBody">
-            <tr>
-              <td colspan="5" style="text-align: center; color: var(--text-muted);">Memuat daftar jadwal...</td>
-            </tr>
-          </tbody>
-        </table>
-      </div>
-    </section>
+            <div style="margin-top: 1rem;">
+              <button type="submit" class="btn btn-primary">Simpan ke Jadwal</button>
+            </div>
+          </form>
+        </section>
+
+        <section class="card">
+          <h2 class="card-title">Daftar Jam Bel pada Jadwal Ini</h2>
+          <div class="table-container">
+            <table class="table-custom">
+              <thead>
+                <tr>
+                  <th>Waktu</th>
+                  <th>Keterangan</th>
+                  <th>Hari</th>
+                  <th>Track</th>
+                  <th>Aksi</th>
+                </tr>
+              </thead>
+              <tbody id="scheduleTableBody">
+                <tr>
+                  <td colspan="5" style="text-align: center; color: var(--text-muted);">Memuat daftar jadwal...</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </section>
       </div>
     </main>
   </div>
@@ -467,4 +496,5 @@
     window.addEventListener('DOMContentLoaded', initSchedulePage);
   </script>
 </body>
+
 </html>

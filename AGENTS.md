@@ -214,4 +214,6 @@ Setiap agen AI wajib memverifikasi checklist berikut sebelum menyerahkan tugas:
     - Menambah ukuran font body status koneksi (`#badgeWifi`) menjadi 13px (`0.8125rem`).
     - Mengoptimalkan performa animasi progress bar menggunakan `transform: scaleX()` terakselerasi GPU untuk menggantikan pemicu *layout reflow* `transition: width`.
     - Menghapus 100% elemen dekoratif dot (`status-dot`) dari seluruh template HTML, skrip JS, dan CSS, menggantikannya dengan tipografi semantik yang bersih.
+  - Perbaikan Bahasa & Diksi Antarmuka (Natural Copywriting):
+    - Menyempurnakan istilah kaku/mesin di seluruh template HTML (`index.html`, `schedule.html`, `audio.html`, `settings.html`): mengganti istilah pabrik/jargon (*"Dashboard Operasional"*, *"Pemicu Cepat"*, *"Preset"*, *"Waktu Sistem"*, *"Keterangan Aktivitas"*) menjadi bahasa sekolah alami (*"Panel Utama"*, *"Bunyikan Bel Manual"*, *"Jadwal Sekolah"*, *"Jam Sekarang"*, *"Keterangan Bel"*).
 

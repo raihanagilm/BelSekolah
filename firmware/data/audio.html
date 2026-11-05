@@ -35,10 +35,10 @@
       <p class="card-subtitle">
         Modul DFPlayer Mini membaca rekaman suara dari direktori <code>/mp3/</code> pada kartu MicroSD berformat FAT32 dengan format penamaan 4-digit numerik terurut.
       </p>
-      <div class="status-badge-group" style="justify-content: flex-start; margin-top: 0.5rem;">
-        <span class="badge badge-success"><span class="badge-dot"></span>Sistem File: FAT32</span>
-        <span class="badge badge-warning"><span class="badge-dot"></span>Direktori: /mp3/</span>
-        <span class="badge badge-success"><span class="badge-dot"></span>Format: MPEG-1 Layer 3 (.mp3)</span>
+      <div class="status-badge-group" style="justify-content: flex-start; margin-top: 0.75rem;">
+        <span class="status-item"><span class="status-dot status-dot-success"></span>FAT32</span>
+        <span class="status-item"><span class="status-dot status-dot-primary"></span>Direktori /mp3/</span>
+        <span class="status-item"><span class="status-dot status-dot-success"></span>Audio MP3</span>
       </div>
     </section>
 
@@ -174,7 +174,7 @@
         });
         const resData = await res.json();
         if (resData.success) {
-          alert('Track audio berhasil disimpan!');
+          AppToast.show('Track audio berhasil disimpan!', 'success');
           renderAudioList(currentData.audio_tracks);
           document.getElementById('trackForm').reset();
           return;
@@ -184,7 +184,7 @@
       }
 
       localStorage.setItem('bell_schedule_local', JSON.stringify(currentData));
-      alert('Track audio berhasil disimpan!');
+      AppToast.show('Track audio berhasil disimpan!', 'success');
       renderAudioList(currentData.audio_tracks);
       document.getElementById('trackForm').reset();
     }

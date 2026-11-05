@@ -75,49 +75,43 @@
     </section>
 
     <section class="card">
-      <h2 class="card-title">Referensi Pinout Hardware ESP32</h2>
-      <div class="table-container">
-        <table class="table-custom">
-          <thead>
-            <tr>
-              <th>Pin ESP32</th>
-              <th>Komponen Target</th>
-              <th>Fungsi</th>
-            </tr>
-          </thead>
-          <tbody>
-            <tr>
-              <td><code>GPIO 17 (TX2)</code></td>
-              <td>RX DFPlayer Mini</td>
-              <td>UART Data Audio (Resistor 1k&Omega; seri)</td>
-            </tr>
-            <tr>
-              <td><code>GPIO 16 (RX2)</code></td>
-              <td>TX DFPlayer Mini</td>
-              <td>UART Status Modul Audio</td>
-            </tr>
-            <tr>
-              <td><code>GPIO 21</code></td>
-              <td>SDA RTC DS3231</td>
-              <td>I2C Data Bus Waktu Presisi</td>
-            </tr>
-            <tr>
-              <td><code>GPIO 22</code></td>
-              <td>SCL RTC DS3231</td>
-              <td>I2C Clock Bus Waktu</td>
-            </tr>
-            <tr>
-              <td><code>GPIO 4</code></td>
-              <td>Signal Relay 5V</td>
-              <td>Saklar Mute Amplifier Sekolah (Anti-Hum)</td>
-            </tr>
-            <tr>
-              <td><code>GPIO 2</code></td>
-              <td>LED Indikator 5mm / Resistor 220&Omega;</td>
-              <td>Indikator Visual Status Bel Aktif (Sinkron Simulasi Wokwi)</td>
-            </tr>
-          </tbody>
-        </table>
+      <div class="card-header-clean">
+        <h2 class="card-title">Zona Pemeliharaan & Reset</h2>
+      </div>
+      <p class="card-subtitle">
+        Peralatan darurat untuk menyegarkan sistem atau mengembalikan konfigurasi ke kondisi awal jika terjadi kendala operasional.
+      </p>
+
+      <div class="maintenance-actions">
+        <div class="maintenance-item">
+          <div class="maintenance-info">
+            <h3>Mulai Ulang Sistem (Reboot)</h3>
+            <p>Memulai ulang mikrokontroler (ESP8266/ESP32) secara halus. Seluruh jadwal dan pengaturan tetap aman tersimpan.</p>
+          </div>
+          <div class="maintenance-btn">
+            <button type="button" class="btn btn-outline" onclick="handleSystemReboot()">Mulai Ulang</button>
+          </div>
+        </div>
+
+        <div class="maintenance-item">
+          <div class="maintenance-info">
+            <h3>Reset PIN & Parameter Sistem</h3>
+            <p>Mengembalikan PIN admin ke <code>1234</code>, jeda pre-roll ke 2 detik, dan volume DFPlayer ke 25. Seluruh susunan jadwal tidak berubah.</p>
+          </div>
+          <div class="maintenance-btn">
+            <button type="button" class="btn btn-outline" onclick="handleResetSettingsOnly()">Reset Pengaturan</button>
+          </div>
+        </div>
+
+        <div class="maintenance-item">
+          <div class="maintenance-info">
+            <h3 style="color: var(--danger);">Reset Data Pabrik (Factory Reset)</h3>
+            <p>Menghapus seluruh modifikasi dan mengembalikan seluruh jadwal ke preset bawaan awal (Reguler, Jumat, Ujian).</p>
+          </div>
+          <div class="maintenance-btn">
+            <button type="button" class="btn btn-outline-danger" onclick="handleFactoryReset()">Reset Pabrik</button>
+          </div>
+        </div>
       </div>
     </section>
   </main>
@@ -155,14 +149,14 @@
         });
         const resData = await res.json();
         if (resData.success) {
-          alert('Pengaturan parameter berhasil disimpan!');
+          AppToast.show('Pengaturan parameter berhasil disimpan!', 'success');
           return;
         }
       } catch (err) {
         // Mode lokal / simulator
       }
       localStorage.setItem('bell_schedule_local', JSON.stringify(currentData));
-      alert('Pengaturan parameter tersimpan!');
+      AppToast.show('Pengaturan parameter tersimpan!', 'success');
     }
 
     async function handleChangePin(e) {
@@ -178,7 +172,7 @@
         });
         const resData = await res.json();
         if (resData.success) {
-          alert('PIN Admin berhasil diperbarui!');
+          AppToast.show('PIN Admin berhasil diperbarui!', 'success');
           document.getElementById('pinForm').reset();
           return;
         }
@@ -192,11 +186,97 @@
         if (!currentData.settings) currentData.settings = {};
         currentData.settings.admin_pin = newPin;
         localStorage.setItem('bell_schedule_local', JSON.stringify(currentData));
-        alert(`PIN Admin berhasil diperbarui menjadi: ${newPin}`);
+        AppToast.show(`PIN Admin berhasil diperbarui menjadi: ${newPin}`, 'success');
         document.getElementById('pinForm').reset();
       } else {
-        alert('PIN lama salah! Default adalah: 1234');
+        AppToast.show('PIN lama salah! Default adalah: 1234', 'danger');
       }
+    }
+
+    async function handleSystemReboot() {
+      const ok = await AppDialog.confirm(
+        'Mulai Ulang Sistem',
+        'Apakah Anda yakin ingin memulai ulang (reboot) modul sistem bel?',
+        { confirmText: 'Mulai Ulang', cancelText: 'Batal', danger: true }
+      );
+      if (!ok) return;
+
+      try {
+        const res = await fetch('/api/system/reboot', { method: 'POST' });
+        const resData = await res.json();
+        if (resData.success) {
+          await AppDialog.alert('Memulai Ulang', 'Perangkat sedang memulai ulang. Halaman akan dimuat kembali dalam 5 detik.', 'info');
+          setTimeout(() => window.location.reload(), 5000);
+          return;
+        }
+      } catch (err) {
+        // Mode luring / laptop
+      }
+      AppToast.show('Sistem dimulai ulang secara lokal.', 'info');
+      setTimeout(() => window.location.reload(), 800);
+    }
+
+    async function handleResetSettingsOnly() {
+      const ok = await AppDialog.confirm(
+        'Reset Pengaturan & PIN',
+        'Kembalikan PIN Admin ke 1234 dan parameter audio ke nilai awal? Susunan jadwal bel tidak akan terhapus.',
+        { confirmText: 'Reset Pengaturan', cancelText: 'Batal', danger: true }
+      );
+      if (!ok) return;
+
+      try {
+        const res = await fetch('/api/system/reset-settings', { method: 'POST' });
+        const resData = await res.json();
+        if (resData.success) {
+          await AppDialog.alert('Berhasil', 'Pengaturan parameter dan PIN berhasil dikembalikan ke default (PIN: 1234).', 'success');
+          window.location.reload();
+          return;
+        }
+      } catch (err) {
+        // Mode luring / laptop
+      }
+
+      if (currentData) {
+        if (!currentData.settings) currentData.settings = {};
+        currentData.settings.admin_pin = '1234';
+        currentData.settings.relay_pre_roll_sec = 2;
+        currentData.settings.speaker_volume = 25;
+        localStorage.setItem('bell_schedule_local', JSON.stringify(currentData));
+        await AppDialog.alert('Berhasil', 'Pengaturan parameter lokal berhasil direset. PIN Admin kini: 1234', 'success');
+        window.location.reload();
+      }
+    }
+
+    async function handleFactoryReset() {
+      const confirmInput = await AppDialog.prompt(
+        'Reset Data Pabrik',
+        'PERINGATAN: Seluruh jadwal dan penyesuaian akan dihapus dan kembali ke setelan awal!\nKetik kata "RESET" (huruf besar) untuk melanjutkan:',
+        { placeholder: 'Ketik RESET', confirmText: 'Reset Pabrik', cancelText: 'Batal', danger: true }
+      );
+
+      if (confirmInput !== 'RESET') {
+        if (confirmInput !== null) {
+          AppToast.show('Konfirmasi dibatalkan. Kata kunci tidak cocok.', 'danger');
+        }
+        return;
+      }
+
+      try {
+        const res = await fetch('/api/system/factory-reset', { method: 'POST' });
+        const resData = await res.json();
+        if (resData.success) {
+          await AppDialog.alert('Reset Selesai', 'Data berhasil direset ke setelan pabrik. Sistem akan memuat ulang jadwal awal.', 'success');
+          localStorage.removeItem('bell_schedule_local');
+          window.location.reload();
+          return;
+        }
+      } catch (err) {
+        // Mode luring / laptop
+      }
+
+      localStorage.removeItem('bell_schedule_local');
+      await AppDialog.alert('Reset Selesai', 'Penyimpanan lokal direset ke setelan bawaan pabrik.', 'success');
+      window.location.reload();
     }
 
     window.addEventListener('DOMContentLoaded', loadSettingsPage);

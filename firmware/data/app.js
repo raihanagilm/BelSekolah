@@ -131,58 +131,70 @@ async function updateNetworkStatus() {
   let espConnected = false;
   let rtcHardwareOk = false;
 
-  // Cek koneksi nyata ke ESP8266 (kebal CORS saat dibuka via file://)
-  try {
-    const checkEsp = new Promise((resolve) => {
-      const img = new Image();
-      const timer = setTimeout(() => {
-        img.src = "";
-        resolve(false);
-      }, 1000);
-      img.onload = () => { clearTimeout(timer); resolve(true); };
-      img.onerror = () => {
-        // Pada server mini ESP8266, endpoint yang merespons (meski 404/200) membuktikan perangkat hidup & terjangkau
-        clearTimeout(timer);
-        resolve(true);
-      };
-      img.src = "http://192.168.4.1/favicon.ico?t=" + Date.now();
-    });
+  // Cek koneksi nyata ke ESP8266 secara akurat (tanpa false-positive onerror)
+  const isDirectEspHost = (location.hostname === '192.168.4.1' || location.hostname === 'bel-sekolah.local');
 
-    // Jalankan juga fetch dengan mode no-cors
-    const pingFetch = fetch("http://192.168.4.1/api/status", { mode: 'no-cors', cache: 'no-store' })
-      .then(() => true)
-      .catch(() => false);
-
-    espConnected = await Promise.race([checkEsp, pingFetch]);
-  } catch (err) {
-    espConnected = false;
-  }
-
-  // Update Badge Hardware RTC
-  if (badgeRtc) {
-    if (espConnected && rtcHardwareOk) {
-      badgeRtc.innerHTML = '<span class="badge-dot"></span>RTC DS3231 Aktif';
-      badgeRtc.className = 'badge badge-success';
-    } else if (espConnected && !rtcHardwareOk) {
-      badgeRtc.innerHTML = '<span class="badge-dot"></span>RTC Belum Terpasang';
-      badgeRtc.className = 'badge badge-warning';
-    } else {
-      badgeRtc.innerHTML = '<span class="badge-dot"></span>Jam Lokal PC / Laptop';
-      badgeRtc.className = 'badge badge-primary';
+  if (isDirectEspHost) {
+    try {
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), 1500);
+      const res = await fetch('/api/status', { signal: controller.signal, cache: 'no-store' });
+      clearTimeout(timeoutId);
+      if (res.ok) {
+        const stat = await res.json();
+        espConnected = true;
+        rtcHardwareOk = !!stat.rtc_ok;
+      }
+    } catch (err) {
+      espConnected = false;
+    }
+  } else {
+    // Jika dibuka dari file:// lokal di PC/Laptop
+    try {
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), 1200);
+      const res = await fetch('http://192.168.4.1/api/status', {
+        method: 'GET',
+        signal: controller.signal,
+        cache: 'no-store'
+      });
+      clearTimeout(timeoutId);
+      if (res.ok) {
+        const stat = await res.json();
+        espConnected = true;
+        rtcHardwareOk = !!stat.rtc_ok;
+      }
+    } catch (err) {
+      // Tidak terhubung ke ESP8266 (timeout atau unreachable)
+      espConnected = false;
     }
   }
 
-  // Update Badge Jaringan / Wi-Fi
+  // Update Status Hardware RTC
+  if (badgeRtc) {
+    if (espConnected && rtcHardwareOk) {
+      badgeRtc.innerHTML = '<span class="status-dot status-dot-success"></span>RTC DS3231 Aktif';
+      badgeRtc.className = 'status-item';
+    } else if (espConnected && !rtcHardwareOk) {
+      badgeRtc.innerHTML = '<span class="status-dot status-dot-warning"></span>RTC Belum Terpasang';
+      badgeRtc.className = 'status-item';
+    } else {
+      badgeRtc.innerHTML = '<span class="status-dot status-dot-primary"></span>Jam Komputer / Laptop';
+      badgeRtc.className = 'status-item';
+    }
+  }
+
+  // Update Status Jaringan / Hardware
   if (badgeWifi) {
     if (espConnected) {
-      badgeWifi.innerHTML = '<span class="badge-dot"></span>ESP8266 Terhubung';
-      badgeWifi.className = 'badge badge-success';
+      badgeWifi.innerHTML = '<span class="status-dot status-dot-success"></span>ESP8266 Terhubung';
+      badgeWifi.className = 'status-item';
     } else if (navigator.onLine) {
-      badgeWifi.innerHTML = '<span class="badge-dot"></span>Internet Terhubung';
-      badgeWifi.className = 'badge badge-success';
+      badgeWifi.innerHTML = '<span class="status-dot status-dot-warning"></span>ESP8266 Belum Terhubung';
+      badgeWifi.className = 'status-item';
     } else {
-      badgeWifi.innerHTML = '<span class="badge-dot"></span>Mode Offline Lokal';
-      badgeWifi.className = 'badge badge-warning';
+      badgeWifi.innerHTML = '<span class="status-dot status-dot-warning"></span>Mode Offline (ESP8266 Belum Terhubung)';
+      badgeWifi.className = 'status-item';
     }
   }
 }
@@ -207,7 +219,7 @@ function initMqtt() {
           // Jika tidak terhubung ke ESP fisik, tampilkan status cloud
           const badgeWifi = document.getElementById('badgeWifi');
           if (badgeWifi && badgeWifi.innerText.includes('Internet')) {
-            badgeWifi.innerHTML = '<span class="badge-dot"></span>Internet & Cloud Siap';
+            badgeWifi.innerHTML = '<span class="status-dot status-dot-success"></span>Internet & Cloud Siap';
           }
         },
         onFailure: () => {}
@@ -257,7 +269,7 @@ async function syncTimeWithBrowser() {
     if (res.ok) {
       const data = await res.json();
       if (data.success) {
-        alert('Jam RTC ESP32 berhasil disinkronkan dengan browser!');
+        await AppDialog.alert('Sinkronisasi Sukses', 'Jam RTC perangkat berhasil disinkronkan dengan browser!', 'success');
         location.reload();
         return;
       }
@@ -267,11 +279,11 @@ async function syncTimeWithBrowser() {
   }
 
   // Simulasi jika di localhost / Live Server
-  if (location.hostname === '127.0.0.1' || location.hostname === 'localhost') {
-    alert(`[Simulasi RTC] Waktu disinkronkan ke Epoch ${epochSec} (${new Date().toLocaleTimeString('id-ID')})`);
+  if (location.hostname === '127.0.0.1' || location.hostname === 'localhost' || location.protocol === 'file:') {
+    AppToast.show(`Waktu disinkronkan ke ${new Date().toLocaleTimeString('id-ID')}`, 'success');
     return;
   }
-  alert('Koneksi terputus saat sinkronisasi jam');
+  AppToast.show('Koneksi terputus saat sinkronisasi jam', 'danger');
 }
 
 function verifyAdminSession() {
@@ -377,3 +389,201 @@ function startClock(timeElementId, dateElementId) {
   setInterval(update, 1000);
   startLocalScheduler();
 }
+
+/* ==========================================================================
+   Komponen Dialog Modal & Toast UI Kustom (Anti-Slop Modern UI)
+   ========================================================================== */
+const AppToast = {
+  container: null,
+  init() {
+    if (!this.container) {
+      this.container = document.createElement('div');
+      this.container.className = 'app-toast-container';
+      document.body.appendChild(this.container);
+    }
+  },
+  show(message, type = 'info', duration = 3500) {
+    this.init();
+    const toast = document.createElement('div');
+    toast.className = `app-toast ${type}`;
+    
+    let iconSvg = '';
+    if (type === 'success') {
+      iconSvg = '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="var(--success)" stroke-width="2.5"><polyline points="20 6 9 17 4 12"></polyline></svg>';
+    } else if (type === 'danger') {
+      iconSvg = '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="var(--danger)" stroke-width="2.5"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="8" x2="12" y2="12"></line><line x1="12" y1="16" x2="12.01" y2="16"></line></svg>';
+    } else if (type === 'warning') {
+      iconSvg = '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="var(--warning)" stroke-width="2.5"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"></path><line x1="12" y1="9" x2="12" y2="13"></line><line x1="12" y1="17" x2="12.01" y2="17"></line></svg>';
+    } else {
+      iconSvg = '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="var(--accent)" stroke-width="2.5"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="16" x2="12" y2="12"></line><line x1="12" y1="8" x2="12.01" y2="8"></line></svg>';
+    }
+
+    toast.innerHTML = `${iconSvg}<span>${message}</span>`;
+    this.container.appendChild(toast);
+
+    setTimeout(() => {
+      toast.style.opacity = '0';
+      toast.style.transform = 'translateY(12px)';
+      setTimeout(() => toast.remove(), 250);
+    }, duration);
+  }
+};
+
+const AppDialog = {
+  createBackdrop() {
+    let backdrop = document.getElementById('appDialogBackdrop');
+    if (!backdrop) {
+      backdrop = document.createElement('div');
+      backdrop.id = 'appDialogBackdrop';
+      backdrop.className = 'app-dialog-backdrop';
+      document.body.appendChild(backdrop);
+    }
+    return backdrop;
+  },
+
+  alert(title, message, type = 'info') {
+    return new Promise((resolve) => {
+      const backdrop = this.createBackdrop();
+      let iconColor = type;
+      let iconSvg = '';
+      if (type === 'success') {
+        iconSvg = '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"></polyline></svg>';
+      } else if (type === 'danger') {
+        iconSvg = '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="12" cy="12" r="10"></circle><line x1="15" y1="9" x2="9" y2="15"></line><line x1="9" y1="9" x2="15" y2="15"></line></svg>';
+      } else if (type === 'warning') {
+        iconSvg = '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"></path><line x1="12" y1="9" x2="12" y2="13"></line><line x1="12" y1="17" x2="12.01" y2="17"></line></svg>';
+      } else {
+        iconSvg = '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="16" x2="12" y2="12"></line><line x1="12" y1="8" x2="12.01" y2="8"></line></svg>';
+      }
+
+      backdrop.innerHTML = `
+        <div class="app-dialog-card" role="dialog" aria-modal="true">
+          <div class="app-dialog-header">
+            <div class="app-dialog-icon ${iconColor}">${iconSvg}</div>
+            <h3 class="app-dialog-title">${title}</h3>
+          </div>
+          <div class="app-dialog-body">${message.replace(/\n/g, '<br>')}</div>
+          <div class="app-dialog-footer">
+            <button class="btn btn-primary" id="appDialogOkBtn" style="min-width: 90px;">Tutup</button>
+          </div>
+        </div>
+      `;
+
+      requestAnimationFrame(() => backdrop.classList.add('active'));
+
+      const okBtn = backdrop.querySelector('#appDialogOkBtn');
+      okBtn.focus();
+      okBtn.onclick = () => {
+        backdrop.classList.remove('active');
+        setTimeout(() => {
+          backdrop.innerHTML = '';
+          resolve(true);
+        }, 200);
+      };
+    });
+  },
+
+  confirm(title, message, options = {}) {
+    return new Promise((resolve) => {
+      const backdrop = this.createBackdrop();
+      const isDanger = options.danger || false;
+      const confirmText = options.confirmText || 'Lanjutkan';
+      const cancelText = options.cancelText || 'Batal';
+      const iconClass = isDanger ? 'danger' : 'warning';
+      
+      const iconSvg = isDanger 
+        ? '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="8" x2="12" y2="12"></line><line x1="12" y1="16" x2="12.01" y2="16"></line></svg>'
+        : '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="12" cy="12" r="10"></circle><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"></path><line x1="12" y1="17" x2="12.01" y2="17"></line></svg>';
+
+      backdrop.innerHTML = `
+        <div class="app-dialog-card" role="dialog" aria-modal="true">
+          <div class="app-dialog-header">
+            <div class="app-dialog-icon ${iconClass}">${iconSvg}</div>
+            <h3 class="app-dialog-title">${title}</h3>
+          </div>
+          <div class="app-dialog-body">${message.replace(/\n/g, '<br>')}</div>
+          <div class="app-dialog-footer">
+            <button class="btn btn-secondary" id="appDialogCancelBtn">${cancelText}</button>
+            <button class="btn ${isDanger ? 'btn-danger' : 'btn-primary'}" id="appDialogConfirmBtn">${confirmText}</button>
+          </div>
+        </div>
+      `;
+
+      requestAnimationFrame(() => backdrop.classList.add('active'));
+
+      const confirmBtn = backdrop.querySelector('#appDialogConfirmBtn');
+      const cancelBtn = backdrop.querySelector('#appDialogCancelBtn');
+      confirmBtn.focus();
+
+      const close = (result) => {
+        backdrop.classList.remove('active');
+        setTimeout(() => {
+          backdrop.innerHTML = '';
+          resolve(result);
+        }, 200);
+      };
+
+      confirmBtn.onclick = () => close(true);
+      cancelBtn.onclick = () => close(false);
+    });
+  },
+
+  prompt(title, message, options = {}) {
+    return new Promise((resolve) => {
+      const backdrop = this.createBackdrop();
+      const placeholder = options.placeholder || '';
+      const confirmText = options.confirmText || 'Konfirmasi';
+      const cancelText = options.cancelText || 'Batal';
+      const isDanger = options.danger || false;
+
+      backdrop.innerHTML = `
+        <div class="app-dialog-card" role="dialog" aria-modal="true">
+          <div class="app-dialog-header">
+            <div class="app-dialog-icon ${isDanger ? 'danger' : 'warning'}">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="8" x2="12" y2="12"></line><line x1="12" y1="16" x2="12.01" y2="16"></line></svg>
+            </div>
+            <h3 class="app-dialog-title">${title}</h3>
+          </div>
+          <div class="app-dialog-body">
+            <div>${message.replace(/\n/g, '<br>')}</div>
+            <input type="text" class="app-dialog-input" id="appDialogPromptInput" placeholder="${placeholder}" autocomplete="off" />
+          </div>
+          <div class="app-dialog-footer">
+            <button class="btn btn-secondary" id="appDialogCancelBtn">${cancelText}</button>
+            <button class="btn ${isDanger ? 'btn-danger' : 'btn-primary'}" id="appDialogConfirmBtn">${confirmText}</button>
+          </div>
+        </div>
+      `;
+
+      requestAnimationFrame(() => backdrop.classList.add('active'));
+
+      const input = backdrop.querySelector('#appDialogPromptInput');
+      const confirmBtn = backdrop.querySelector('#appDialogConfirmBtn');
+      const cancelBtn = backdrop.querySelector('#appDialogCancelBtn');
+
+      setTimeout(() => input.focus(), 100);
+
+      const close = (val) => {
+        backdrop.classList.remove('active');
+        setTimeout(() => {
+          backdrop.innerHTML = '';
+          resolve(val);
+        }, 200);
+      };
+
+      confirmBtn.onclick = () => close(input.value);
+      cancelBtn.onclick = () => close(null);
+
+      input.onkeydown = (e) => {
+        if (e.key === 'Enter') close(input.value);
+        if (e.key === 'Escape') close(null);
+      };
+    });
+  }
+};
+
+// Polyfill window.alert, window.confirm, window.prompt agar tidak pernah muncul dialog bawaan browser
+window.nativeAlert = window.alert;
+window.alert = (msg) => {
+  AppToast.show(msg, 'info');
+};

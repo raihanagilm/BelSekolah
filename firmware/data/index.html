@@ -34,9 +34,9 @@
         <div id="liveClock" class="clock-time">--:--:--</div>
         <div id="liveDate" class="clock-date">Memuat tanggal...</div>
         <div class="status-badge-group">
-          <span id="badgeRtc" class="badge badge-warning"><span class="badge-dot"></span>Jam Lokal PC / Laptop</span>
-          <span id="badgePreset" class="badge badge-warning"><span class="badge-dot"></span>Preset: Memuat...</span>
-          <span id="badgeWifi" class="badge badge-warning"><span class="badge-dot"></span>Mengecek Jaringan...</span>
+          <span id="badgeRtc" class="status-item"><span class="status-dot status-dot-primary"></span>Jam Komputer / Laptop</span>
+          <span id="badgePreset" class="status-item"><span class="status-dot status-dot-primary"></span>Preset: Memuat...</span>
+          <span id="badgeWifi" class="status-item"><span class="status-dot status-dot-warning"></span>ESP8266 Belum Terhubung</span>
         </div>
       </div>
     </section>
@@ -131,7 +131,7 @@
 
       const activePresetKey = data.active_preset || 'reguler';
       const presetObj = data.presets[activePresetKey];
-      document.getElementById('badgePreset').innerHTML = '<span class="badge-dot"></span>Preset: ' + (presetObj ? presetObj.name : activePresetKey);
+      document.getElementById('badgePreset').innerHTML = '<span class="status-dot status-dot-primary"></span>Preset: ' + (presetObj ? presetObj.name : activePresetKey);
 
       const today = new Date().getDay(); // 0: Minggu, 1: Senin, dst.
       const tbody = document.getElementById('todayScheduleList');
@@ -157,7 +157,7 @@
           <td><span class="table-time-badge">${item.time}</span></td>
           <td style="font-weight: 500;">${item.label}</td>
           <td>Track #${item.track}</td>
-          <td><span class="badge badge-success"><span class="badge-dot"></span>Terjadwal</span></td>
+          <td><span class="status-item"><span class="status-dot status-dot-success"></span>Aktif</span></td>
         `;
         tbody.appendChild(tr);
       });
@@ -182,7 +182,7 @@
     async function submitPinAndTrigger() {
       const pin = document.getElementById('adminPinInput').value;
       if (!pin) {
-        alert('PIN wajib diisi');
+        AppToast.show('PIN wajib diisi', 'warning');
         return;
       }
       
@@ -206,7 +206,7 @@
         closePinModal();
         executeTrigger(trackToPlay);
       } else {
-        alert('PIN salah. Akses ditolak!');
+        AppToast.show('PIN salah. Akses ditolak!', 'danger');
       }
     }
 
@@ -214,7 +214,7 @@
       console.log('Mengeksekusi trigger track:', trackId);
       const res = await triggerBell(trackId);
       if (res && res.success) {
-        alert('Bel berhasil dipicu! Audio sedang diputar.');
+        AppToast.show('Bel berhasil dipicu! Audio sedang diputar.', 'success');
       }
     }
 

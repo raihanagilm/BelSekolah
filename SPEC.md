@@ -151,6 +151,9 @@ Endpoint REST API yang disediakan oleh ESPAsyncWebServer:
 | `POST` | `/api/auth/login` | `{"pin": "1234"}` | Validasi PIN admin untuk sesi modifikasi jadwal dan pengaturan |
 | `POST` | `/api/auth/change-pin` | `{"old_pin": "1234", "new_pin": "5678"}` | Mengganti PIN admin keamanan sistem |
 | `POST` | `/api/tracks/save` | `[{"track": 1, "name": "0001.mp3", "title": "..."}]` | Memperbarui daftar dan label judul nada bel audio |
+| `POST` | `/api/system/reboot` | - | Memulai ulang mikrokontroler (soft restart) secara aman |
+| `POST` | `/api/system/reset-settings` | - | Mengembalikan PIN admin ke 1234 dan parameter audio ke nilai awal (jadwal tetap aman) |
+| `POST` | `/api/system/factory-reset` | - | Mereset seluruh jadwal dan konfigurasi kembali ke preset bawaan pabrik |
 
 ---
 

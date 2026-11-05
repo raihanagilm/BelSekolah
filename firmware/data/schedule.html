@@ -230,7 +230,7 @@
       toggleEditPresetForm();
       populatePresetSelect();
       await saveFullSchedule();
-      alert(`Nama preset berhasil diubah menjadi "${newName}"`);
+      AppToast.show(`Nama preset berhasil diubah menjadi "${newName}"`, 'success');
     }
 
     async function handleCreatePreset(e) {
@@ -240,7 +240,7 @@
 
       if (!key || !name) return;
       if (currentData.presets[key]) {
-        alert('ID Preset sudah ada. Gunakan ID unik lain.');
+        AppToast.show('ID Preset sudah ada. Gunakan ID unik lain.', 'warning');
         return;
       }
 
@@ -255,18 +255,23 @@
       populatePresetSelect();
       renderTable();
       await saveFullSchedule();
-      alert(`Preset baru "${name}" berhasil dibuat! Silakan tambahkan jadwalnya.`);
+      AppToast.show(`Preset baru "${name}" berhasil dibuat! Silakan tambahkan jadwalnya.`, 'success');
       document.getElementById('newPresetKey').value = '';
       document.getElementById('newPresetName').value = '';
     }
 
     async function deleteCurrentPreset() {
       if (activePreset === 'reguler') {
-        alert('Preset utama (Reguler) tidak boleh dihapus.');
+        AppToast.show('Preset utama (Reguler) tidak boleh dihapus.', 'warning');
         return;
       }
       const presetName = currentData.presets[activePreset]?.name || activePreset;
-      if (!confirm(`Hapus preset "${presetName}" beserta seluruh jadwal di dalamnya?`)) return;
+      const ok = await AppDialog.confirm(
+        'Hapus Preset',
+        `Apakah Anda yakin ingin menghapus preset "${presetName}" beserta seluruh jadwal di dalamnya?`,
+        { confirmText: 'Hapus Preset', cancelText: 'Batal', danger: true }
+      );
+      if (!ok) return;
 
       delete currentData.presets[activePreset];
       activePreset = 'reguler';
@@ -274,7 +279,7 @@
       populatePresetSelect();
       renderTable();
       await saveFullSchedule();
-      alert('Preset berhasil dihapus.');
+      AppToast.show('Preset berhasil dihapus.', 'success');
     }
 
     function renderTable() {
@@ -371,7 +376,7 @@
       });
 
       if (selectedDays.length === 0) {
-        alert('Pilih minimal satu hari aktif');
+        AppToast.show('Pilih minimal satu hari aktif', 'warning');
         return;
       }
 
@@ -409,11 +414,18 @@
     }
 
     async function deleteScheduleItem(id) {
-      if (!confirm('Hapus jadwal ini?')) return;
+      const ok = await AppDialog.confirm(
+        'Hapus Jadwal',
+        'Apakah Anda yakin ingin menghapus jadwal ini?',
+        { confirmText: 'Hapus', cancelText: 'Batal', danger: true }
+      );
+      if (!ok) return;
+
       const preset = currentData.presets[activePreset];
       preset.schedules = preset.schedules.filter(s => s.id !== id);
       renderTable();
       await saveFullSchedule();
+      AppToast.show('Jadwal berhasil dihapus.', 'success');
     }
 
     async function saveFullSchedule() {

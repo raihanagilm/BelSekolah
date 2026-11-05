@@ -48,6 +48,7 @@ Frontend dibagi menjadi 4 halaman terpisah untuk menjaga kejelasan alur kerja:
   - Warna status: Hijau `#15803d` (sukses), Merah `#b91c1c` (danger/manual trigger)
   - Background: Slate `#f8fafc` & Kartu `#ffffff`
 - **UX-04 (No Keyboard Emoji)**: Gunakan simbol teks standar atau ikon SVG bersih untuk tombol aksi.
+- **UX-05 (Zero Native Browser Dialogs)**: Dilarang memicu dialog pop-up bawaan browser (`window.alert`, `window.confirm`, `window.prompt` dengan teks *"This page says"*). Seluruh feedback dan dialog konfirmasi wajib menggunakan komponen kustom `AppDialog` dan `AppToast` yang terintegrasi di `style.css` dan `app.js`.
 - **UX-09 (Kontras WCAG AA)**: Seluruh teks pada tombol dan tabel wajib memiliki rasio kontras $\ge 4.5:1$.
 - **UX-10 & UX-11 (Responsiveness)**: Tata letak responsif penuh dari layar smartphone (320px) hingga layar monitor ruang piket (1920px).
 

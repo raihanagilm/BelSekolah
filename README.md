@@ -69,38 +69,68 @@ Setiap agen AI dan pengembang wajib memahami pembagian tanggung jawab dokumen ma
 
 ```
 d:/BelSekolah/
+├── .gemini/                   # Konfigurasi AI Agent & Global Rules lokal workspace
+│   └── GEMINI.md              # Rule Better Design & Discovery Protocol
+├── .gitignore                 # Filter file binary, cache build & artefak
 ├── README.md                  # [User Guide] Panduan umum dan petunjuk pengguna
-├── AGENTS.md                  # [AI Ruler] Kontrak perilaku coding AI & anti-slop rules
+├── AGENTS.md                  # [AI Ruler] Kontrak perilaku coding AI, aturan global & anti-slop
 ├── SPEC.md                    # [Architecture Spec] Spesifikasi teknis, alur data & REST API
 ├── DAFTAR_BELANJA.md          # [Bill of Materials] Panduan belanja komponen & estimasi harga
+├── PANDUAN_TEST_ESP8266.md    # Panduan pengujian mandiri hardware ESP8266
+├── PANDUAN_TRANSISI.md        # Panduan perakitan breadboard & transisi hardware fisik
+├── BelSekolah.exe             # Aplikasi Desktop Windows Launcher (Direct Click tanpa CMD)
+├── dist/                      # Paket installer rilis
+│   └── Setup_BelSekolah_v1.2.0.exe # Installer Windows mandiri (Desktop & Start Menu Shortcut)
+├── launcher/                  # Source launcher C# dan Inno Setup script
+│   ├── Program.cs             # Source launcher C#
+│   ├── app.ico                # Icon resmi aplikasi bel sekolah
+│   └── installer.iss          # Script compiler Inno Setup
+├── Aplikasi_Bel_Sekolah.bat   # Script peluncuran aplikasi desktop alternatif (.bat)
+├── Upload_Web_Ke_ESP8266.bat  # Script otomatisasi upload LittleFS ke ESP8266
 ├── docs/                      # Dokumentasi per domain pengerjaan
 │   ├── ARDUINO.md             # Panduan lengkap firmware & skema rangkaian
 │   └── WEB.md                 # Panduan arsitektur frontend LittleFS
+├── tools/                     # Skrip utilitas operasional
+│   └── organize_audio.ps1     # Skrip manajemen file audio
 ├── simulation/                # Konfigurasi simulasi Wokwi
-│   ├── diagram.json           # Sirkuit virtual simulasi ESP32 + RTC + Relay
-│   └── wokwi.toml             # Konfigurasi simulator Wokwi
-└── firmware/                  # Firmware dan data LittleFS ESP32
+│   └── diagram.json           # Sirkuit virtual simulasi ESP + RTC + DFPlayer + Dual Relay
+├── microsd_audio/             # File audio MP3 siap salin ke MicroSD FAT32
+│   └── mp3/                   # Format penamaan track: 0001.mp3 s/d 0021.mp3
+└── firmware/                  # Source code firmware dan data LittleFS
+    ├── firmware.ino           # Sketch utama Arduino IDE (ESP8266 / ESP32 multi-target)
     ├── platformio.ini         # Konfigurasi dependensi PlatformIO
+    ├── wokwi_diagram.json     # Diagram simulasi sirkuit Wokwi
+    ├── mokxi/                 # Paket simulasi interaktif online Mokxi
     ├── src/
-    │   └── main.cpp           # Firmware C++ ESP32 (Web Server, Scheduler, DFPlayer UART)
+    │   └── main.cpp           # Firmware C++ untuk build PlatformIO
     └── data/                  # File Web & Database yang diunggah ke flash LittleFS
         ├── schedule.json      # Database konfigurasi jadwal & track audio
-        ├── index.html         # Dashboard utama (status jam & trigger manual)
+        ├── index.html         # Dashboard utama (status jam, ticker & trigger manual)
         ├── schedule.html      # Halaman manajemen jadwal & switch preset
         ├── audio.html         # Pustaka audio DFPlayer & uji dengar
         ├── settings.html      # Sinkronisasi jam browser & setting hardware
         ├── style.css          # Desain UI clean, responsive & anti-slop
-        └── app.js             # Client-side API fetch logic
+        ├── app.js             # Client-side API fetch logic & hybrid scheduler
+        └── audio/             # File MP3 lokal untuk fallback audio laptop
 ```
 
 ---
 
 ## 5. Menjalankan & Menguji Proyek
 
-### A. Membuka Aplikasi Desktop Langsung di PC (Semi-Offline)
-Cukup klik ganda (double-click) file **[Aplikasi_Bel_Sekolah.bat](file:///d:/BelSekolah/Aplikasi_Bel_Sekolah.bat)**:
-- Script otomatis mendeteksi koneksi: jika PC terhubung ke Wi-Fi ESP32 (`192.168.4.1`), aplikasi akan terhubung secara online.
-- Jika sedang tidak terhubung ke ESP32, aplikasi otomatis berjalan dalam **Mode Semi-Offline Mandiri** dengan antarmuka native tanpa address bar browser, memungkinkan operator piket mengatur jadwal dan menguji simulasi secara lokal.
+### A. Menggunakan Installer Resmi Windows (.exe)
+Jalankan file installer **[dist/Setup_BelSekolah_v1.2.0.exe](file:///d:/BelSekolah/dist/Setup_BelSekolah_v1.2.0.exe)**:
+- Wizard instalasi otomatis memasang aplikasi ke folder Program Files / direktori pilihan pengguna.
+- Otomatis membuat shortcut **Bel Sekolah Otomatis Mandiri** di **Desktop** dan **Start Menu** lengkap dengan icon lonceng.
+- Menyediakan uninstaller terdaftar resmi di Windows Settings / Control Panel (*Add or Remove Programs*).
+
+### B. Menjalankan Langsung Tanpa Instalasi (Portable Launcher)
+Cukup klik ganda (double-click) file executable **[BelSekolah.exe](file:///d:/BelSekolah/BelSekolah.exe)**:
+- Membuka antarmuka aplikasi secara instan dalam jendela desktop khusus tanpa pop-up jendela hitam command prompt (`cmd.exe`).
+- Otomatis mendeteksi browser Chromium (Edge/Chrome) pada PC dan mengaktifkan mode `--app` desktop mandiri.
+
+### C. Menggunakan Script Alternatif (.bat)
+Sebagai alternatif cadangan, Anda tetap dapat menjalankan file **[Aplikasi_Bel_Sekolah.bat](file:///d:/BelSekolah/Aplikasi_Bel_Sekolah.bat)**.
 
 ### B. Menguji Antarmuka Web Secara Lokal
 Buka file `firmware/data/index.html` langsung di browser Anda untuk melihat tampilan dashboard responsif. Halaman dilengkapi fallback mock otomatis sehingga semua menu dan tombol dapat diuji sebelum ESP32 terpasang.

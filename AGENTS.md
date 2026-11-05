@@ -58,6 +58,30 @@ Struktur dokumen dipisahkan berdasarkan fokus domain agar setiap pengerjaan memi
 
 ---
 
+## 2. Aturan Global (User Global Rules & Protocols)
+
+Berikut aturan global (Better Design, Discovery Protocol, dan Standar Desain/Pengujian) yang telah dipindahkan dan diberlakukan penuh pada workspace ini:
+
+### A. Better Design Protocol
+1. **Design system**: Pertahankan desain asli sistem bel sekolah. Gunakan token warna, tipografi, dan radius yang konsisten.
+2. **Principles**: Terapkan prinsip hierarki visual sebelum styling, dan fungsionalitas alur sebelum behavior interaktif.
+3. **Build**: Layar aplikasi berada di dalam app shell yang rapi dengan data waktu nyata dan indikator status akurat.
+4. **Review**: Pastikan kontras teks lulus WCAG AA, kerapian spacing, dan hilangkan potensi ambiguitas antarmuka.
+
+### B. Discovery & Anti-Assumption Protocol
+1. **Evaluasi Prompt**: Cek apakah permintaan ambigu atau kurang spesifik. Jangan menebak asumsi sendiri jika konteks kritis belum jelas.
+2. **End-to-End Workflow Mapping**: Petakan alur operasional bel (mode hybrid laptop vs IoT ESP8266/ESP32, trigger manual vs otomatis, sinkronisasi waktu, relay auto-mute).
+3. **Anti-AI Clichés**: Dilarang keras menggunakan bullet dekoratif mentah, badge hiasan tanpa fungsi, atau emoji keyboard berlebihan pada elemen formal.
+4. **Sistem 1 Warna Dominan & Shade Ramp (Anti-Rainbow Slop)**: Gunakan satu identitas warna utama (Deep Navy `#1e3a8a` & Royal Blue `#2563eb`) dengan variasi shade ramp. Hindari tombol/kartu warna-warni pelangi.
+5. **Anti Box-in-Box**: Hindari pembungkusan kotak/border bertingkat berlebihan. Biarkan tipografi bernapas.
+6. **Strict Text Casing**: Konsisten dalam penggunaan huruf kapital/kecil pada teks keterangan selevel.
+7. **Isolasi Warna Semantik**: Warna hijau (sukses/terhubung), merah (bahaya/putus/habis), kuning/amber (peringatan/transisi) hanya untuk status fungsional.
+8. **Test Relevancy & Data Freshness**: Seluruh simulasi dan skenario pengujian wajib mencerminkan logika firmware dan hardware aktif terkini.
+
+---
+
+---
+
 ## 3. Aturan Coding & Anti-Slop Khusus Proyek Ini
 
 Menggabungkan panduan `antislop`, `antislop-vibecoding`, `antislop-ui`, dan `modern-web-guidance`:
@@ -140,6 +164,28 @@ Setiap agen AI wajib memverifikasi checklist berikut sebelum menyerahkan tugas:
       - [firmware/data/app.js](file:///d:/BelSekolah/firmware/data/app.js): Menambahkan background scheduler jam lokal browser dan dispatcher audio ganda (memutar file `.mp3` langsung dari folder lokal laptop via HTML5 Audio API sekaligus memicu relay ESP8266 secara hybrid).
       - [Aplikasi_Bel_Sekolah.bat](file:///d:/BelSekolah/Aplikasi_Bel_Sekolah.bat): Otomasi peluncuran aplikasi desktop Chromium (`--app`) langsung ke file web lokal laptop dengan pendeteksian otomatis koneksi Wi-Fi ESP8266.
       - [firmware/firmware.ino](file:///d:/BelSekolah/firmware/firmware.ino): Penambahan fallback antarmuka dashboard darurat tersemat (Embedded Web) dan pemicu bel non-blocking berbasis state-machine (mencegah watchdog timeout / HTTP 500 error).
+- **2026-11-03**:
+  - Penataan struktur proyek dan migrasi aturan global:
+    - Membuat folder `.gemini/GEMINI.md` lokal di workspace untuk menampung rule global (`Better Design` & `Discovery / Anti-Assumption Protocol`).
+    - Mengintegrasikan aturan global ke dalam dokumen kontrak kerja [AGENTS.md](file:///d:/BelSekolah/AGENTS.md) pada Bagian 2 (Aturan Global).
+    - Memperbaiki kelengkapan direktori workspace:
+      - Menambahkan folder `firmware/src/` berisi `main.cpp` (sinkron dengan `firmware.ino`) untuk kompatibilitas build PlatformIO.
+      - Menambahkan folder `simulation/` berisi `diagram.json` untuk konfigurasi simulator Wokwi.
+      - Merelokasi skrip utilitas `organize_audio.ps1` ke folder `tools/`.
+      - Menambahkan `.gitignore` di root untuk merapikan artefak binary (`.bin`, `.exe`, `.pcap`) dan file build cache.
+  - Perbaikan antarmuka web anti-slop & implementasi sistem reset:
+    - Menghilangkan elemen badge khas AI (`.badge-dot`, background berkapsul pastel ganda) dan merapikan status menjadi `.status-item` yang bersih.
+    - Menghapus tabel pinout hardware yang tidak relevan bagi operator dari halaman `settings.html`.
+    - Mengimplementasikan **Zona Pemeliharaan & Reset** di `settings.html`:
+      - **Mulai Ulang Sistem (Soft Reboot)**: Endpoint `/api/system/reboot`.
+      - **Reset PIN & Parameter**: Endpoint `/api/system/reset-settings` (kembali ke PIN 1234, tanpa menghapus jadwal).
+      - **Reset Data Pabrik (Factory Reset)**: Endpoint `/api/system/factory-reset` dengan konfirmasi pengetikan kata kunci `RESET`.
+    - Sinkronisasi firmware C++ di `firmware.ino` dan `main.cpp` serta kontrak REST API di `SPEC.md`.
+  - Pembuatan launcher desktop native dan installer Windows (.exe):
+    - Dibuat icon resmi resolusi tinggi [launcher/app.ico](file:///d:/BelSekolah/launcher/app.ico).
+    - Dibuat launcher native Windows C# [BelSekolah.exe](file:///d:/BelSekolah/BelSekolah.exe) tanpa jendela CMD hitam console, dengan pendeteksi otomatis browser Chromium (--app mode).
+    - Dibuat skrip compiler Inno Setup [launcher/installer.iss](file:///d:/BelSekolah/launcher/installer.iss).
+    - Dikompilasi paket installer resmi [dist/Setup_BelSekolah_v1.2.0.exe](file:///d:/BelSekolah/dist/Setup_BelSekolah_v1.2.0.exe) dengan wizard instalasi, pembuatan shortcut Desktop & Start Menu, serta registrasi uninstaller sistem.
 - **2026-10-27**:
   - Dokumentasi integrasi perangkat nyata (Real Hardware):
     - [PANDUAN_TRANSISI.md](file:///d:/BelSekolah/PANDUAN_TRANSISI.md): Menambahkan panduan wiring komprehensif untuk **Modul Relay 5V 2-Channel** yang dimiliki pengguna (VCC ke VU/VIN, GND, IN1 ke D7, IN2 ke D0).
@@ -150,4 +196,9 @@ Setiap agen AI wajib memverifikasi checklist berikut sebelum menyerahkan tugas:
   - Penyesuaian dokumen belanja [DAFTAR_BELANJA.md](file:///d:/BelSekolah/DAFTAR_BELANJA.md):
     - Memperbarui status kepemilikan pengguna: ESP8266, Relay 2-Channel, dan MicroSD sudah dimiliki.
     - Menghitung ulang estimasi belanja riil yang perlu dibeli menjadi hanya DFPlayer Mini, RTC DS3231, dan Resistor 1kΩ (total sekitar Rp 43.000). Menambahkan rincian modul display LCD 1602 I2C opsional.
+- **2026-11-05**:
+  - Penghapusan seluruh dialog bawaan peramban (*native browser alert, confirm, prompt* "This page says") pada antarmuka web:
+    - Diimplementasikan modul dialog kustom `AppDialog` (`alert`, `confirm`, `prompt`) berbasis Promise dengan backdrop blur, icon semantik, dan token desain resmi di [firmware/data/app.js](file:///d:/BelSekolah/firmware/data/app.js) & [firmware/data/style.css](file:///d:/BelSekolah/firmware/data/style.css).
+    - Ditambahkan sistem notifikasi melayang non-intrusif `AppToast` untuk konfirmasi sukses/info/peringatan.
+    - Dimutakhirkan alur konfirmasi pada [settings.html](file:///d:/BelSekolah/firmware/data/settings.html), [schedule.html](file:///d:/BelSekolah/firmware/data/schedule.html), [index.html](file:///d:/BelSekolah/firmware/data/index.html), dan [audio.html](file:///d:/BelSekolah/firmware/data/audio.html).
 

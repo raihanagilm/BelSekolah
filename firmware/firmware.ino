@@ -340,9 +340,10 @@ void registerHttpRoutes() {
       ".container{max-width:600px;margin:0 auto;background:var(--card);border-radius:12px;padding:24px;box-shadow:0 4px 6px -1px rgba(0,0,0,0.1);}"
       "h1{color:var(--primary);margin-top:0;font-size:22px;border-bottom:2px solid #e2e8f0;padding-bottom:12px;}"
       ".status-box{background:#f1f5f9;border-radius:8px;padding:12px 16px;margin-bottom:20px;font-size:14px;line-height:1.6;}"
-      ".badge{display:inline-block;padding:3px 8px;border-radius:12px;font-size:12px;font-weight:600;margin-right:6px;}"
-      ".badge-ok{background:#dcfce7;color:#166534;}"
-      ".badge-warn{background:#fef9c3;color:#854d0e;}"
+      ".badge{display:inline-flex;align-items:center;font-size:12px;font-weight:500;color:#334155;margin-right:12px;}"
+      ".dot{width:7px;height:7px;border-radius:50%;display:inline-block;margin-right:5px;flex-shrink:0;}"
+      ".dot-ok{background:#16a34a;}"
+      ".dot-warn{background:#d97706;}"
       ".grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(130px,1fr));gap:10px;margin-top:15px;}"
       "button{background:var(--accent);color:#fff;border:none;border-radius:8px;padding:12px 8px;font-size:13px;font-weight:600;cursor:pointer;transition:background 0.2s;}"
       "button:hover{background:var(--primary);}"
@@ -366,9 +367,9 @@ void registerHttpRoutes() {
       "function loadStat(){"
       "fetch('/api/status').then(r=>r.json()).then(d=>{"
       "document.getElementById('statBox').innerHTML="
-      "'<span class=\"badge badge-ok\">Wi-Fi Online</span> '+"
-      "'<span class=\"badge '+(d.df_ok?'badge-ok':'badge-warn')+'\">DFPlayer: '+(d.df_ok?'Siap':'Offline')+'</span> '+"
-      "'<span class=\"badge '+(d.rtc_ok?'badge-ok':'badge-warn')+'\">RTC: '+(d.rtc_ok?'Siap':'Belum Ada')+'</span>'+"
+      "'<span class=\"badge\"><span class=\"dot dot-ok\"></span>Wi-Fi Aktif</span>'+"
+      "'<span class=\"badge\"><span class=\"dot '+(d.df_ok?'dot-ok':'dot-warn')+'\"></span>DFPlayer '+(d.df_ok?'Siap':'Offline')+'</span>'+"
+      "'<span class=\"badge\"><span class=\"dot '+(d.rtc_ok?'dot-ok':'dot-warn')+'\"></span>RTC '+(d.rtc_ok?'Siap':'Belum Terpasang')+'</span>'+"
       "'<br>Preset Aktif: <b>'+d.active_preset+'</b> | Uptime: <b>'+d.uptime_sec+'s</b>';"
       "});}"
       "function playTrack(t){"
@@ -515,4 +516,84 @@ void registerHttpRoutes() {
     }
   });
   server.addHandler(saveTracksHandler);
+
+  // REST API: System Soft Reboot
+  server.on("/api/system/reboot", HTTP_POST, [](AsyncWebServerRequest *request) {
+    request->send(200, "application/json", "{\"success\":true,\"message\":\"Memulai ulang perangkat...\"}");
+    delay(200);
+#if defined(ESP8266)
+    ESP.restart();
+#else
+    ESP.restart();
+#endif
+  });
+
+  // REST API: Reset Settings & PIN Only (Jadwal Aman)
+  server.on("/api/system/reset-settings", HTTP_POST, [](AsyncWebServerRequest *request) {
+    if (LittleFS.exists("/schedule.json")) {
+      File f = LittleFS.open("/schedule.json", "r");
+      JsonDocument doc;
+      deserializeJson(doc, f);
+      f.close();
+
+      doc["settings"]["admin_pin"] = "1234";
+      doc["settings"]["relay_pre_roll_sec"] = 2;
+      doc["settings"]["speaker_volume"] = 25;
+
+      File fWrite = LittleFS.open("/schedule.json", "w");
+      serializeJson(doc, fWrite);
+      fWrite.close();
+
+      loadSettings();
+      request->send(200, "application/json", "{\"success\":true,\"message\":\"Pengaturan berhasil direset ke nilai awal\"}");
+    } else {
+      request->send(500, "application/json", "{\"success\":false,\"message\":\"Gagal membaca konfigurasi flash\"}");
+    }
+  });
+
+  // REST API: Factory Reset (Jadwal & Pengaturan Kembali ke Standar)
+  server.on("/api/system/factory-reset", HTTP_POST, [](AsyncWebServerRequest *request) {
+    // Tulis kembali struktur default JSON
+    const char* defaultJson =
+      "{\"active_preset\":\"reguler\",\"presets\":{\"reguler\":{\"name\":\"Jadwal Reguler (Senin - Kamis)\",\"schedules\":["
+      "{\"id\":1,\"days\":[1,2,3,4],\"time\":\"06:45\",\"track\":1,\"label\":\"Siswa Datang / Bel Masuk\"},"
+      "{\"id\":2,\"days\":[1,2,3,4],\"time\":\"07:00\",\"track\":2,\"label\":\"Jam Pelajaran 01\"},"
+      "{\"id\":3,\"days\":[1,2,3,4],\"time\":\"07:45\",\"track\":3,\"label\":\"Jam Pelajaran 02\"},"
+      "{\"id\":4,\"days\":[1,2,3,4],\"time\":\"08:30\",\"track\":4,\"label\":\"Jam Pelajaran 03\"},"
+      "{\"id\":5,\"days\":[1,2,3,4],\"time\":\"09:15\",\"track\":5,\"label\":\"Jam Pelajaran 04\"},"
+      "{\"id\":6,\"days\":[1,2,3,4],\"time\":\"10:00\",\"track\":6,\"label\":\"Istirahat Pertama\"},"
+      "{\"id\":7,\"days\":[1,2,3,4],\"time\":\"10:30\",\"track\":7,\"label\":\"Jam Pelajaran 05\"},"
+      "{\"id\":8,\"days\":[1,2,3,4],\"time\":\"11:15\",\"track\":8,\"label\":\"Jam Pelajaran 06\"},"
+      "{\"id\":9,\"days\":[1,2,3,4],\"time\":\"12:00\",\"track\":11,\"label\":\"Istirahat Kedua / Dzuhur\"},"
+      "{\"id\":10,\"days\":[1,2,3,4],\"time\":\"12:45\",\"track\":9,\"label\":\"Jam Pelajaran 07\"},"
+      "{\"id\":11,\"days\":[1,2,3,4],\"time\":\"13:30\",\"track\":10,\"label\":\"Jam Pelajaran 08\"},"
+      "{\"id\":12,\"days\":[1,2,3,4],\"time\":\"14:15\",\"track\":12,\"label\":\"Jam Pelajaran 09\"},"
+      "{\"id\":13,\"days\":[1,2,3,4],\"time\":\"15:00\",\"track\":16,\"label\":\"Siswa Pulang / Akhir Pelajaran\"}]},"
+      "\"jumat\":{\"name\":\"Jadwal Khusus Hari Jumat\",\"schedules\":["
+      "{\"id\":1,\"days\":[5],\"time\":\"06:45\",\"track\":1,\"label\":\"Siswa Datang / Bel Masuk\"},"
+      "{\"id\":2,\"days\":[5],\"time\":\"07:00\",\"track\":2,\"label\":\"Jam Pelajaran 01\"},"
+      "{\"id\":3,\"days\":[5],\"time\":\"07:45\",\"track\":3,\"label\":\"Jam Pelajaran 02\"},"
+      "{\"id\":4,\"days\":[5],\"time\":\"08:30\",\"track\":4,\"label\":\"Jam Pelajaran 03\"},"
+      "{\"id\":5,\"days\":[5],\"time\":\"09:15\",\"track\":5,\"label\":\"Jam Pelajaran 04\"},"
+      "{\"id\":6,\"days\":[5],\"time\":\"09:45\",\"track\":6,\"label\":\"Istirahat Pertama\"},"
+      "{\"id\":7,\"days\":[5],\"time\":\"10:15\",\"track\":7,\"label\":\"Jam Pelajaran 05\"},"
+      "{\"id\":8,\"days\":[5],\"time\":\"11:00\",\"track\":16,\"label\":\"Siswa Pulang Jumat (Persiapan Sholat)\"}]},"
+      "\"ujian\":{\"name\":\"Jadwal Penilaian / Ujian (UNAS/PTS/PAS)\",\"schedules\":["
+      "{\"id\":1,\"days\":[1,2,3,4,5],\"time\":\"07:15\",\"track\":17,\"label\":\"Ujian: Masuk Ruang Ujian\"},"
+      "{\"id\":2,\"days\":[1,2,3,4,5],\"time\":\"07:20\",\"track\":18,\"label\":\"Ujian: Mulai Dalam 10 Menit\"},"
+      "{\"id\":3,\"days\":[1,2,3,4,5],\"time\":\"07:30\",\"track\":19,\"label\":\"Ujian: Mulai Ujian\"},"
+      "{\"id\":4,\"days\":[1,2,3,4,5],\"time\":\"09:20\",\"track\":20,\"label\":\"Ujian: Selesai Dalam 10 Menit\"},"
+      "{\"id\":5,\"days\":[1,2,3,4,5],\"time\":\"09:30\",\"track\":21,\"label\":\"Ujian: Selesai Ujian / Istirahat\"}]}},"
+      "\"settings\":{\"admin_pin\":\"1234\",\"ntp_server\":\"pool.ntp.org\",\"timezone_offset_sec\":25200,\"relay_pre_roll_sec\":2,\"speaker_volume\":25}}";
+
+    File f = LittleFS.open("/schedule.json", "w");
+    if (f) {
+      f.print(defaultJson);
+      f.close();
+      loadSettings();
+      request->send(200, "application/json", "{\"success\":true,\"message\":\"Factory reset berhasil dilakukan\"}");
+    } else {
+      request->send(500, "application/json", "{\"success\":false,\"message\":\"Gagal menulis konfigurasi pabrik ke LittleFS\"}");
+    }
+  });
 }

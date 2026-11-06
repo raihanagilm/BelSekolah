@@ -266,8 +266,79 @@ function initMqtt() {
 }
 window.addEventListener('load', initMqtt);
 
+// ==========================================
+// PENGONTROL AUDIO TUNGGAL (ANTI-OVERLAPPING)
+// ==========================================
+let currentPlayingAudio = null;
+let currentPlayingTrackId = null;
+let currentPreviewBtn = null;
+
+function stopCurrentAudio() {
+  if (currentPlayingAudio) {
+    try {
+      currentPlayingAudio.pause();
+      currentPlayingAudio.currentTime = 0;
+    } catch (e) {}
+    currentPlayingAudio = null;
+  }
+  if (currentPreviewBtn) {
+    currentPreviewBtn.textContent = 'Tes Nada';
+    currentPreviewBtn.classList.remove('btn-danger');
+    currentPreviewBtn.classList.add('btn-outline');
+    currentPreviewBtn = null;
+  }
+  currentPlayingTrackId = null;
+}
+
+// Uji coba nada khusus di speaker laptop (TIDAK mengaktifkan relay/speaker sekolah)
+function previewLocalAudio(trackId, btnElement = null) {
+  // Jika tombol tes yang sama ditekan lagi saat audio sedang jalan -> STOP audio
+  if (currentPlayingAudio && currentPlayingTrackId === trackId) {
+    stopCurrentAudio();
+    AppToast.show('Uji coba nada dihentikan.', 'info');
+    return;
+  }
+
+  // Hentikan audio sebelumnya (jika ada yang sedang berbunyi)
+  stopCurrentAudio();
+
+  const trackFile = `./audio/${String(trackId).padStart(4, '0')}.mp3`;
+  const audioObj = new Audio(trackFile);
+  currentPlayingAudio = audioObj;
+  currentPlayingTrackId = trackId;
+
+  if (btnElement) {
+    currentPreviewBtn = btnElement;
+    currentPreviewBtn.textContent = 'Berhenti';
+    currentPreviewBtn.classList.remove('btn-outline');
+    currentPreviewBtn.classList.add('btn-danger');
+  }
+
+  audioObj.onended = () => {
+    stopCurrentAudio();
+  };
+
+  audioObj.onerror = () => {
+    stopCurrentAudio();
+    AppToast.show(`File audio track #${trackId} tidak ditemukan.`, 'warning');
+  };
+
+  audioObj.play()
+    .then(() => {
+      console.log('[Preview] Uji coba suara hanya di laptop:', trackFile);
+      AppToast.show(`Memutar uji coba Track #${trackId} (Speaker Laptop)`, 'info');
+    })
+    .catch(e => {
+      stopCurrentAudio();
+      console.warn('Audio auto-play dicegat browser:', e);
+    });
+}
+
 async function triggerBell(trackId) {
-  // 1. Coba kirim trigger ke ESP8266 fisik (192.168.4.1 atau IP saat ini) untuk aktifkan Relay Amplifier
+  // 1. Hentikan audio preview lokal jika sedang berjalan
+  stopCurrentAudio();
+
+  // 2. Coba kirim trigger ke ESP8266 fisik (192.168.4.1 atau IP saat ini) untuk aktifkan Relay Amplifier
   try {
     const espUrl = (location.hostname === '192.168.4.1') 
       ? `/api/trigger?track=${trackId}` 
@@ -278,7 +349,7 @@ async function triggerBell(trackId) {
       .catch(() => console.log('[ESP8266] Offline / Tidak terhubung Wi-Fi ESP'));
   } catch (err) {}
 
-  // 2. Kirim sinyal MQTT jika terhubung ke cloud/Wokwi
+  // 3. Kirim sinyal MQTT jika terhubung ke cloud/Wokwi
   if (mqttClient && mqttClient.isConnected()) {
     try {
       const message = new Paho.MQTT.Message(String(trackId));
@@ -287,9 +358,19 @@ async function triggerBell(trackId) {
     } catch (e) {}
   }
 
-  // 3. Putar suara audio MP3 asli langsung di speaker/soundcard Laptop atau Komputer
+  // 4. Putar suara audio MP3 asli di laptop dengan perlindungan single audio instance
   const trackFile = `./audio/${String(trackId).padStart(4, '0')}.mp3`;
   const audioObj = new Audio(trackFile);
+  currentPlayingAudio = audioObj;
+  currentPlayingTrackId = trackId;
+
+  audioObj.onended = () => {
+    if (currentPlayingAudio === audioObj) {
+      currentPlayingAudio = null;
+      currentPlayingTrackId = null;
+    }
+  };
+
   audioObj.play()
     .then(() => console.log('[Audio] Memutar suara asli lokal laptop:', trackFile))
     .catch(e => {

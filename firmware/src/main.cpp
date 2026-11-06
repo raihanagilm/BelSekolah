@@ -160,9 +160,12 @@ void loop() {
 }
 
 void triggerBellAsync(int trackNumber) {
+  // Jika sedang memutar suara lain, potong dan ganti dengan track baru
   if (currentBellState != BELL_IDLE) {
-    Serial.println("[BELL] Bel sedang berbunyi, abaikan request trigger ganda.");
-    return;
+    Serial.printf("[BELL] Memotong pemutaran lama, langsung beralih ke Track #%d\n", trackNumber);
+    if (dfFound) {
+      dfplayer.stop();
+    }
   }
   pendingTrackNumber = trackNumber;
   currentBellState = BELL_PREROLL;

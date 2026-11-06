@@ -144,7 +144,7 @@
           <td>${t.title}</td>
           <td>
             <div class="btn-group" style="align-items: center;">
-              <audio controls style="height: 36px; vertical-align: middle;">
+              <audio controls style="height: 36px; vertical-align: middle;" onplay="handleAudioPlay(this)">
                 <source src="./audio/${trackFileName}" type="audio/mpeg">
                 Browser Anda tidak mendukung audio player.
               </audio>
@@ -153,6 +153,20 @@
           </td>
         `;
         tbody.appendChild(tr);
+      });
+    }
+
+    function handleAudioPlay(currentAudio) {
+      // Hentikan audio preview app.js jika ada
+      if (typeof stopCurrentAudio === 'function') {
+        stopCurrentAudio();
+      }
+      // Hentikan seluruh tag audio lain di halaman
+      document.querySelectorAll('audio').forEach(a => {
+        if (a !== currentAudio && !a.paused) {
+          a.pause();
+          a.currentTime = 0;
+        }
       });
     }
 

@@ -401,7 +401,7 @@
             </div>
           </div>
           <div class="timeline-right">
-            <button type="button" class="btn btn-outline btn-sm" onclick="triggerBell(${item.track})" title="Dengarkan contoh nada suara">Tes Nada</button>
+            <button type="button" class="btn btn-outline btn-sm" onclick="previewLocalAudio(${item.track}, this)" title="Uji dengar nada bel hanya di laptop">Tes Nada</button>
             <button type="button" class="btn btn-outline btn-sm" onclick="openEditScheduleModal(${item.id})">Ubah</button>
             <button type="button" class="btn btn-danger btn-sm" onclick="deleteScheduleItem(${item.id})">Hapus</button>
           </div>

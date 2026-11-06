@@ -102,6 +102,26 @@
     { "track": 20, "name": "0020.mp3", "title": "Ujian: Selesai Dalam 10 Menit" },
     { "track": 21, "name": "0021.mp3", "title": "Ujian: Selesai Ujian" }
   ],
+  "playlists": [
+    {
+      "id": "lagu_pagi",
+      "name": "Penyambutan Pagi Hari",
+      "start_time": "06:30",
+      "auto_play": true,
+      "days": [1, 2, 3, 4, 5],
+      "tracks": [1, 2],
+      "description": "Lagu semangat pagi menyambut siswa datang"
+    },
+    {
+      "id": "istirahat_santai",
+      "name": "Instrumen Istirahat Siang",
+      "start_time": "12:00",
+      "auto_play": false,
+      "days": [1, 2, 3, 4, 5],
+      "tracks": [6, 11],
+      "description": "Diputar santai saat jam istirahat dan makan siang"
+    }
+  ],
   "settings": {
     "admin_pin": "1234",
     "ntp_server": "pool.ntp.org",

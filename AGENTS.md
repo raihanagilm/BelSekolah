@@ -196,6 +196,12 @@ Setiap agen AI wajib memverifikasi checklist berikut sebelum menyerahkan tugas:
   - Penyesuaian dokumen belanja [DAFTAR_BELANJA.md](file:///d:/BelSekolah/DAFTAR_BELANJA.md):
     - Memperbarui status kepemilikan pengguna: ESP8266, Relay 2-Channel, dan MicroSD sudah dimiliki.
     - Menghitung ulang estimasi belanja riil yang perlu dibeli menjadi hanya DFPlayer Mini, RTC DS3231, dan Resistor 1kΩ (total sekitar Rp 43.000). Menambahkan rincian modul display LCD 1602 I2C opsional.
+- **2026-11-06**:
+  - Penataan dan Integrasi Pustaka Playlist Lagu Otomatis ke Menu Jadwal:
+    - Memindahkan kalkulasi durasi dan perkiraan jam selesai playlist lagu tepat di samping input Jam Mulai (kolom 2-grid sejajar), menggantikan dropdown nada bel saat tab playlist dipilih.
+    - Menghilangkan kartu kalkulasi besar di bagian bawah form, sehingga tinggi dialog modal menjadi sangat ringkas dan seluruh form muat sempurna di layar resolusi standar laptop TU (768p).
+    - Memperbaiki scrolling penuh pada `.modal-box` (`max-height: calc(100vh - 2.5rem); overflow-y: auto;`) dan `.modal-overlay`.
+    - Mengintegrasikan antrean pemutaran lagu otomatis (`app.js`) dan mini floating player bar dengan kontrol jeda, lewati, dan stop.
 - **2026-11-05**:
   - Penghapusan seluruh dialog bawaan peramban (*native browser alert, confirm, prompt* "This page says") pada antarmuka web:
     - Diimplementasikan modul dialog kustom `AppDialog` (`alert`, `confirm`, `prompt`) berbasis Promise dengan backdrop blur, icon semantik, dan token desain resmi di [firmware/data/app.js](file:///d:/BelSekolah/firmware/data/app.js) & [firmware/data/style.css](file:///d:/BelSekolah/firmware/data/style.css).
@@ -254,6 +260,13 @@ Setiap agen AI wajib memverifikasi checklist berikut sebelum menyerahkan tugas:
     - **Pengontrol Audio Tunggal (*Single Audio Controller*)**: Mencegah suara dobel/bertumpuk di soundcard browser laptop. Setiap pemicu suara baru langsung menghentikan rekaman sebelumnya seketika (`pause()` & `currentTime = 0`).
     - **Auto-Pause Audio Table**: Memutar salah satu elemen `<audio controls>` di [audio.html](file:///d:/BelSekolah/firmware/data/audio.html) otomatis menghentikan audio track lain yang sedang aktif.
     - **Firmware Bel Preemption**: Pemutaran bel resmi di mikrokontroler ([firmware.ino](file:///d:/BelSekolah/firmware/firmware.ino) & [main.cpp](file:///d:/BelSekolah/firmware/src/main.cpp)) otomatis memanggil `dfplayer.stop()` jika ada instruksi pemutaran baru (khususnya bel darurat) sebelum memutar track baru.
+  - Integrasi Sempurna Playlist Lagu ke dalam Kelola Jadwal (Single Flow Scheduling):
+    - **Penyatuan Menu & Navigasi Bersih**: Menghilangkan menu terpisah playlist dan mengembalikan navigasi sidebar ke 4 menu inti yang ringkas ([index.html](file:///d:/BelSekolah/firmware/data/index.html), [schedule.html](file:///d:/BelSekolah/firmware/data/schedule.html), [audio.html](file:///d:/BelSekolah/firmware/data/audio.html), [settings.html](file:///d:/BelSekolah/firmware/data/settings.html)).
+    - **Modal Jadwal Dual-Mode**: Pada modal `+ Tambah Jam Bel` di [schedule.html](file:///d:/BelSekolah/firmware/data/schedule.html), operator dapat memilih tipe agenda: **Bel Tunggal** (nada bel standar) atau **Daftar Putar Lagu (Playlist)**.
+    - **Kalkulasi Jam Selesai & Durasi Otomatis**: Ketika memilih tipe Playlist Lagu dan mengisi jam mulai (misal `06:30`), sistem secara otomatis menghitung durasi total file MP3 dan menampilkan jam perkiraan selesai secara real-time (contoh: *Mulai: 06:30 → Selesai: 06:33*).
+    - **Tampilan Timeline Terpadu**: Di alur timeline [schedule.html](file:///d:/BelSekolah/firmware/data/schedule.html) dan Beranda [index.html](file:///d:/BelSekolah/firmware/data/index.html), agenda playlist lagu tampil jelas dengan penanda lencana khusus *Daftar Lagu*, jam selesai, dan tombol *Putar Lagu*.
+    - **Preselaksi Hari Cerdas & Fleksibel**: Pilihan centang hari (Senin - Sabtu) tetap disediakan di modal [schedule.html](file:///d:/BelSekolah/firmware/data/schedule.html) dengan nilai bawaan (*default*) yang otomatis tercentang mengikuti kategori aktif yang sedang dibuka, namun operator tetap memiliki kebebasan penuh untuk menambah atau mengurangi hari sesuai kebutuhan spesifik.
+    - **Eksekusi Otomatis Terjadwal**: Mesin background scheduler di [app.js](file:///d:/BelSekolah/firmware/data/app.js) mengevaluasi jam mulai dan secara otomatis memicu antrean pemutaran lagu ke amplifier sekolah tanpa intervensi manual.
     - Di Beranda ([index.html](file:///d:/BelSekolah/firmware/data/index.html)): Tombol pada baris timeline diubah menjadi **`Bunyikan Sekarang`** yang berfungsi mempercepat/memposisikan alur hari ini secara instan tanpa merusak data master jadwal.
     - Di Kelola Jadwal ([schedule.html](file:///d:/BelSekolah/firmware/data/schedule.html)): Mengganti tab panjang dengan **Dropdown Pemilih Kategori** yang rapi dan elegan, tombol baris jadwal diubah menjadi **`Tes Nada`** (hanya untuk mendengar audio).
     - Mode Otomatisasi Kalender (`active_preset: "auto"`): Sistem secara cerdas mengaktifkan kategori sesuai hari kalender (Senin -> upacara, Selasa-Kamis -> reguler, Jumat -> KBM pendek), sekaligus menyediakan opsi kunci khusus (override) untuk masa ujian tanpa risiko benturan jadwal.

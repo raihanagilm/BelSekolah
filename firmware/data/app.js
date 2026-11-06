@@ -1,4 +1,38 @@
-// Default data cadangan untuk preview offline / Live Server
+// Perkiraan durasi lagu MP3 (detik) dari metadata audio lokal
+const AUDIO_TRACK_DURATIONS = {
+  1: 53, 2: 53, 3: 52, 4: 52, 5: 52,
+  6: 52, 7: 52, 8: 52, 9: 53, 10: 53,
+  11: 52, 12: 53, 13: 52, 14: 54, 15: 54,
+  16: 88, 17: 60, 18: 47, 19: 45, 20: 48, 21: 64
+};
+
+function getTrackDurationSec(trackId) {
+  return AUDIO_TRACK_DURATIONS[trackId] || 53;
+}
+
+function calculatePlaylistTotalDuration(trackIds) {
+  if (!trackIds || trackIds.length === 0) return 0;
+  return trackIds.reduce((sum, tid) => sum + getTrackDurationSec(tid), 0);
+}
+
+function formatDurationHuman(totalSec) {
+  const m = Math.floor(totalSec / 60);
+  const s = totalSec % 60;
+  if (m === 0) return `${s} Detik`;
+  if (s === 0) return `${m} Menit`;
+  return `${m} Menit ${s} Detik`;
+}
+
+function calculateEndTime(startTimeStr, totalSec) {
+  if (!startTimeStr || !startTimeStr.includes(':')) return '--:--';
+  const parts = startTimeStr.split(':');
+  const startMinutes = parseInt(parts[0], 10) * 60 + parseInt(parts[1], 10);
+  const totalMinutesToAdd = Math.ceil(totalSec / 60);
+  const endTotalMinutes = (startMinutes + totalMinutesToAdd) % 1440;
+  const endH = String(Math.floor(endTotalMinutes / 60)).padStart(2, '0');
+  const endM = String(endTotalMinutes % 60).padStart(2, '0');
+  return `${endH}:${endM}`;
+}
 const defaultFallbackData = {
   "active_presets": ["senin", "selasa_kamis", "jumat"],
   "active_preset": "senin",
@@ -102,6 +136,20 @@ const defaultFallbackData = {
     { "track": 19, "name": "0019.mp3", "title": "Ujian: Mulai Ujian" },
     { "track": 20, "name": "0020.mp3", "title": "Ujian: Selesai Dalam 10 Menit" },
     { "track": 21, "name": "0021.mp3", "title": "Ujian: Selesai Ujian" }
+  ],
+  "playlists": [
+    {
+      "id": "lagu_pagi",
+      "name": "Penyambutan Pagi Hari",
+      "tracks": [1, 2],
+      "description": "Lagu semangat pagi menyambut siswa datang (06:30 - 06:55)"
+    },
+    {
+      "id": "istirahat_santai",
+      "name": "Instrumen Istirahat Siang",
+      "tracks": [6, 11],
+      "description": "Diputar santai saat jam istirahat dan makan siang"
+    }
   ],
   "settings": {
     "admin_pin": "1234",
@@ -267,11 +315,18 @@ function initMqtt() {
 window.addEventListener('load', initMqtt);
 
 // ==========================================
-// PENGONTROL AUDIO TUNGGAL (ANTI-OVERLAPPING)
+// PENGONTROL AUDIO TUNGGAL & SISTEM PLAYLIST
 // ==========================================
 let currentPlayingAudio = null;
 let currentPlayingTrackId = null;
 let currentPreviewBtn = null;
+
+// State Pemutar Playlist / Antrean
+let playlistQueue = [];
+let currentQueueIndex = -1;
+let isPlaylistPlaying = false;
+let isPlaylistPaused = false;
+let playlistName = '';
 
 function stopCurrentAudio() {
   if (currentPlayingAudio) {
@@ -288,6 +343,143 @@ function stopCurrentAudio() {
     currentPreviewBtn = null;
   }
   currentPlayingTrackId = null;
+}
+
+// ==========================================
+// KONTROL PLAYLIST & ANTREAN LAGU OTOMATIS
+// ==========================================
+function startPlaylistQueue(name, trackIds) {
+  if (!trackIds || trackIds.length === 0) {
+    AppToast.show('Pilih minimal 1 lagu dalam antrean.', 'warning');
+    return;
+  }
+
+  // Hentikan pemutaran sebelumnya jika ada
+  stopPlaylistQueue();
+  stopCurrentAudio();
+
+  playlistName = name || 'Daftar Putar';
+  playlistQueue = [...trackIds];
+  currentQueueIndex = 0;
+  isPlaylistPlaying = true;
+  isPlaylistPaused = false;
+
+  showFloatingMusicPlayer();
+  playQueueItem(currentQueueIndex);
+}
+
+function playQueueItem(index) {
+  if (index < 0 || index >= playlistQueue.length) {
+    // Selesai seluruh antrean
+    stopPlaylistQueue();
+    AppToast.show('Daftar putar lagu telah selesai.', 'info');
+    return;
+  }
+
+  currentQueueIndex = index;
+  const trackId = playlistQueue[index];
+  
+  // Ambil judul lagu
+  let title = `Track #${trackId}`;
+  if (currentData && currentData.audio_tracks) {
+    const t = currentData.audio_tracks.find(x => x.track === trackId);
+    if (t) title = t.title;
+  }
+
+  updateFloatingMusicUI(title, index + 1, playlistQueue.length);
+
+  // Putar lagu melalui triggerBell (ke amplifier sekolah & laptop)
+  triggerBell(trackId, () => {
+    // Callback ketika lagu selesai diputar -> otomatis lanjut ke track berikutnya!
+    if (isPlaylistPlaying && !isPlaylistPaused) {
+      console.log(`[Playlist] Lagu ${index + 1} selesai, beralih otomatis ke berikutnya...`);
+      playQueueItem(currentQueueIndex + 1);
+    }
+  });
+}
+
+function nextPlaylistItem() {
+  if (!isPlaylistPlaying) return;
+  if (currentQueueIndex + 1 < playlistQueue.length) {
+    playQueueItem(currentQueueIndex + 1);
+  } else {
+    stopPlaylistQueue();
+    AppToast.show('Sudah mencapai akhir daftar lagu.', 'info');
+  }
+}
+
+function togglePausePlaylist() {
+  if (!isPlaylistPlaying) return;
+  const btnPause = document.getElementById('musicBarPauseBtn');
+
+  if (isPlaylistPaused) {
+    // Resume
+    isPlaylistPaused = false;
+    if (currentPlayingAudio) currentPlayingAudio.play();
+    if (btnPause) btnPause.textContent = 'Jeda';
+    AppToast.show('Daftar putar dilanjutkan.', 'info');
+  } else {
+    // Pause
+    isPlaylistPaused = true;
+    if (currentPlayingAudio) currentPlayingAudio.pause();
+    if (btnPause) btnPause.textContent = 'Lanjut';
+    AppToast.show('Daftar putar dijeda.', 'info');
+  }
+}
+
+function stopPlaylistQueue() {
+  isPlaylistPlaying = false;
+  isPlaylistPaused = false;
+  playlistQueue = [];
+  currentQueueIndex = -1;
+  stopCurrentAudio();
+  hideFloatingMusicPlayer();
+}
+
+function showFloatingMusicPlayer() {
+  let bar = document.getElementById('floatingMusicBar');
+  if (!bar) {
+    bar = document.createElement('div');
+    bar.id = 'floatingMusicBar';
+    bar.className = 'floating-music-bar';
+    bar.innerHTML = `
+      <div class="music-bar-content">
+        <div class="music-bar-icon">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M9 18V5l12-2v13"></path>
+            <circle cx="6" cy="18" r="3"></circle>
+            <circle cx="18" cy="16" r="3"></circle>
+          </svg>
+        </div>
+        <div class="music-bar-meta">
+          <span class="music-bar-badge" id="musicBarBadge">Memutar Daftar Lagu</span>
+          <span class="music-bar-title" id="musicBarTitle">Memuat lagu...</span>
+        </div>
+        <div class="music-bar-controls">
+          <button type="button" class="btn btn-outline btn-sm" id="musicBarPauseBtn" onclick="togglePausePlaylist()">Jeda</button>
+          <button type="button" class="btn btn-outline btn-sm" onclick="nextPlaylistItem()">Lewati (Next)</button>
+          <button type="button" class="btn btn-danger btn-sm" onclick="stopPlaylistQueue()">Hentikan</button>
+        </div>
+      </div>
+    `;
+    document.body.appendChild(bar);
+  }
+  bar.classList.add('active');
+}
+
+function hideFloatingMusicPlayer() {
+  const bar = document.getElementById('floatingMusicBar');
+  if (bar) bar.classList.remove('active');
+}
+
+function updateFloatingMusicUI(title, currentNum, totalNum) {
+  const badge = document.getElementById('musicBarBadge');
+  const titleEl = document.getElementById('musicBarTitle');
+  const pauseBtn = document.getElementById('musicBarPauseBtn');
+
+  if (badge) badge.textContent = `${playlistName} (${currentNum}/${totalNum})`;
+  if (titleEl) titleEl.textContent = title;
+  if (pauseBtn) pauseBtn.textContent = 'Jeda';
 }
 
 // Uji coba nada khusus di speaker laptop (TIDAK mengaktifkan relay/speaker sekolah)
@@ -334,7 +526,7 @@ function previewLocalAudio(trackId, btnElement = null) {
     });
 }
 
-async function triggerBell(trackId) {
+async function triggerBell(trackId, onEndedCallback = null) {
   // 1. Hentikan audio preview lokal jika sedang berjalan
   stopCurrentAudio();
 
@@ -369,12 +561,29 @@ async function triggerBell(trackId) {
       currentPlayingAudio = null;
       currentPlayingTrackId = null;
     }
+    if (typeof onEndedCallback === 'function') {
+      onEndedCallback();
+    }
+  };
+
+  audioObj.onerror = () => {
+    if (currentPlayingAudio === audioObj) {
+      currentPlayingAudio = null;
+      currentPlayingTrackId = null;
+    }
+    if (typeof onEndedCallback === 'function') {
+      // Jika file gagal dimuat, tetap lanjutkan ke antrean berikutnya
+      setTimeout(onEndedCallback, 1500);
+    }
   };
 
   audioObj.play()
     .then(() => console.log('[Audio] Memutar suara asli lokal laptop:', trackFile))
     .catch(e => {
       console.warn('Audio auto-play dicegat browser, mencoba fallback:', e);
+      if (typeof onEndedCallback === 'function') {
+        setTimeout(onEndedCallback, 3000);
+      }
     });
 
   return { success: true };
@@ -528,9 +737,36 @@ function startLocalScheduler() {
       if (item.time === timeStr && item.days.includes(currentDay)) {
         lastBellMinute = currentMin;
         lastBellDay = currentDay;
+
+        // Jika item adalah Playlist Lagu (baik via array tracks langsung atau playlist_id)
+        const trackList = item.tracks || (item.playlist_id && (currentData.playlists || []).find(p => p.id === item.playlist_id)?.tracks);
+        if (trackList && trackList.length > 0) {
+          console.log(`[JADWAL COCOK] (${activeKey}) ${timeStr} - Memulai Playlist Lagu: ${item.label}`);
+          startPlaylistQueue(item.label, trackList);
+          AppToast.show(`Daftar Lagu: "${item.label}" dimulai!`, 'success');
+          break;
+        }
+
+        // Jika item adalah Bel Tunggal
         console.log(`[JADWAL COCOK] (${activeKey}) ${timeStr} - Memutar Track #${item.track}: ${item.label}`);
         await triggerBell(item.track);
         break;
+      }
+    }
+    // 2. Evaluasi Playlist Terjadwal Otomatis
+    if (currentData.playlists && Array.isArray(currentData.playlists)) {
+      for (const pl of currentData.playlists) {
+        if (pl.auto_play && pl.start_time === timeStr) {
+          const days = pl.days || [1, 2, 3, 4, 5];
+          if (days.includes(currentDay) && !isPlaylistPlaying) {
+            lastBellMinute = currentMin;
+            lastBellDay = currentDay;
+            console.log(`[PLAYLIST OTOMATIS] ${timeStr} - Memulai playlist "${pl.name}"`);
+            startPlaylistQueue(pl.name, pl.tracks);
+            AppToast.show(`Playlist Otomatis: "${pl.name}" dimulai!`, 'success');
+            break;
+          }
+        }
       }
     }
   }, 1000);
